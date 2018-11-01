@@ -32,8 +32,8 @@ android {
 }
 
 dependencies {
-  implementation "com.android.support:appcompat-v7:$versions.supportLib"
-  implementation "com.android.support:recyclerview-v7:$versions.supportLib"
+  implementation "androidx.appcompat:appcompat:$versions.androidX"
+  implementation "androidx.recyclerview:recyclerview:$versions.androidX"
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$versions.kotlin"
 
   implementation "com.google.dagger:dagger:$versions.dagger"
