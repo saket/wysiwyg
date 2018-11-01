@@ -9,7 +9,7 @@ buildscript {
       rxBindings : '2.1.0',
       dagger     : '2.10',
       butterKnife: '8.8.1',
-      timber     : '4.7.0',
+      timber     : '4.7.1',
       kotlin     : '1.3.0',
       moshi      : '1.7.0',
   ]
