@@ -5,8 +5,6 @@ buildscript {
       minSdk        : 21,
       compileSdk    : 27,
       supportLib    : '27.1.1',
-      autoValue     : '1.4',
-      autoValueMoshi: '0.4.3',
       retrofit      : '2.2.0',
       rxBindings    : '2.1.0',
       dagger        : '2.10',
