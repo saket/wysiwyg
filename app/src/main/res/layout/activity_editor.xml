@@ -6,18 +6,25 @@
   android:orientation="vertical"
   tools:context="me.saket.wysiwyg.EditorActivity">
 
-  <EditText
-    android:id="@+id/editor_editor"
+  <ScrollView
     android:layout_width="match_parent"
     android:layout_height="0dp"
     android:layout_weight="1"
-    android:background="@null"
-    android:gravity="top"
-    android:hint="It begins with a word…"
-    android:importantForAutofill="no"
-    android:inputType="textCapSentences|textMultiLine"
-    android:padding="16dp"
-    tools:ignore="HardcodedText,UnusedAttribute" />
+    android:fillViewport="true">
+
+    <EditText
+      android:id="@+id/editor_editor"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:breakStrategy="balanced"
+      android:background="@null"
+      android:gravity="top"
+      android:hint="It begins with a word…"
+      android:importantForAutofill="no"
+      android:inputType="textCapSentences|textMultiLine|textNoSuggestions"
+      android:padding="16dp"
+      tools:ignore="HardcodedText,UnusedAttribute" />
+  </ScrollView>
 
   <me.saket.wysiwyg.toolbar.MarkdownFormatToolbarView
     android:id="@+id/editor_format_toolbar"
