@@ -7,6 +7,7 @@ import com.vladsch.flexmark.ast.Code
 import com.vladsch.flexmark.ast.DelimitedNode
 import com.vladsch.flexmark.ast.Document
 import com.vladsch.flexmark.ast.Emphasis
+import com.vladsch.flexmark.ast.FencedCodeBlock
 import com.vladsch.flexmark.ast.Heading
 import com.vladsch.flexmark.ast.IndentedCodeBlock
 import com.vladsch.flexmark.ast.Link
@@ -100,9 +101,8 @@ class MarkdownNodeTreeVisitor(private val spanPool: MarkdownSpanPool, private va
       } else if (node is IndentedCodeBlock) {
         highlightIndentedCodeBlock(node)
 
-        // TODO.
-        //} else if (node instanceOf Superscript) {
-        //  visit(((Superscript) node));
+      } else if (node is FencedCodeBlock) {
+        highlightFencedCodeBlock(node)
 
       } else if (node is BlockQuote) {
         highlightBlockQuote(node)
@@ -168,6 +168,11 @@ class MarkdownNodeTreeVisitor(private val spanPool: MarkdownSpanPool, private va
     val lineStartOffset = indentedCodeBlock.startOffset - 4
 
     writer!!.pushSpan(spanPool.indentedCodeBlock(), lineStartOffset, indentedCodeBlock.endOffset)
+    writer!!.pushSpan(spanPool.monospaceTypeface(), indentedCodeBlock.startOffset, indentedCodeBlock.endOffset)
+  }
+
+  private fun highlightFencedCodeBlock(indentedCodeBlock: FencedCodeBlock) {
+    writer!!.pushSpan(spanPool.indentedCodeBlock(), indentedCodeBlock.startOffset, indentedCodeBlock.endOffset)
     writer!!.pushSpan(spanPool.monospaceTypeface(), indentedCodeBlock.startOffset, indentedCodeBlock.endOffset)
   }
 
