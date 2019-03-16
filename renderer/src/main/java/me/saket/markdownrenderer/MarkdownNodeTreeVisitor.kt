@@ -27,7 +27,7 @@ import timber.log.Timber
  * To support:
  * - Superscript
  */
-class MarkdownNodeTreeVisitor(private val spanPool: MarkdownSpanPool, private val options: MarkdownHintOptionsK) {
+class MarkdownNodeTreeVisitor(private val spanPool: MarkdownSpanPool, private val options: MarkdownHintOptions) {
 
   @ColorInt
   private val syntaxColor: Int = options.syntaxColor
@@ -92,12 +92,7 @@ class MarkdownNodeTreeVisitor(private val spanPool: MarkdownSpanPool, private va
         }
 
       } else if (node is Link) {
-        val linkNode = node as Link?
-        if (linkNode!!.text.equalsIgnoreCase(SPOILER_TAG) && linkNode.url.equalsIgnoreCase(SPOILER_URL)) {
-          highlightSpoiler(linkNode)
-        } else {
-          highlightLink(linkNode)
-        }
+        highlightLink(node)
 
       } else if (node is Code) {
         highlightInlineCode(node)
@@ -106,7 +101,7 @@ class MarkdownNodeTreeVisitor(private val spanPool: MarkdownSpanPool, private va
         highlightIndentedCodeBlock(node)
 
         // TODO.
-        //} else if (node instanceof Superscript) {
+        //} else if (node instanceOf Superscript) {
         //  visit(((Superscript) node));
 
       } else if (node is BlockQuote) {
@@ -312,26 +307,7 @@ class MarkdownNodeTreeVisitor(private val spanPool: MarkdownSpanPool, private va
     writer!!.pushSpan(spanPool.foregroundColor(linkUrlColor), urlOpeningPosition, link.endOffset)
   }
 
-  fun highlightSpoiler(spoilerLink: Link) {
-    // Text.
-    val textClosingPosition = spoilerLink.startOffset + SPOILER_TAG_WITH_BRACKETS.length
-    writer!!.pushSpan(spanPool.foregroundColor(options.spoilerSyntaxHintColor), spoilerLink.startOffset, textClosingPosition)
-
-    // Url.
-    val urlOpeningBracketLength = 1
-    val urlClosingPosition = textClosingPosition + urlOpeningBracketLength + SPOILER_URL.length
-    writer!!.pushSpan(spanPool.foregroundColor(syntaxColor), textClosingPosition, urlClosingPosition)
-    writer!!.pushSpan(spanPool.foregroundColor(syntaxColor), spoilerLink.endOffset - 1, spoilerLink.endOffset)
-
-    // Content.
-    val contentClosingPosition = spoilerLink.endOffset - 1
-    writer!!.pushSpan(spanPool.foregroundColor(linkUrlColor), urlClosingPosition, contentClosingPosition)
-  }
-
   companion object {
     private val FOUR_ASTERISKS_HORIZONTAL_RULE = SubSequence.of("****")
-    private const val SPOILER_TAG = "spoiler"
-    private const val SPOILER_TAG_WITH_BRACKETS = "[spoiler]"
-    private const val SPOILER_URL = "/s"
   }
 }

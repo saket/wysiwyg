@@ -1,6 +1,7 @@
 package me.saket.markdownrenderer
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.graphics.Typeface
 import android.text.style.ForegroundColorSpan
 import android.text.style.LeadingMarginSpan
@@ -23,7 +24,7 @@ import java.util.Stack
  * For avoiding creation of new spans on every text change.
  */
 @SuppressLint("UseSparseArrays")
-class MarkdownSpanPool(private val spannableTheme: SpannableTheme) {
+class MarkdownSpanPool(context: Context, options: MarkdownHintOptions) {
 
   private val italicsSpans = Stack<StyleSpan>()
   private val boldSpans = Stack<StyleSpan>()
@@ -37,6 +38,14 @@ class MarkdownSpanPool(private val spannableTheme: SpannableTheme) {
   private val quoteSpans = Stack<BlockQuoteSpan>()
   private val leadingMarginSpans = HashMap<Int, LeadingMarginSpan.Standard>()
   private val horizontalRuleSpans = HashMap<String, HorizontalRuleSpan>()
+
+  private val spannableTheme = SpannableTheme.builderWithDefaults(context)
+      .headingBreakHeight(0)
+      .blockQuoteColor(options.blockQuoteIndentationRuleColor)
+      .blockQuoteWidth(options.blockQuoteVerticalRuleStrokeWidth)
+      .blockMargin(options.listBlockIndentationMargin)
+      .codeBackgroundColor(options.inlineCodeBackgroundColor)
+      .build()
 
   fun italics(): StyleSpan {
     return when {

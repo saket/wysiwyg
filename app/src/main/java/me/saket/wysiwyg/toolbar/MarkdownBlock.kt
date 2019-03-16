@@ -1,5 +1,6 @@
 package me.saket.wysiwyg.toolbar
 
+// TODO: Convert to sealed class and use polymorphism.
 data class MarkdownBlock(
     val prefix: String,
     val suffix: String = ""

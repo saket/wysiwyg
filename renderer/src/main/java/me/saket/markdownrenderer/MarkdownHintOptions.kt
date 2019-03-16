@@ -3,7 +3,7 @@ package me.saket.markdownrenderer
 import androidx.annotation.ColorInt
 import androidx.annotation.Px
 
-data class MarkdownHintOptionsK(
+data class MarkdownHintOptions(
 
     @ColorInt
     val syntaxColor: Int,
@@ -29,20 +29,11 @@ data class MarkdownHintOptionsK(
     val linkTextColor: Int,
 
     @ColorInt
-    val spoilerSyntaxHintColor: Int,
-
-    @ColorInt
-    val spoilerHiddenContentOverlayColor: Int,
-
-    @ColorInt
     val horizontalRuleColor: Int,
 
     @Px
     val horizontalRuleStrokeWidth: Int,
 
     @ColorInt
-    val inlineCodeBackgroundColor: Int,
-
-    @ColorInt
-    val tableBorderColor: Int
+    val inlineCodeBackgroundColor: Int
 )
