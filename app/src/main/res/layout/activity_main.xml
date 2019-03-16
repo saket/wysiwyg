@@ -5,8 +5,14 @@
   android:layout_height="match_parent"
   tools:context="me.saket.wysiwyg.MainActivity">
 
-  <TextView
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:text="Hello World!" />
+  <EditText
+    android:id="@+id/main_editor"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="top"
+    android:hint="It begins with a word"
+    android:importantForAutofill="no"
+    android:inputType="textCapSentences"
+    android:padding="16dp"
+    tools:ignore="UnusedAttribute" />
 </FrameLayout>
