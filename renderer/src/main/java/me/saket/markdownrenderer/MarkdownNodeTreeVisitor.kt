@@ -59,7 +59,7 @@ class MarkdownNodeTreeVisitor(private val spanPool: MarkdownSpanPool, private va
    *
    * @param parent the parent node whose children should be visited
    */
-  protected fun visitChildren(parent: Node) {
+  private fun visitChildren(parent: Node) {
     var node: Node? = parent.firstChild
     while (node != null) {
       // A subclass of this visitor might modify the node, resulting in getNext returning a different node or no
@@ -129,7 +129,7 @@ class MarkdownNodeTreeVisitor(private val spanPool: MarkdownSpanPool, private va
     }
   }
 
-  fun <T> highlightMarkdownSyntax(delimitedNode: T) where T : Node, T : DelimitedNode {
+  private fun <T> highlightMarkdownSyntax(delimitedNode: T) where T : Node, T : DelimitedNode {
     if (delimitedNode.openingMarker.isNotEmpty()) {
       writer!!.pushSpan(
           spanPool.foregroundColor(syntaxColor),
@@ -147,23 +147,23 @@ class MarkdownNodeTreeVisitor(private val spanPool: MarkdownSpanPool, private va
     }
   }
 
-  fun highlightItalics(emphasis: Emphasis) {
+  private fun highlightItalics(emphasis: Emphasis) {
     writer!!.pushSpan(spanPool.italics(), emphasis.startOffset, emphasis.endOffset)
     highlightMarkdownSyntax(emphasis)
   }
 
-  fun highlightBold(strongEmphasis: StrongEmphasis) {
+  private fun highlightBold(strongEmphasis: StrongEmphasis) {
     writer!!.pushSpan(spanPool.bold(), strongEmphasis.startOffset, strongEmphasis.endOffset)
     highlightMarkdownSyntax(strongEmphasis)
   }
 
-  fun highlightInlineCode(code: Code) {
+  private fun highlightInlineCode(code: Code) {
     writer!!.pushSpan(spanPool.inlineCode(), code.startOffset, code.endOffset)
     writer!!.pushSpan(spanPool.monospaceTypeface(), code.startOffset, code.endOffset)
     highlightMarkdownSyntax(code)
   }
 
-  fun highlightIndentedCodeBlock(indentedCodeBlock: IndentedCodeBlock) {
+  private fun highlightIndentedCodeBlock(indentedCodeBlock: IndentedCodeBlock) {
     // A LineBackgroundSpan needs to start at the starting of the line.
     val lineStartOffset = indentedCodeBlock.startOffset - 4
 
@@ -171,7 +171,7 @@ class MarkdownNodeTreeVisitor(private val spanPool: MarkdownSpanPool, private va
     writer!!.pushSpan(spanPool.monospaceTypeface(), indentedCodeBlock.startOffset, indentedCodeBlock.endOffset)
   }
 
-  fun highlightStrikeThrough(strikethrough: Strikethrough) {
+  private fun highlightStrikeThrough(strikethrough: Strikethrough) {
     writer!!.pushSpan(spanPool.strikethrough(), strikethrough.startOffset, strikethrough.endOffset)
     highlightMarkdownSyntax(strikethrough)
   }
@@ -205,7 +205,7 @@ class MarkdownNodeTreeVisitor(private val spanPool: MarkdownSpanPool, private va
   //
   //  }
 
-  fun highlightBlockQuote(blockQuote: BlockQuote) {
+  private fun highlightBlockQuote(blockQuote: BlockQuote) {
     // Android seems to require quote spans to be inserted at the starting of the line.
     // Otherwise, nested quote spans aren't rendered correctly. Calculate the offset for
     // this quote's starting index instead and include all text from there under the spans.
@@ -228,7 +228,7 @@ class MarkdownNodeTreeVisitor(private val spanPool: MarkdownSpanPool, private va
     writer!!.pushSpan(spanPool.foregroundColor(blockQuoteTextColor), blockQuote.startOffset - nestedParents, blockQuote.endOffset)
   }
 
-  fun highlightHeading(heading: Heading) {
+  private fun highlightHeading(heading: Heading) {
     writer!!.pushSpan(spanPool.heading(heading.level), heading.startOffset, heading.endOffset)
     writer!!.pushSpan(
         spanPool.foregroundColor(syntaxColor),
@@ -237,15 +237,15 @@ class MarkdownNodeTreeVisitor(private val spanPool: MarkdownSpanPool, private va
     )
   }
 
-  fun highlightListBlock(listBlock: ListBlock) {
+  private fun highlightListBlock(listBlock: ListBlock) {
     writer!!.pushSpan(spanPool.leadingMargin(listBlockIndentationMargin), listBlock.startOffset, listBlock.endOffset)
   }
 
-  fun highlightListItem(listItem: ListItem) {
+  private fun highlightListItem(listItem: ListItem) {
     writer!!.pushSpan(spanPool.foregroundColor(syntaxColor), listItem.startOffset, listItem.startOffset + 1)
   }
 
-  fun highlightThematicBreak(thematicBreak: ThematicBreak) {
+  private fun highlightThematicBreak(thematicBreak: ThematicBreak) {
     val thematicBreakChars = thematicBreak.chars
 
     // '****' clashes with bold syntax, so avoid drawing a rule for it.
@@ -297,7 +297,7 @@ class MarkdownNodeTreeVisitor(private val spanPool: MarkdownSpanPool, private va
     writer!!.pushSpan(spanPool.foregroundColor(syntaxColor), ruleStartOffset, node.endOffset)
   }
 
-  fun highlightLink(link: Link) {
+  private fun highlightLink(link: Link) {
     // Text.
     writer!!.pushSpan(spanPool.foregroundColor(options.linkTextColor), link.startOffset, link.endOffset)
 
