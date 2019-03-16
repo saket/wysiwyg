@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:tools="http://schemas.android.com/tools"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  android:orientation="vertical"
+  android:paddingTop="12dp">
+
+  <EditText
+    android:id="@+id/addlinkdialog_title"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginEnd="16dp"
+    android:layout_marginStart="16dp"
+    android:hint="@string/composereply_addlink_title"
+    android:imeOptions="actionNext"
+    android:inputType="textCapSentences"
+    android:maxLines="1"
+    tools:ignore="Autofill" />
+
+  <EditText
+    android:id="@+id/addlinkdialog_url"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginEnd="16dp"
+    android:layout_marginStart="16dp"
+    android:hint="@string/composereply_addlink_url"
+    android:inputType="textUri"
+    tools:ignore="Autofill" />
+
+  <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="8dp"
+    android:layout_marginEnd="12dp"
+    android:layout_marginStart="12dp"
+    android:layout_marginTop="8dp"
+    android:gravity="end">
+
+    <Button
+      android:id="@+id/addlinkdialog_cancel"
+      style="?attr/buttonBarNegativeButtonStyle"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="@string/composereply_addlink_cancel"
+      android:textColor="@color/gray_500" />
+
+    <Button
+      android:id="@+id/addlinkdialog_insert"
+      style="?attr/buttonBarPositiveButtonStyle"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="@string/composereply_addlink_insert" />
+  </LinearLayout>
+</LinearLayout>

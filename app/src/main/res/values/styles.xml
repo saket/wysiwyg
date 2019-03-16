@@ -5,4 +5,25 @@
     <item name="colorPrimaryDark">@color/color_primary_dark</item>
     <item name="colorAccent">@color/color_accent</item>
   </style>
+
+  <style name="DankSeparator">
+    <item name="android:background">@color/white_opacity_05</item>
+  </style>
+
+  <style name="DankSeparator.VerticalContent">
+    <item name="android:layout_width">match_parent</item>
+    <item name="android:layout_height">1dp</item>
+  </style>
+
+  <style name="DankSeparator.HorizontalContent">
+    <item name="android:layout_width">1dp</item>
+    <item name="android:layout_height">match_parent</item>
+  </style>
+
+  <style name="DankTextFormatToolbarButton">
+    <item name="android:layout_width">wrap_content</item>
+    <item name="android:layout_height">wrap_content</item>
+    <item name="android:background">?attr/selectableItemBackgroundBorderless</item>
+    <item name="android:padding">12dp</item>
+  </style>
 </resources>
