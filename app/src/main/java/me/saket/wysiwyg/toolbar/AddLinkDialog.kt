@@ -70,7 +70,7 @@ class AddLinkDialog : DialogFragment() {
     }
 
     if (title.isNotBlank() && url.isNotBlank()) {
-      (requireActivity() as OnLinkInsertListener).onLinkInsert(title, url)
+      (requireActivity() as OnLinkInsertListener).onLinkInsert(Link(title, url))
       dismiss()
     }
   }
@@ -84,10 +84,6 @@ class AddLinkDialog : DialogFragment() {
 
     private const val KEY_PRE_FILLED_TITLE = "preFilledTitle"
     private const val TAG = "AddLinkDialog"
-
-    fun show(fragmentManager: FragmentManager) {
-      showPreFilled(fragmentManager, null)
-    }
 
     fun showPreFilled(fragmentManager: FragmentManager, preFilledTitle: String?) {
       var dialog = fragmentManager.findFragmentByTag(TAG) as AddLinkDialog?

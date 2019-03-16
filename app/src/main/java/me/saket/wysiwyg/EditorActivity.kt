@@ -8,13 +8,15 @@ import kotterknife.bindView
 import me.saket.markdownrenderer.MarkdownHintOptions
 import me.saket.markdownrenderer.MarkdownHints
 import me.saket.markdownrenderer.MarkdownSpanPool
+import me.saket.wysiwyg.toolbar.AddLinkDialog
+import me.saket.wysiwyg.toolbar.Link
+import me.saket.wysiwyg.toolbar.MarkdownFormatToolbarView
 import me.saket.wysiwyg.toolbar.OnLinkInsertListener
-import me.saket.wysiwyg.toolbar.TextFormatToolbarView
 
 class EditorActivity : AppCompatActivity(), OnLinkInsertListener {
 
   private val editorEditText: EditText by bindView(R.id.editor_editor)
-  private val formatToolbarView: TextFormatToolbarView by bindView(R.id.editor_format_toolbar)
+  private val formatToolbarView: MarkdownFormatToolbarView by bindView(R.id.editor_format_toolbar)
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -25,7 +27,16 @@ class EditorActivity : AppCompatActivity(), OnLinkInsertListener {
     val markdownHints = MarkdownHints(editorEditText, markdownHintOptions, markdownSpanPool)
     editorEditText.addTextChangedListener(markdownHints)
 
-    formatToolbarView.editorEditText = editorEditText
+    formatToolbarView.onMarkdownSyntaxApplied = { syntax -> syntax.insert(editorEditText) }
+    formatToolbarView.onInsertLinkClicked = {
+      // selectionStart can be lesser than selectionEnd if the selection was made right-to-left.
+      val selectionStart = Math.min(editorEditText.selectionStart, editorEditText.selectionEnd)
+      val selectionEnd = Math.max(editorEditText.selectionStart, editorEditText.selectionEnd)
+
+      // preFilledTitle will be empty when there's no text selected.
+      val preFilledTitle = editorEditText.text.subSequence(selectionStart, selectionEnd)
+      AddLinkDialog.showPreFilled(supportFragmentManager, preFilledTitle.toString())
+    }
   }
 
   private fun markdownHintOptions(): MarkdownHintOptions {
@@ -45,32 +56,7 @@ class EditorActivity : AppCompatActivity(), OnLinkInsertListener {
         inlineCodeBackgroundColor = color(R.color.markdown_inline_code_background))
   }
 
-  override fun onLinkInsert(title: String, url: String) {
-    val selectionStart = Math.min(editorEditText.selectionStart, editorEditText.selectionEnd)
-    val selectionEnd = Math.max(editorEditText.selectionStart, editorEditText.selectionEnd)
-
-    val linkMarkdown = when {
-      title.isEmpty() -> url
-      else -> String.format("[%s](%s)", title, url)
-    }
-    editorEditText.text.replace(selectionStart, selectionEnd, linkMarkdown)
+  override fun onLinkInsert(link: Link) {
+    link.insert(editorEditText)
   }
-
-  //  override fun onClickAction(buttonView: View, markdownAction: MarkdownAction) {
-  //    when (markdownAction) {
-  //      INSERT_LINK -> {
-  //        // preFilledTitle will be empty when there's no text selected.
-  //        val selectionStart = Math.min(replyField.getSelectionStart(), replyField.getSelectionEnd())
-  //        val selectionEnd = Math.max(replyField.getSelectionStart(), replyField.getSelectionEnd())
-  //        val preFilledTitle = replyField.getText().subSequence(selectionStart, selectionEnd)
-  //        AddLinkDialog.showPreFilled(supportFragmentManager, preFilledTitle.toString())
-  //      }
-  //
-  //      QUOTE, HEADING -> {
-  //        insertQuoteOrHeadingMarkdownSyntax(markdownBlock)
-  //      }
-  //
-  //      else -> insertMarkdownSyntax(markdownBlock)
-  //    }
-  //  }
 }
