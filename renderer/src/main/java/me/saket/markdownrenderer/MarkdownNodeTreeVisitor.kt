@@ -158,35 +158,6 @@ class MarkdownNodeTreeVisitor(private val spanPool: MarkdownSpanPool, private va
     highlightMarkdownSyntax(strikethrough)
   }
 
-  //  public void visit(Superscript superscript) {
-  //    //writer.pushSpan(spanPool.foregroundColor(syntaxColor), superscript.getStartOffset(), superscript.getEndOffset());
-  //    //writer.pushSpan(new SuperscriptSpan(), superscript.getStartOffset(), superscript.getEndOffset());
-  //
-  //    BasedSequence superscriptText = superscript.getText();
-  //    int relativeStartOffset = superscript.getStartOffset();
-  //    int relativeEndOffset = superscript.getEndOffset() - 1;
-  //
-  //    Timber.i("-----------------------");
-  //    Timber.i("Superscript: [%s..%s]", relativeStartOffset, relativeEndOffset);
-  //
-  //    for (int i = superscriptText.length() - 1, o = relativeEndOffset; i >= 0 && o >= relativeStartOffset; o--, i--) {
-  //      char c = superscriptText.charAt(i);
-  //      if (c == '^') {
-  //        //Timber.i("Superscript: [%s..%s]", i + relativeStartOffset, relativeEndOffset);
-  //        //Timber.i("Superscript: %s", superscriptText.substring(i, superscriptText.length()));
-  //        Timber.i("[%s..%s]", o - 1, relativeEndOffset);
-  //        writer.pushSpan(new SuperscriptSpan(), o - 1, relativeEndOffset);
-  //        writer.pushSpan(spanPool.foregroundColor(syntaxColor), o - 1, relativeEndOffset);
-  //      }
-  //    }
-  //
-  //    writer.pushSpan(new SuperscriptSpan(), relativeStartOffset, relativeEndOffset);
-  //    writer.pushSpan(spanPool.foregroundColor(syntaxColor), relativeStartOffset, relativeEndOffset);
-  //
-  //    //    applyHighlightForegroundSpan(superscript);
-  //
-  //  }
-
   private fun highlightBlockQuote(blockQuote: BlockQuote) {
     // Android seems to require quote spans to be inserted at the starting of the line.
     // Otherwise, nested quote spans aren't rendered correctly. Calculate the offset for
