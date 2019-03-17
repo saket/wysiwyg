@@ -1,5 +1,5 @@
 <resources>
-  <string name="app_name">WYSIWYG</string>
+  <string name="app_name">Wysiwyg</string>
 
   <string name="cd_textformat_bold">Bold</string>
   <string name="cd_textformat_italic">Italic</string>

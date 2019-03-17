@@ -1,23 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:tools="http://schemas.android.com/tools"
   android:layout_width="match_parent"
   android:layout_height="match_parent"
   android:orientation="vertical"
   tools:context="me.saket.wysiwyg.EditorActivity">
 
+  <TextView
+    android:id="@+id/editor_toolbar"
+    android:layout_width="match_parent"
+    android:layout_height="?attr/actionBarSize"
+    android:fontFamily="monospace"
+    android:gravity="center_vertical"
+    android:paddingEnd="16dp"
+    android:paddingStart="16dp"
+    android:text="@string/app_name"
+    android:textAppearance="@style/TextAppearance.AppCompat.Title"
+    android:textColor="@color/color_accent"
+    android:textStyle="bold" />
+
   <ScrollView
     android:layout_width="match_parent"
-    android:layout_height="0dp"
-    android:layout_weight="1"
+    android:layout_height="match_parent"
+    android:layout_above="@+id/editor_format_toolbar"
+    android:layout_below="@+id/editor_toolbar"
+    android:layout_marginTop="-4dp"
     android:fillViewport="true">
 
     <EditText
       android:id="@+id/editor_editor"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:breakStrategy="balanced"
       android:background="@null"
+      android:breakStrategy="balanced"
       android:gravity="top"
       android:hint="It begins with a word…"
       android:importantForAutofill="no"
@@ -29,5 +44,6 @@
   <me.saket.wysiwyg.toolbar.MarkdownFormatToolbarView
     android:id="@+id/editor_format_toolbar"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content" />
-</LinearLayout>
+    android:layout_height="wrap_content"
+    android:layout_alignParentBottom="true" />
+</RelativeLayout>
