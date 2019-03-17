@@ -1,24 +1,27 @@
 package me.saket.markdownrenderer
 
-import android.text.Editable
+import android.text.Spannable
 import android.text.Spanned
 
-/**
- * TODO: Doc.
- */
-class MarkdownHintsSpanWriter {
+/** TODO: Doc. */
+interface MarkdownHintsSpanWriter {
+  fun pushSpan(span: Any, start: Int, end: Int): MarkdownHintsSpanWriter
+  fun writeTo(editable: Spannable)
 
-  private var editable: Editable? = null
+  class Deferrable : MarkdownHintsSpanWriter {
 
-  fun setText(editable: Editable) {
-    this.editable = editable
-  }
+    private val spans = mutableListOf<Triple<Any, Int, Int>>()
 
-  fun pushSpan(span: Any, start: Int, end: Int): MarkdownHintsSpanWriter {
-    if (!MarkdownHints.SUPPORTED_MARKDOWN_SPANS.contains(span.javaClass)) {
-      throw IllegalArgumentException("Span not supported: " + span.javaClass)
+    override fun pushSpan(span: Any, start: Int, end: Int): MarkdownHintsSpanWriter {
+      spans.add(Triple(span, start, end))
+      return this
     }
-    editable!!.setSpan(span, start, end, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
-    return this
+
+    override fun writeTo(editable: Spannable) {
+      for ((span, start, end) in spans) {
+        editable.setSpan(span, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+      }
+      spans.clear()
+    }
   }
 }

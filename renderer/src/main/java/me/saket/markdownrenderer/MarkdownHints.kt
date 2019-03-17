@@ -1,14 +1,18 @@
 package me.saket.markdownrenderer
 
+import android.app.Activity
 import android.text.Editable
 import android.text.Spannable
+import android.text.TextWatcher
 import android.text.style.ForegroundColorSpan
 import android.text.style.LeadingMarginSpan
 import android.text.style.StrikethroughSpan
 import android.text.style.StyleSpan
 import android.text.style.SuperscriptSpan
 import android.text.style.TypefaceSpan
+import android.view.View
 import android.widget.EditText
+import android.widget.TextView
 import com.vladsch.flexmark.Extension
 import com.vladsch.flexmark.ext.gfm.strikethrough.StrikethroughExtension
 import com.vladsch.flexmark.parser.Parser
@@ -18,8 +22,8 @@ import me.saket.markdownrenderer.spans.HorizontalRuleSpan
 import me.saket.markdownrenderer.spans.IndentedCodeBlockSpan
 import me.saket.markdownrenderer.spans.InlineCodeSpan
 import ru.noties.markwon.spans.BlockQuoteSpan
-import timber.log.Timber
 import java.util.HashSet
+import java.util.concurrent.Executors
 
 /**
  * Usage: EditText#addTextChangedListener(new MarkdownHints(EditText, HighlightOptions, SpanPool));
@@ -30,23 +34,36 @@ class MarkdownHints(
     private val spanPool: MarkdownSpanPool
 ) : SimpleTextWatcher() {
 
-  private val markdownNodeTreeVisitor: MarkdownNodeTreeVisitor = MarkdownNodeTreeVisitor(spanPool, markdownHintOptions)
-  private val markdownHintsSpanWriter: MarkdownHintsSpanWriter = MarkdownHintsSpanWriter()
+  private val bgExecutor = Executors.newSingleThreadExecutor()
+  private val markdownNodeTreeVisitor = MarkdownNodeTreeVisitor(spanPool, markdownHintOptions)
+
   private val parser: Parser = Parser.builder()
       .extensions(listOf<Extension>(StrikethroughExtension.create()))
       .build()
 
+  init {
+    editText.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
+      override fun onViewDetachedFromWindow(v: View?) {
+        bgExecutor.shutdownNow()
+      }
+
+      override fun onViewAttachedToWindow(v: View?) {}
+    })
+  }
+
   override fun afterTextChanged(editable: Editable) {
-    editText.removeTextChangedListener(this)
+    bgExecutor.submit {
+      val markdownHintsSpanWriter = MarkdownHintsSpanWriter.Deferrable()
+      val markdownRootNode = parser.parse(SubSequence.of(editable))
+      markdownNodeTreeVisitor.visit(markdownRootNode, markdownHintsSpanWriter)
 
-    // We'll see stale styling if previous spans aren't removed.
-    removeHintSpans(editable)
-
-    val markdownRootNode = parser.parse(SubSequence.of(editable))
-    markdownHintsSpanWriter.setText(editable)
-    markdownNodeTreeVisitor.visit(markdownRootNode, markdownHintsSpanWriter)
-
-    editText.addTextChangedListener(this)
+      (editText.context as Activity).runOnUiThread {
+        editText.suspendTextWatcherAndRun(this) {
+          removeHintSpans(editable)
+          markdownHintsSpanWriter.writeTo(editable)
+        }
+      }
+    }
   }
 
   private fun removeHintSpans(spannable: Spannable) {
@@ -75,9 +92,11 @@ class MarkdownHints(
       SUPPORTED_MARKDOWN_SPANS.add(InlineCodeSpan::class.java)
       SUPPORTED_MARKDOWN_SPANS.add(IndentedCodeBlockSpan::class.java)
     }
-
-    fun enableLogging() {
-      Timber.plant(Timber.DebugTree())
-    }
   }
+}
+
+private fun TextView.suspendTextWatcherAndRun(textWatcher: TextWatcher, runner: () -> Unit) {
+  removeTextChangedListener(textWatcher)
+  runner()
+  addTextChangedListener(textWatcher)
 }
