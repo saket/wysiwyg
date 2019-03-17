@@ -89,7 +89,13 @@ class MarkdownNodeTreeVisitor(private val spanPool: MarkdownSpanPool, private va
         is Link -> highlightLink(node)
         is Code -> highlightInlineCode(node)
         is IndentedCodeBlock -> highlightIndentedCodeBlock(node)
-        is FencedCodeBlock -> highlightFencedCodeBlock(node)
+        is FencedCodeBlock -> {
+          if (node.openingMarker.contains('~')) {
+            // Ignore. Messes with strikethrough.
+          } else {
+            highlightFencedCodeBlock(node)
+          }
+        }
         is BlockQuote -> highlightBlockQuote(node)
         is ListBlock -> highlightListBlock(node)
         is ListItem -> highlightListItem(node)
