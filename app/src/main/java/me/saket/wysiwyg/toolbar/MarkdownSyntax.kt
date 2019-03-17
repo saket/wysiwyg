@@ -33,7 +33,6 @@ sealed class CompoundableMarkdownSyntax(prefix: String) : SymmetricMarkdownSynta
   override fun insert(editText: EditText) {
     val syntax = prefix[0]   // '>' or '#'.
 
-    // To keep things simple, we'll always insert the quote at the beginning.
     val layout = editText.layout
     val text = editText.text
     val currentLineIndex = layout.getLineForOffset(editText.selectionStart)
@@ -43,17 +42,26 @@ sealed class CompoundableMarkdownSyntax(prefix: String) : SymmetricMarkdownSynta
     val isCurrentLineNonEmpty = currentLine.isNotEmpty()
     val isNestingSyntax = isCurrentLineNonEmpty && currentLine[0] == syntax
 
+    var textOffsetOfCompoundedSyntax = textOffsetOfCurrentLine
+
+    // Find the end of this compounded syntax so that another '>' or '#' can be inserted.
+    if (isNestingSyntax) {
+      while (text[textOffsetOfCompoundedSyntax] == syntax) {
+        ++textOffsetOfCompoundedSyntax
+      }
+    }
+
     val selectionStartCopy = editText.selectionStart
     val selectionEndCopy = editText.selectionEnd
 
-    editText.setSelection(textOffsetOfCurrentLine)
+    editText.setSelection(textOffsetOfCompoundedSyntax)
     super.insert(editText)
     val quoteSyntaxLength = prefix.length
     editText.setSelection(selectionStartCopy + quoteSyntaxLength, selectionEndCopy + quoteSyntaxLength)
 
     // Next, delete extra spaces between nested quotes/heading.
     if (isNestingSyntax) {
-      text.delete(textOffsetOfCurrentLine + 1, textOffsetOfCurrentLine + 2)
+      text.delete(textOffsetOfCompoundedSyntax + 1, textOffsetOfCompoundedSyntax + 2)
     }
   }
 }
