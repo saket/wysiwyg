@@ -6,6 +6,7 @@ import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.WindowManager
+import android.view.inputmethod.EditorInfo
 import android.widget.Button
 import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
@@ -52,6 +53,15 @@ class AddLinkDialog : DialogFragment() {
 
     cancelButton.setOnClickListener { dismiss() }
     insertButton.setOnClickListener { validateLinkAndSendCallback() }
+    urlEditText.setOnEditorActionListener { _, actionId, _ ->
+      when (actionId) {
+        EditorInfo.IME_ACTION_DONE -> {
+          validateLinkAndSendCallback()
+          true
+        }
+        else -> false
+      }
+    }
 
     return dialog
   }
