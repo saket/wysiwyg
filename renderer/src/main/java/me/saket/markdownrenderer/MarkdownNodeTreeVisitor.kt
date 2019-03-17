@@ -67,61 +67,38 @@ class MarkdownNodeTreeVisitor(private val spanPool: MarkdownSpanPool, private va
       // node after visiting it. So get the next node before visiting.
       val next = node.next
 
-      if (node is Emphasis) {
-        highlightItalics(node)
+      when (node) {
+        is Emphasis -> highlightItalics(node)
+        is StrongEmphasis -> highlightBold(node)
+        is Strikethrough -> highlightStrikeThrough(node)
+        is Heading ->
+          // Setext styles aren't supported. Setext-style headers are "underlined" using equal signs
+          // (for first-level headers) and dashes (for second-level headers). For example:
+          // This is an H1
+          // =============
+          //
+          // This is an H2
+          // -------------
+          if (node.isAtxHeading) {
+            highlightHeading(node)
 
-      } else if (node is StrongEmphasis) {
-        highlightBold(node)
-
-      } else if (node is Strikethrough) {
-        highlightStrikeThrough(node)
-
-      } else if (node is Heading) {
-        // Setext styles aren't supported. Setext-style headers are "underlined" using equal signs
-        // (for first-level headers) and dashes (for second-level headers). For example:
-        // This is an H1
-        // =============
-        //
-        // This is an H2
-        // -------------
-        if (node.isAtxHeading) {
-          highlightHeading(node)
-
-        } else {
-          // Reddit allows thematic breaks without a leading new line. So we'll manually support this.
-          highlightThematicBreakWithoutLeadingNewLine(node)
-        }
-
-      } else if (node is Link) {
-        highlightLink(node)
-
-      } else if (node is Code) {
-        highlightInlineCode(node)
-
-      } else if (node is IndentedCodeBlock) {
-        highlightIndentedCodeBlock(node)
-
-      } else if (node is FencedCodeBlock) {
-        highlightFencedCodeBlock(node)
-
-      } else if (node is BlockQuote) {
-        highlightBlockQuote(node)
-
-      } else if (node is ListBlock) {
-        highlightListBlock(node)
-
-      } else if (node is ListItem) {
-        highlightListItem(node)
-
-      } else if (node is ThematicBreak) {
+          } else {
+            // Reddit allows thematic breaks without a leading new line. So we'll manually support this.
+            highlightThematicBreakWithoutLeadingNewLine(node)
+          }
+        is Link -> highlightLink(node)
+        is Code -> highlightInlineCode(node)
+        is IndentedCodeBlock -> highlightIndentedCodeBlock(node)
+        is FencedCodeBlock -> highlightFencedCodeBlock(node)
+        is BlockQuote -> highlightBlockQuote(node)
+        is ListBlock -> highlightListBlock(node)
+        is ListItem -> highlightListItem(node)
         // a.k.a. horizontal rule.
-        highlightThematicBreak(node)
-
-      } else if (node is Document || node is Text || node is Paragraph || node is SoftLineBreak) {
-        // Ignored.
-
-      } else {
-        Timber.w("Unknown node: $node")
+        is ThematicBreak -> highlightThematicBreak(node)
+        is Document, is Text, is Paragraph, is SoftLineBreak -> {
+          // Ignored.
+        }
+        else -> Timber.w("Unknown node: $node")
       }
       visitChildren(node)
 
