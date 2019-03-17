@@ -71,11 +71,11 @@ class AddLinkDialog : DialogFragment() {
     val url = urlEditText.text.toString().trim()
 
     titleEditText.error = when {
-      title.isNotBlank() -> getString(R.string.composereply_addlink_error_empty_field)
+      title.isBlank() -> getString(R.string.composereply_addlink_error_empty_field)
       else -> null
     }
     urlEditText.error = when {
-      url.isNotBlank() -> getString(R.string.composereply_addlink_error_empty_field)
+      url.isBlank() -> getString(R.string.composereply_addlink_error_empty_field)
       else -> null
     }
 
