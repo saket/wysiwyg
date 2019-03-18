@@ -39,6 +39,6 @@ class MarkdownHints(
 
         editText.addTextChangedListener(this)
       }
-    }
+    }.get()
   }
 }
