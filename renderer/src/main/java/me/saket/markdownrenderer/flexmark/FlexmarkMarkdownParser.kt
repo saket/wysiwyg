@@ -35,8 +35,18 @@ class FlexmarkMarkdownParser(
       .build()
 
   override fun parseSpans(text: Spannable): MarkdownHintsSpanWriter {
+    // Instead of creating immutable CharSequences, Flexmark uses SubSequence that
+    // maintains a mutable text and changes its visible window whenever a new
+    // text is required to reduce object creation. SubSequence.of() internally skips
+    // creating a new object if the text is already a SubSequence. This leads to bugs
+    // that are hard to track. For instance, try adding a new line break at the end
+    // and then delete it. It'll result in a crash because HorizontalRuleSpan keeps
+    // a reference to the mutable text. When the underlying text is trimmed, the
+    // bounds (start, end) become larger than the actual text.
+    val immutableText = SubSequence.of(text.toString())
+
     val spanWriter = MarkdownHintsSpanWriter()
-    val markdownRootNode = parser.parse(SubSequence.of(text))
+    val markdownRootNode = parser.parse(immutableText)
     markdownNodeTreeVisitor.visit(markdownRootNode, spanWriter)
     return spanWriter
   }
