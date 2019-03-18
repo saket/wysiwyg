@@ -36,15 +36,15 @@ sealed class CompoundableMarkdownSyntax(prefix: String) : SymmetricMarkdownSynta
     val layout = editText.layout
     val text = editText.text
     val currentLineIndex = layout.getLineForOffset(editText.selectionStart)
-    val textOffsetOfCurrentLine = layout.getLineStart(currentLineIndex)
+    val currentLineStart = layout.getLineStart(currentLineIndex)
+    val currentLineEnd = layout.getLineEnd(currentLineIndex)
 
-    val currentLine = text.subSequence(textOffsetOfCurrentLine, text.length)
+    val currentLine = text.subSequence(currentLineStart, currentLineEnd)
     val isCurrentLineNonEmpty = currentLine.isNotEmpty()
     val isNestingSyntax = isCurrentLineNonEmpty && currentLine[0] == syntax
 
-    var textOffsetOfCompoundedSyntax = textOffsetOfCurrentLine
-
     // Find the end of this compounded syntax so that another '>' or '#' can be inserted.
+    var textOffsetOfCompoundedSyntax = currentLineStart
     if (isNestingSyntax) {
       while (text[textOffsetOfCompoundedSyntax] == syntax) {
         ++textOffsetOfCompoundedSyntax
@@ -87,14 +87,12 @@ object ThematicBreak : MarkdownSyntax() {
     val layout = editText.layout
     val text = editText.text
     val currentLineIndex = layout.getLineForOffset(editText.selectionStart)
-    val textOffsetOfCurrentLine = layout.getLineStart(currentLineIndex)
-
-    val currentLine = text.subSequence(textOffsetOfCurrentLine, text.length)
-    val isAtStartOfCurrentLine = currentLine.isEmpty()
+    val currentLine = text.subSequence(layout.getLineStart(currentLineIndex), layout.getLineEnd(currentLineIndex))
+    val isAtStartOfCurrentLine = currentLine.toString().replace("\n", "").isEmpty()
 
     val lineSyntax = when {
-      isAtStartOfCurrentLine.not() -> "\n---\n"
-      else -> "---\n"
+      isAtStartOfCurrentLine.not() -> "\n---"
+      else -> "---"
     }
     editText.text.insert(editText.selectionEnd, lineSyntax)
   }
