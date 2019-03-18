@@ -11,7 +11,7 @@ import com.vladsch.flexmark.Extension
 import com.vladsch.flexmark.ext.gfm.strikethrough.StrikethroughExtension
 import com.vladsch.flexmark.parser.Parser
 import com.vladsch.flexmark.util.sequence.SubSequence
-import me.saket.markdownrenderer.MarkdownHintOptions
+import me.saket.markdownrenderer.MarkdownHintStyles
 import me.saket.markdownrenderer.MarkdownHintsSpanWriter
 import me.saket.markdownrenderer.MarkdownNodeTreeVisitor
 import me.saket.markdownrenderer.MarkdownParser
@@ -24,11 +24,11 @@ import ru.noties.markwon.spans.BlockQuoteSpan
 import java.util.HashSet
 
 class FlexmarkMarkdownParser(
-    markdownHintOptions: MarkdownHintOptions,
+    styles: MarkdownHintStyles,
     private val spanPool: MarkdownSpanPool
 ) : MarkdownParser {
 
-  private val markdownNodeTreeVisitor = MarkdownNodeTreeVisitor(spanPool, markdownHintOptions)
+  private val markdownNodeTreeVisitor = MarkdownNodeTreeVisitor(spanPool, styles)
 
   private val parser: Parser = Parser.builder()
       .extensions(listOf<Extension>(StrikethroughExtension.create()))

@@ -22,31 +22,43 @@ import com.vladsch.flexmark.ast.ThematicBreak
 import com.vladsch.flexmark.ext.gfm.strikethrough.Strikethrough
 import com.vladsch.flexmark.util.sequence.SubSequence
 import me.saket.markdownrenderer.spans.HorizontalRuleSpan
+import ru.noties.markwon.spans.SpannableTheme
 import timber.log.Timber
 
 /**
  * To support:
  * - Superscript
  */
-class MarkdownNodeTreeVisitor(private val spanPool: MarkdownSpanPool, private val options: MarkdownHintOptions) {
+class MarkdownNodeTreeVisitor(
+    private val spanPool: MarkdownSpanPool,
+    private val styles: MarkdownHintStyles
+) {
 
   @ColorInt
-  private val syntaxColor: Int = options.syntaxColor
+  private val syntaxColor: Int = styles.syntaxColor
 
   @ColorInt
-  private val blockQuoteTextColor: Int = options.blockQuoteTextColor
+  private val blockQuoteTextColor: Int = styles.blockQuoteTextColor
 
   @ColorInt
-  private val linkUrlColor: Int = options.linkUrlColor
+  private val linkUrlColor: Int = styles.linkUrlColor
 
   @ColorInt
-  private val horizontalRuleColor: Int = options.horizontalRuleColor
+  private val horizontalRuleColor: Int = styles.horizontalRuleColor
 
   @Px
-  private val horizontalRuleStrokeWidth: Int = options.horizontalRuleStrokeWidth
+  private val horizontalRuleStrokeWidth: Int = styles.horizontalRuleStrokeWidth
 
   @Px
-  private val listBlockIndentationMargin: Int = options.listBlockIndentationMargin
+  private val listBlockIndentationMargin: Int = styles.listBlockIndentationMargin
+
+  private val spannableTheme = SpannableTheme.builderWithDefaults(styles.context)
+      .headingBreakHeight(0)
+      .blockQuoteColor(styles.blockQuoteIndentationRuleColor)
+      .blockQuoteWidth(styles.blockQuoteVerticalRuleStrokeWidth)
+      .blockMargin(styles.listBlockIndentationMargin)
+      .codeBackgroundColor(styles.inlineCodeBackgroundColor)
+      .build()
 
   private var writer: MarkdownHintsSpanWriter? = null
 
@@ -141,7 +153,7 @@ class MarkdownNodeTreeVisitor(private val spanPool: MarkdownSpanPool, private va
   }
 
   private fun highlightInlineCode(code: Code) {
-    writer!!.add(spanPool.inlineCode(), code.startOffset, code.endOffset)
+    writer!!.add(spanPool.inlineCode(spannableTheme), code.startOffset, code.endOffset)
     writer!!.add(spanPool.monospaceTypeface(), code.startOffset, code.endOffset)
     highlightMarkdownSyntax(code)
   }
@@ -150,12 +162,12 @@ class MarkdownNodeTreeVisitor(private val spanPool: MarkdownSpanPool, private va
     // A LineBackgroundSpan needs to start at the starting of the line.
     val lineStartOffset = indentedCodeBlock.startOffset - 4
 
-    writer!!.add(spanPool.indentedCodeBlock(), lineStartOffset, indentedCodeBlock.endOffset)
+    writer!!.add(spanPool.indentedCodeBlock(spannableTheme), lineStartOffset, indentedCodeBlock.endOffset)
     writer!!.add(spanPool.monospaceTypeface(), indentedCodeBlock.startOffset, indentedCodeBlock.endOffset)
   }
 
   private fun highlightFencedCodeBlock(indentedCodeBlock: FencedCodeBlock) {
-    writer!!.add(spanPool.indentedCodeBlock(), indentedCodeBlock.startOffset, indentedCodeBlock.endOffset)
+    writer!!.add(spanPool.indentedCodeBlock(spannableTheme), indentedCodeBlock.startOffset, indentedCodeBlock.endOffset)
     writer!!.add(spanPool.monospaceTypeface(), indentedCodeBlock.startOffset, indentedCodeBlock.endOffset)
   }
 
@@ -176,7 +188,7 @@ class MarkdownNodeTreeVisitor(private val spanPool: MarkdownSpanPool, private va
     }
 
     // Quote's vertical rule.
-    val quoteSpan = spanPool.quote()
+    val quoteSpan = spanPool.quote(spannableTheme)
     writer!!.add(quoteSpan, blockQuote.startOffset - nestedParents, blockQuote.endOffset)
 
     // Quote markers ('>').
@@ -188,7 +200,7 @@ class MarkdownNodeTreeVisitor(private val spanPool: MarkdownSpanPool, private va
   }
 
   private fun highlightHeading(heading: Heading) {
-    writer!!.add(spanPool.heading(heading.level), heading.startOffset, heading.endOffset)
+    writer!!.add(spanPool.heading(heading.level, spannableTheme), heading.startOffset, heading.endOffset)
     writer!!.add(
         spanPool.foregroundColor(syntaxColor),
         heading.startOffset,
@@ -258,7 +270,7 @@ class MarkdownNodeTreeVisitor(private val spanPool: MarkdownSpanPool, private va
 
   private fun highlightLink(link: Link) {
     // Text.
-    writer!!.add(spanPool.foregroundColor(options.linkTextColor), link.startOffset, link.endOffset)
+    writer!!.add(spanPool.foregroundColor(styles.linkTextColor), link.startOffset, link.endOffset)
 
     // Url.
     val textClosingPosition = link.startOffset + link.text.length + 1

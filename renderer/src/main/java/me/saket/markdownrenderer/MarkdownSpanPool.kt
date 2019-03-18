@@ -1,7 +1,6 @@
 package me.saket.markdownrenderer
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.graphics.Typeface
 import android.text.style.ForegroundColorSpan
 import android.text.style.LeadingMarginSpan
@@ -24,7 +23,7 @@ import java.util.Stack
  * For avoiding creation of new spans on every text change.
  */
 @SuppressLint("UseSparseArrays")
-class MarkdownSpanPool(context: Context, options: MarkdownHintOptions) {
+class MarkdownSpanPool {
 
   private val italicsSpans = Stack<StyleSpan>()
   private val boldSpans = Stack<StyleSpan>()
@@ -38,14 +37,6 @@ class MarkdownSpanPool(context: Context, options: MarkdownHintOptions) {
   private val quoteSpans = Stack<BlockQuoteSpan>()
   private val leadingMarginSpans = HashMap<Int, LeadingMarginSpan.Standard>()
   private val horizontalRuleSpans = HashMap<String, HorizontalRuleSpan>()
-
-  private val spannableTheme = SpannableTheme.builderWithDefaults(context)
-      .headingBreakHeight(0)
-      .blockQuoteColor(options.blockQuoteIndentationRuleColor)
-      .blockQuoteWidth(options.blockQuoteVerticalRuleStrokeWidth)
-      .blockMargin(options.listBlockIndentationMargin)
-      .codeBackgroundColor(options.inlineCodeBackgroundColor)
-      .build()
 
   fun italics(): StyleSpan {
     return when {
@@ -68,14 +59,14 @@ class MarkdownSpanPool(context: Context, options: MarkdownHintOptions) {
     }
   }
 
-  fun inlineCode(): InlineCodeSpan {
+  fun inlineCode(spannableTheme: SpannableTheme): InlineCodeSpan {
     return when {
       inlineCodeSpans.empty() -> InlineCodeSpan(spannableTheme)
       else -> inlineCodeSpans.pop()
     }
   }
 
-  fun indentedCodeBlock(): IndentedCodeBlockSpan {
+  fun indentedCodeBlock(spannableTheme: SpannableTheme): IndentedCodeBlockSpan {
     return when {
       indentedCodeSpans.empty() -> IndentedCodeBlockSpan(spannableTheme)
       else -> indentedCodeSpans.pop()
@@ -96,7 +87,7 @@ class MarkdownSpanPool(context: Context, options: MarkdownHintOptions) {
     }
   }
 
-  fun heading(level: Int): HeadingSpanWithLevel {
+  fun heading(level: Int, spannableTheme: SpannableTheme): HeadingSpanWithLevel {
     return when {
       headingSpans.containsKey(level) -> headingSpans.remove(level)!!
       else -> HeadingSpanWithLevel(spannableTheme, level)
@@ -110,7 +101,7 @@ class MarkdownSpanPool(context: Context, options: MarkdownHintOptions) {
     }
   }
 
-  fun quote(): BlockQuoteSpan {
+  fun quote(spannableTheme: SpannableTheme): BlockQuoteSpan {
     return when {
       quoteSpans.empty() -> BlockQuoteSpan(spannableTheme)
       else -> quoteSpans.pop()

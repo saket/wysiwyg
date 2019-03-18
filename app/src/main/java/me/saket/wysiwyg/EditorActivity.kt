@@ -5,7 +5,7 @@ import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import kotterknife.bindView
-import me.saket.markdownrenderer.MarkdownHintOptions
+import me.saket.markdownrenderer.MarkdownHintStyles
 import me.saket.markdownrenderer.MarkdownHints
 import me.saket.markdownrenderer.MarkdownSpanPool
 import me.saket.markdownrenderer.flexmark.FlexmarkMarkdownParser
@@ -23,10 +23,7 @@ class EditorActivity : AppCompatActivity(), OnLinkInsertListener {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_editor)
 
-    // TODO: Remove dependency of markdownHintOptions from MarkdownSpanPool.
-    val markdownHintOptions = markdownHintOptions()
-    val markdownSpanPool = MarkdownSpanPool(this, markdownHintOptions)
-    val markdownParser = FlexmarkMarkdownParser(markdownHintOptions, markdownSpanPool)
+    val markdownParser = FlexmarkMarkdownParser(markdownHintStyles(), MarkdownSpanPool())
     editorEditText.addTextChangedListener(MarkdownHints(editorEditText, markdownParser))
 
     formatToolbarView.onMarkdownSyntaxApplied = { syntax -> syntax.insert(editorEditText) }
@@ -41,11 +38,12 @@ class EditorActivity : AppCompatActivity(), OnLinkInsertListener {
     }
   }
 
-  private fun markdownHintOptions(): MarkdownHintOptions {
+  private fun markdownHintStyles(): MarkdownHintStyles {
     val color = { colorResId: Int -> ContextCompat.getColor(this, colorResId) }
     val dimensPx = { dimenResId: Int -> resources.getDimensionPixelSize(dimenResId) }
 
-    return MarkdownHintOptions(
+    return MarkdownHintStyles(
+        context = this,
         syntaxColor = color(R.color.markdown_syntax),
         blockQuoteIndentationRuleColor = color(R.color.markdown_blockquote_indentation_rule),
         blockQuoteTextColor = color(R.color.markdown_blockquote_text),

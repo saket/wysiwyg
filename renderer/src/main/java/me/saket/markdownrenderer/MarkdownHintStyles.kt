@@ -1,9 +1,16 @@
 package me.saket.markdownrenderer
 
+import android.content.Context
 import androidx.annotation.ColorInt
 import androidx.annotation.Px
+import ru.noties.markwon.spans.SpannableTheme
 
-data class MarkdownHintOptions(
+data class MarkdownHintStyles(
+    /**
+     * TODO: I find passing the context around uncomfortable. Get rid of this by supplying the defaults directly.
+     * Used for resolving default colors and dimensions in [SpannableTheme.builderWithDefaults].
+     */
+    val context: Context,
 
     @ColorInt
     val syntaxColor: Int,
