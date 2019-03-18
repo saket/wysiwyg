@@ -246,10 +246,14 @@ class MarkdownNodeTreeVisitor(
       throw AssertionError()
     }
 
+    val thematicBreakChars = node.closingMarker
     val ruleStartOffset = node.startOffset + node.text.length + 1
-    val thematicBreakChars = node.chars.subSequence(ruleStartOffset, node.endOffset)
 
-    if (thematicBreakChars[0] == '=') {
+    if (thematicBreakChars.length < 3) {
+      // Not sure why "-" gets treated as a heading.
+      return
+
+    } else if (thematicBreakChars[0] == '=') {
       // "===" line breaks aren't supported by Reddit.
       return
     }
