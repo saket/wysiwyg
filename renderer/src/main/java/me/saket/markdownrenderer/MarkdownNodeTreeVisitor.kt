@@ -60,7 +60,7 @@ class MarkdownNodeTreeVisitor(
       .codeBackgroundColor(styles.inlineCodeBackgroundColor)
       .build()
 
-  private var writer: MarkdownHintsSpanWriter? = null
+  private lateinit var writer: MarkdownHintsSpanWriter
 
   fun visit(markdownRootNode: Node, hintsWriter: MarkdownHintsSpanWriter) {
     this.writer = hintsWriter
@@ -126,7 +126,7 @@ class MarkdownNodeTreeVisitor(
 
   private fun <T> highlightMarkdownSyntax(delimitedNode: T) where T : Node, T : DelimitedNode {
     if (delimitedNode.openingMarker.isNotEmpty()) {
-      writer!!.add(
+      writer.add(
           spanPool.foregroundColor(syntaxColor),
           delimitedNode.startOffset,
           delimitedNode.startOffset + delimitedNode.openingMarker.length
@@ -134,7 +134,7 @@ class MarkdownNodeTreeVisitor(
     }
 
     if (delimitedNode.closingMarker.isNotEmpty()) {
-      writer!!.add(
+      writer.add(
           spanPool.foregroundColor(syntaxColor),
           delimitedNode.endOffset - delimitedNode.closingMarker.length,
           delimitedNode.endOffset
@@ -143,18 +143,18 @@ class MarkdownNodeTreeVisitor(
   }
 
   private fun highlightItalics(emphasis: Emphasis) {
-    writer!!.add(spanPool.italics(), emphasis.startOffset, emphasis.endOffset)
+    writer.add(spanPool.italics(), emphasis.startOffset, emphasis.endOffset)
     highlightMarkdownSyntax(emphasis)
   }
 
   private fun highlightBold(strongEmphasis: StrongEmphasis) {
-    writer!!.add(spanPool.bold(), strongEmphasis.startOffset, strongEmphasis.endOffset)
+    writer.add(spanPool.bold(), strongEmphasis.startOffset, strongEmphasis.endOffset)
     highlightMarkdownSyntax(strongEmphasis)
   }
 
   private fun highlightInlineCode(code: Code) {
-    writer!!.add(spanPool.inlineCode(spannableTheme), code.startOffset, code.endOffset)
-    writer!!.add(spanPool.monospaceTypeface(), code.startOffset, code.endOffset)
+    writer.add(spanPool.inlineCode(spannableTheme), code.startOffset, code.endOffset)
+    writer.add(spanPool.monospaceTypeface(), code.startOffset, code.endOffset)
     highlightMarkdownSyntax(code)
   }
 
@@ -162,17 +162,17 @@ class MarkdownNodeTreeVisitor(
     // A LineBackgroundSpan needs to start at the starting of the line.
     val lineStartOffset = indentedCodeBlock.startOffset - 4
 
-    writer!!.add(spanPool.indentedCodeBlock(spannableTheme), lineStartOffset, indentedCodeBlock.endOffset)
-    writer!!.add(spanPool.monospaceTypeface(), indentedCodeBlock.startOffset, indentedCodeBlock.endOffset)
+    writer.add(spanPool.indentedCodeBlock(spannableTheme), lineStartOffset, indentedCodeBlock.endOffset)
+    writer.add(spanPool.monospaceTypeface(), indentedCodeBlock.startOffset, indentedCodeBlock.endOffset)
   }
 
   private fun highlightFencedCodeBlock(indentedCodeBlock: FencedCodeBlock) {
-    writer!!.add(spanPool.indentedCodeBlock(spannableTheme), indentedCodeBlock.startOffset, indentedCodeBlock.endOffset)
-    writer!!.add(spanPool.monospaceTypeface(), indentedCodeBlock.startOffset, indentedCodeBlock.endOffset)
+    writer.add(spanPool.indentedCodeBlock(spannableTheme), indentedCodeBlock.startOffset, indentedCodeBlock.endOffset)
+    writer.add(spanPool.monospaceTypeface(), indentedCodeBlock.startOffset, indentedCodeBlock.endOffset)
   }
 
   private fun highlightStrikeThrough(strikethrough: Strikethrough) {
-    writer!!.add(spanPool.strikethrough(), strikethrough.startOffset, strikethrough.endOffset)
+    writer.add(spanPool.strikethrough(), strikethrough.startOffset, strikethrough.endOffset)
     highlightMarkdownSyntax(strikethrough)
   }
 
@@ -189,19 +189,19 @@ class MarkdownNodeTreeVisitor(
 
     // Quote's vertical rule.
     val quoteSpan = spanPool.quote(spannableTheme)
-    writer!!.add(quoteSpan, blockQuote.startOffset - nestedParents, blockQuote.endOffset)
+    writer.add(quoteSpan, blockQuote.startOffset - nestedParents, blockQuote.endOffset)
 
     // Quote markers ('>').
     val markerStartOffset = blockQuote.startOffset - nestedParents
-    writer!!.add(spanPool.foregroundColor(syntaxColor), markerStartOffset, blockQuote.startOffset + 1)
+    writer.add(spanPool.foregroundColor(syntaxColor), markerStartOffset, blockQuote.startOffset + 1)
 
     // Text color.
-    writer!!.add(spanPool.foregroundColor(blockQuoteTextColor), blockQuote.startOffset - nestedParents, blockQuote.endOffset)
+    writer.add(spanPool.foregroundColor(blockQuoteTextColor), blockQuote.startOffset - nestedParents, blockQuote.endOffset)
   }
 
   private fun highlightHeading(heading: Heading) {
-    writer!!.add(spanPool.heading(heading.level, spannableTheme), heading.startOffset, heading.endOffset)
-    writer!!.add(
+    writer.add(spanPool.heading(heading.level, spannableTheme), heading.startOffset, heading.endOffset)
+    writer.add(
         spanPool.foregroundColor(syntaxColor),
         heading.startOffset,
         heading.startOffset + heading.openingMarker.length
@@ -209,11 +209,11 @@ class MarkdownNodeTreeVisitor(
   }
 
   private fun highlightListBlock(listBlock: ListBlock) {
-    writer!!.add(spanPool.leadingMargin(listBlockIndentationMargin), listBlock.startOffset, listBlock.endOffset)
+    writer.add(spanPool.leadingMargin(listBlockIndentationMargin), listBlock.startOffset, listBlock.endOffset)
   }
 
   private fun highlightListItem(listItem: ListItem) {
-    writer!!.add(spanPool.foregroundColor(syntaxColor), listItem.startOffset, listItem.startOffset + 1)
+    writer.add(spanPool.foregroundColor(syntaxColor), listItem.startOffset, listItem.startOffset + 1)
   }
 
   private fun highlightThematicBreak(thematicBreak: ThematicBreak) {
@@ -235,10 +235,10 @@ class MarkdownNodeTreeVisitor(
       val immutableThematicBreakChars = thematicBreakChars.toString()
 
       val hrSpan = spanPool.horizontalRule(immutableThematicBreakChars, horizontalRuleColor, horizontalRuleStrokeWidth, ruleMode)
-      writer!!.add(hrSpan, thematicBreak.startOffset, thematicBreak.endOffset)
+      writer.add(hrSpan, thematicBreak.startOffset, thematicBreak.endOffset)
     }
 
-    writer!!.add(spanPool.foregroundColor(syntaxColor), thematicBreak.startOffset, thematicBreak.endOffset)
+    writer.add(spanPool.foregroundColor(syntaxColor), thematicBreak.startOffset, thematicBreak.endOffset)
   }
 
   private fun highlightThematicBreakWithoutLeadingNewLine(node: Heading) {
@@ -267,19 +267,19 @@ class MarkdownNodeTreeVisitor(
           horizontalRuleStrokeWidth,
           HorizontalRuleSpan.Mode.HYPHENS
       )
-      writer!!.add(horizontalRuleSpan, ruleStartOffset, node.endOffset)
+      writer.add(horizontalRuleSpan, ruleStartOffset, node.endOffset)
     }
-    writer!!.add(spanPool.foregroundColor(syntaxColor), ruleStartOffset, node.endOffset)
+    writer.add(spanPool.foregroundColor(syntaxColor), ruleStartOffset, node.endOffset)
   }
 
   private fun highlightLink(link: Link) {
     // Text.
-    writer!!.add(spanPool.foregroundColor(styles.linkTextColor), link.startOffset, link.endOffset)
+    writer.add(spanPool.foregroundColor(styles.linkTextColor), link.startOffset, link.endOffset)
 
     // Url.
     val textClosingPosition = link.startOffset + link.text.length + 1
     val urlOpeningPosition = textClosingPosition + 1
-    writer!!.add(spanPool.foregroundColor(linkUrlColor), urlOpeningPosition, link.endOffset)
+    writer.add(spanPool.foregroundColor(linkUrlColor), urlOpeningPosition, link.endOffset)
   }
 
   companion object {
