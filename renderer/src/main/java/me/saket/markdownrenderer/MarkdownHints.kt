@@ -28,16 +28,14 @@ class MarkdownHints(
   }
 
   override fun afterTextChanged(editable: Editable) {
-    editText.removeTextChangedListener(this)
-
     bgExecutor.submit {
       val spanWriter = parser.parseSpans(editable)
 
       uiExecutor.execute {
-        parser.removeSpans(editable)
-        spanWriter.writeTo(editable)
-
-        editText.addTextChangedListener(this)
+        editText.suspendTextWatcherAndRun(this) {
+          parser.removeSpans(editable)
+          spanWriter.writeTo(editable)
+        }
       }
     }.get()
   }
