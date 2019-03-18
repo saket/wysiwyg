@@ -76,6 +76,9 @@ data class Link(val title: String, val url: String) : MarkdownSyntax() {
       else -> String.format("[%s](%s)", title, url)
     }
     editText.text.replace(selectionStart, selectionEnd, linkMarkdown)
+
+    val linkEnd = selectionStart + linkMarkdown.length
+    editText.setSelection(linkEnd, linkEnd)
   }
 }
 
