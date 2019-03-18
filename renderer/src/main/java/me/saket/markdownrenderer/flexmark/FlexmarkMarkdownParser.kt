@@ -35,12 +35,16 @@ class FlexmarkMarkdownParser(
       .build()
 
   override fun parseSpans(text: Spannable): MarkdownHintsSpanWriter {
-    val markdownHintsSpanWriter = MarkdownHintsSpanWriter.Deferrable()
+    val spanWriter = MarkdownHintsSpanWriter()
     val markdownRootNode = parser.parse(SubSequence.of(text))
-    markdownNodeTreeVisitor.visit(markdownRootNode, markdownHintsSpanWriter)
-    return markdownHintsSpanWriter
+    markdownNodeTreeVisitor.visit(markdownRootNode, spanWriter)
+    return spanWriter
   }
 
+  /**
+   * Called on every text change so that stale spans can
+   * be removed before applying new ones.
+   */
   override fun removeSpans(text: Spannable) {
     val spans = text.getSpans(0, text.length, Any::class.java)
     for (span in spans) {
