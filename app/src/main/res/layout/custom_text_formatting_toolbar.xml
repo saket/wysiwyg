@@ -54,5 +54,13 @@
       style="@style/DankTextFormatToolbarButton"
       android:contentDescription="@string/cd_textformat_header"
       android:src="@drawable/ic_format_header_pound" />
+
+    <View style="@style/DankSeparator.HorizontalContent" />
+
+    <ImageButton
+      android:id="@+id/textformattoolbar_thematic_break"
+      style="@style/DankTextFormatToolbarButton"
+      android:contentDescription="@string/cd_textformat_thematic_header"
+      android:src="@drawable/ic_format_border_horizontal_24dp" />
   </LinearLayout>
 </HorizontalScrollView>

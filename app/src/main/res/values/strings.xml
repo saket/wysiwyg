@@ -10,6 +10,7 @@
   <string name="cd_textformat_superscript">Superscript</string>
   <string name="cd_textformat_code">Pre-formatted code</string>
   <string name="cd_textformat_header">Header</string>
+  <string name="cd_textformat_thematic_header">Line break</string>
   <string name="cd_textformat_spoiler">Spoiler</string>
   <string name="composereply_redo">Redo</string>
   <string name="composereply_undo">Undo</string>

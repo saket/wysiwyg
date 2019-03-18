@@ -82,6 +82,24 @@ data class Link(val title: String, val url: String) : MarkdownSyntax() {
   }
 }
 
+object ThematicBreak : MarkdownSyntax() {
+  override fun insert(editText: EditText) {
+    val layout = editText.layout
+    val text = editText.text
+    val currentLineIndex = layout.getLineForOffset(editText.selectionStart)
+    val textOffsetOfCurrentLine = layout.getLineStart(currentLineIndex)
+
+    val currentLine = text.subSequence(textOffsetOfCurrentLine, text.length)
+    val isAtStartOfCurrentLine = currentLine.isEmpty()
+
+    val lineSyntax = when {
+      isAtStartOfCurrentLine.not() -> "\n---\n"
+      else -> "---\n"
+    }
+    editText.text.insert(editText.selectionEnd, lineSyntax)
+  }
+}
+
 object Bold : SymmetricMarkdownSyntax("**")
 object Italic : SymmetricMarkdownSyntax("*")
 object StrikeThrough : SymmetricMarkdownSyntax("~~")
