@@ -1,6 +1,6 @@
 package me.saket.markdownrenderer.spans
 
-import ru.noties.markwon.spans.CodeSpan
-import ru.noties.markwon.spans.SpannableTheme
+import ru.noties.markwon.core.MarkwonTheme
+import ru.noties.markwon.core.spans.CodeSpan
 
-class InlineCodeSpan(theme: SpannableTheme) : CodeSpan(theme, false)
+class InlineCodeSpan(theme: MarkwonTheme) : CodeSpan(theme)

@@ -34,5 +34,5 @@ dependencies {
   implementation "com.vladsch.flexmark:flexmark-java:$versions.flexmark"
   implementation "com.vladsch.flexmark:flexmark-ext-superscript:$versions.flexmark"
   implementation "com.vladsch.flexmark:flexmark-ext-gfm-strikethrough:$versions.flexmark"
-  implementation "ru.noties:markwon:$versions.markwon"
+  implementation "ru.noties.markwon:core:$versions.markwon"
 }

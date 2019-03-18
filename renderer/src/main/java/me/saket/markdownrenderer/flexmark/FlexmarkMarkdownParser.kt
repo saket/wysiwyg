@@ -20,7 +20,7 @@ import me.saket.markdownrenderer.spans.HeadingSpanWithLevel
 import me.saket.markdownrenderer.spans.HorizontalRuleSpan
 import me.saket.markdownrenderer.spans.IndentedCodeBlockSpan
 import me.saket.markdownrenderer.spans.InlineCodeSpan
-import ru.noties.markwon.spans.BlockQuoteSpan
+import ru.noties.markwon.core.spans.BlockQuoteSpan
 import java.util.HashSet
 
 class FlexmarkMarkdownParser(

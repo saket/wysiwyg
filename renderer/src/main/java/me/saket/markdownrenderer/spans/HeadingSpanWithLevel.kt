@@ -1,6 +1,6 @@
 package me.saket.markdownrenderer.spans
 
-import ru.noties.markwon.spans.HeadingSpan
-import ru.noties.markwon.spans.SpannableTheme
+import ru.noties.markwon.core.MarkwonTheme
+import ru.noties.markwon.core.spans.HeadingSpan
 
-class HeadingSpanWithLevel(theme: SpannableTheme, val level: Int) : HeadingSpan(theme, level)
+class HeadingSpanWithLevel(theme: MarkwonTheme, val level: Int) : HeadingSpan(theme, level)

@@ -14,8 +14,8 @@ import me.saket.markdownrenderer.spans.HeadingSpanWithLevel
 import me.saket.markdownrenderer.spans.HorizontalRuleSpan
 import me.saket.markdownrenderer.spans.IndentedCodeBlockSpan
 import me.saket.markdownrenderer.spans.InlineCodeSpan
-import ru.noties.markwon.spans.BlockQuoteSpan
-import ru.noties.markwon.spans.SpannableTheme
+import ru.noties.markwon.core.MarkwonTheme
+import ru.noties.markwon.core.spans.BlockQuoteSpan
 import java.util.HashMap
 import java.util.Stack
 
@@ -59,16 +59,16 @@ class MarkdownSpanPool {
     }
   }
 
-  fun inlineCode(spannableTheme: SpannableTheme): InlineCodeSpan {
+  fun inlineCode(markwonTheme: MarkwonTheme): InlineCodeSpan {
     return when {
-      inlineCodeSpans.empty() -> InlineCodeSpan(spannableTheme)
+      inlineCodeSpans.empty() -> InlineCodeSpan(markwonTheme)
       else -> inlineCodeSpans.pop()
     }
   }
 
-  fun indentedCodeBlock(spannableTheme: SpannableTheme): IndentedCodeBlockSpan {
+  fun indentedCodeBlock(markwonTheme: MarkwonTheme): IndentedCodeBlockSpan {
     return when {
-      indentedCodeSpans.empty() -> IndentedCodeBlockSpan(spannableTheme)
+      indentedCodeSpans.empty() -> IndentedCodeBlockSpan(markwonTheme)
       else -> indentedCodeSpans.pop()
     }
   }
@@ -87,10 +87,10 @@ class MarkdownSpanPool {
     }
   }
 
-  fun heading(level: Int, spannableTheme: SpannableTheme): HeadingSpanWithLevel {
+  fun heading(level: Int, markwonTheme: MarkwonTheme): HeadingSpanWithLevel {
     return when {
       headingSpans.containsKey(level) -> headingSpans.remove(level)!!
-      else -> HeadingSpanWithLevel(spannableTheme, level)
+      else -> HeadingSpanWithLevel(markwonTheme, level)
     }
   }
 
@@ -101,9 +101,9 @@ class MarkdownSpanPool {
     }
   }
 
-  fun quote(spannableTheme: SpannableTheme): BlockQuoteSpan {
+  fun quote(markwonTheme: MarkwonTheme): BlockQuoteSpan {
     return when {
-      quoteSpans.empty() -> BlockQuoteSpan(spannableTheme)
+      quoteSpans.empty() -> BlockQuoteSpan(markwonTheme)
       else -> quoteSpans.pop()
     }
   }
