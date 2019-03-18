@@ -30,9 +30,6 @@ class MarkdownHints(
   override fun afterTextChanged(editable: Editable) {
     editText.removeTextChangedListener(this)
 
-    // I should probably think about handling stale background threads
-    // if the text is changing faster than the parsing can happen in
-    // background, but it *seems* to be fine right now.
     bgExecutor.submit {
       val spanWriter = parser.parseSpans(editable)
 

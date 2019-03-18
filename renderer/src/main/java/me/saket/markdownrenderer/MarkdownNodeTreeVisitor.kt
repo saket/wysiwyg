@@ -5,6 +5,7 @@ import androidx.annotation.Px
 import com.vladsch.flexmark.ast.BlockQuote
 import com.vladsch.flexmark.ast.Code
 import com.vladsch.flexmark.ast.DelimitedNode
+import com.vladsch.flexmark.ast.Document
 import com.vladsch.flexmark.ast.Emphasis
 import com.vladsch.flexmark.ast.FencedCodeBlock
 import com.vladsch.flexmark.ast.Heading
@@ -12,14 +13,13 @@ import com.vladsch.flexmark.ast.IndentedCodeBlock
 import com.vladsch.flexmark.ast.Link
 import com.vladsch.flexmark.ast.ListBlock
 import com.vladsch.flexmark.ast.ListItem
+import com.vladsch.flexmark.ast.Node
 import com.vladsch.flexmark.ast.Paragraph
 import com.vladsch.flexmark.ast.SoftLineBreak
 import com.vladsch.flexmark.ast.StrongEmphasis
 import com.vladsch.flexmark.ast.Text
 import com.vladsch.flexmark.ast.ThematicBreak
 import com.vladsch.flexmark.ext.gfm.strikethrough.Strikethrough
-import com.vladsch.flexmark.util.ast.Document
-import com.vladsch.flexmark.util.ast.Node
 import com.vladsch.flexmark.util.sequence.SubSequence
 import me.saket.markdownrenderer.spans.HorizontalRuleSpan
 import ru.noties.markwon.core.MarkwonTheme
