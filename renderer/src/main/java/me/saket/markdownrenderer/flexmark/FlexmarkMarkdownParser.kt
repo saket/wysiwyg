@@ -13,7 +13,6 @@ import com.vladsch.flexmark.parser.Parser
 import com.vladsch.flexmark.util.sequence.SubSequence
 import me.saket.markdownrenderer.MarkdownHintStyles
 import me.saket.markdownrenderer.MarkdownHintsSpanWriter
-import me.saket.markdownrenderer.MarkdownNodeTreeVisitor
 import me.saket.markdownrenderer.MarkdownParser
 import me.saket.markdownrenderer.MarkdownSpanPool
 import me.saket.markdownrenderer.spans.HeadingSpanWithLevel

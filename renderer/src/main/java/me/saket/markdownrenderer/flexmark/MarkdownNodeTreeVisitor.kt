@@ -1,4 +1,4 @@
-package me.saket.markdownrenderer
+package me.saket.markdownrenderer.flexmark
 
 import androidx.annotation.ColorInt
 import androidx.annotation.Px
@@ -21,6 +21,9 @@ import com.vladsch.flexmark.ast.Text
 import com.vladsch.flexmark.ast.ThematicBreak
 import com.vladsch.flexmark.ext.gfm.strikethrough.Strikethrough
 import com.vladsch.flexmark.util.sequence.SubSequence
+import me.saket.markdownrenderer.MarkdownHintStyles
+import me.saket.markdownrenderer.MarkdownHintsSpanWriter
+import me.saket.markdownrenderer.MarkdownSpanPool
 import me.saket.markdownrenderer.spans.HorizontalRuleSpan
 import ru.noties.markwon.core.MarkwonTheme
 import timber.log.Timber
