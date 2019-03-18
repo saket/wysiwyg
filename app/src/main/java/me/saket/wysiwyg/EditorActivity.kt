@@ -8,6 +8,7 @@ import kotterknife.bindView
 import me.saket.markdownrenderer.MarkdownHintOptions
 import me.saket.markdownrenderer.MarkdownHints
 import me.saket.markdownrenderer.MarkdownSpanPool
+import me.saket.markdownrenderer.flexmark.FlexmarkMarkdownParser
 import me.saket.wysiwyg.toolbar.AddLinkDialog
 import me.saket.wysiwyg.toolbar.Link
 import me.saket.wysiwyg.toolbar.MarkdownFormatToolbarView
@@ -22,10 +23,11 @@ class EditorActivity : AppCompatActivity(), OnLinkInsertListener {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_editor)
 
+    // TODO: Remove dependency of markdownHintOptions from MarkdownSpanPool.
     val markdownHintOptions = markdownHintOptions()
     val markdownSpanPool = MarkdownSpanPool(this, markdownHintOptions)
-    val markdownHints = MarkdownHints(editorEditText, markdownHintOptions, markdownSpanPool)
-    editorEditText.addTextChangedListener(markdownHints)
+    val markdownParser = FlexmarkMarkdownParser(markdownHintOptions, markdownSpanPool)
+    editorEditText.addTextChangedListener(MarkdownHints(editorEditText, markdownParser))
 
     formatToolbarView.onMarkdownSyntaxApplied = { syntax -> syntax.insert(editorEditText) }
     formatToolbarView.onInsertLinkClicked = {

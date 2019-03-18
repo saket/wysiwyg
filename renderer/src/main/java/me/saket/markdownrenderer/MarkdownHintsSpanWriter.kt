@@ -3,16 +3,18 @@ package me.saket.markdownrenderer
 import android.text.Spannable
 import android.text.Spanned
 
-/** TODO: Doc. */
+/**
+ * TODO: Doc.
+ */
 interface MarkdownHintsSpanWriter {
-  fun pushSpan(span: Any, start: Int, end: Int): MarkdownHintsSpanWriter
+  fun add(span: Any, start: Int, end: Int): MarkdownHintsSpanWriter
   fun writeTo(editable: Spannable)
 
   class Deferrable : MarkdownHintsSpanWriter {
 
     private val spans = mutableListOf<Triple<Any, Int, Int>>()
 
-    override fun pushSpan(span: Any, start: Int, end: Int): MarkdownHintsSpanWriter {
+    override fun add(span: Any, start: Int, end: Int): MarkdownHintsSpanWriter {
       spans.add(Triple(span, start, end))
       return this
     }
