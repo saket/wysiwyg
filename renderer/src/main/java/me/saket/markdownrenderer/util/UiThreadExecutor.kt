@@ -1,4 +1,4 @@
-package me.saket.markdownrenderer
+package me.saket.markdownrenderer.util
 
 import android.os.Handler
 import android.os.Looper

@@ -1,8 +1,10 @@
 package me.saket.markdownrenderer
 
-import android.text.Editable
-import android.view.View
 import android.widget.EditText
+import me.saket.markdownrenderer.util.AfterTextChange
+import me.saket.markdownrenderer.util.OnViewDetach
+import me.saket.markdownrenderer.util.UiThreadExecutor
+import me.saket.markdownrenderer.util.suspendTextWatcherAndRun
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
@@ -16,35 +18,31 @@ import java.util.concurrent.Executors
 class MarkdownHints(
     private val editText: EditText,
     private val parser: MarkdownParser
-) : View.OnAttachStateChangeListener {
+) {
 
   private val bgExecutor: ExecutorService = Executors.newSingleThreadExecutor()
   private val uiExecutor = UiThreadExecutor()
 
   init {
-    editText.addOnAttachStateChangeListener(this)
+    cleanupOnViewDetach()
   }
 
-  override fun onViewAttachedToWindow(v: View) {}
-
-  override fun onViewDetachedFromWindow(v: View) {
-    bgExecutor.shutdownNow()
+  private fun cleanupOnViewDetach() {
+    editText.addOnAttachStateChangeListener(OnViewDetach {
+      bgExecutor.shutdownNow()
+    })
   }
 
-  fun textWatcher(): SimpleTextWatcher {
-    return object : SimpleTextWatcher() {
-      override fun afterTextChanged(editable: Editable) {
-        bgExecutor.submit {
-          val spanWriter = parser.parseSpans(editable)
+  fun textWatcher() = AfterTextChange { editable, textWatcher ->
+    bgExecutor.submit {
+      val spanWriter = parser.parseSpans(editable)
 
-          uiExecutor.execute {
-            editText.suspendTextWatcherAndRun(this) {
-              parser.removeSpans(editable)
-              spanWriter.writeTo(editable)
-            }
-          }
-        }.get()
+      uiExecutor.execute {
+        editText.suspendTextWatcherAndRun(textWatcher) {
+          parser.removeSpans(editable)
+          spanWriter.writeTo(editable)
+        }
       }
-    }
+    }.get()
   }
 }

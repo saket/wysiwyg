@@ -1,4 +1,4 @@
-package me.saket.markdownrenderer
+package me.saket.markdownrenderer.util
 
 import android.text.TextWatcher
 import android.widget.TextView
