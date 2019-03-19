@@ -22,6 +22,10 @@ import me.saket.markdownrenderer.spans.InlineCodeSpan
 import ru.noties.markwon.core.spans.BlockQuoteSpan
 import java.util.HashSet
 
+/**
+ * Usage:
+ * FlexmarkMarkdownParser(MarkdownHintStyles(context), MarkdownSpanPool())
+ */
 class FlexmarkMarkdownParser(
     styles: MarkdownHintStyles,
     private val spanPool: MarkdownSpanPool

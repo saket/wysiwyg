@@ -20,7 +20,7 @@ import java.util.HashMap
 import java.util.Stack
 
 /**
- * For avoiding creation of new spans on every text change.
+ * Pool for reusing spans instead of creating and throwing them on every text change.
  */
 @SuppressLint("UseSparseArrays")
 class MarkdownSpanPool {

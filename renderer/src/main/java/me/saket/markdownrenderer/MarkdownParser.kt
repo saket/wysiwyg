@@ -1,7 +1,11 @@
 package me.saket.markdownrenderer
 
 import android.text.Spannable
+import me.saket.markdownrenderer.flexmark.FlexmarkMarkdownParser
 
+/**
+ * See [FlexmarkMarkdownParser].
+ */
 interface MarkdownParser {
 
   fun parseSpans(text: Spannable): MarkdownHintsSpanWriter

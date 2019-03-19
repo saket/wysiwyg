@@ -5,10 +5,14 @@ import androidx.annotation.ColorInt
 import androidx.annotation.Px
 import ru.noties.markwon.core.MarkwonTheme
 
+/**
+ * Colors and dimensions to use for highlighting markdown syntax.
+ */
 data class MarkdownHintStyles(
+
     /**
-     * TODO: I find passing the context around uncomfortable. Get rid of this by supplying the defaults directly.
      * Used for resolving default colors and dimensions in [MarkwonTheme.builderWithDefaults].
+     * TODO: Passing the context around isn't good. Get rid of this by supplying the defaults to Markwon library directly.
      */
     val context: Context,
 

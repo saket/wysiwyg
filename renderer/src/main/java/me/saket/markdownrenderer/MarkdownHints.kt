@@ -12,7 +12,7 @@ import java.util.concurrent.Executors
  * Highlights markdown syntax in real-time.
  *
  * Usage:
- * val markdownHints = new MarkdownHints(EditText, MarkdownParser))
+ * val markdownHints = MarkdownHints(EditText, MarkdownParser))
  * editText.addTextChangedListener(markdownHints.textWatcher())
  */
 class MarkdownHints(
