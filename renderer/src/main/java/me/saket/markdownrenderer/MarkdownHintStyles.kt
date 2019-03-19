@@ -3,6 +3,7 @@ package me.saket.markdownrenderer
 import android.content.Context
 import androidx.annotation.ColorInt
 import androidx.annotation.Px
+import androidx.core.content.ContextCompat
 import ru.noties.markwon.core.MarkwonTheme
 
 /**
@@ -10,41 +11,42 @@ import ru.noties.markwon.core.MarkwonTheme
  */
 data class MarkdownHintStyles(
 
-    /**
-     * Used for resolving default colors and dimensions in [MarkwonTheme.builderWithDefaults].
-     * TODO: Passing the context around isn't good. Get rid of this by supplying the defaults to Markwon library directly.
-     */
+    /** Used for resolving default colors and dimensions in [MarkwonTheme.builderWithDefaults]. */
     val context: Context,
 
+    /** Color used for highlighting '**', '~~' and other syntax characters. */
     @ColorInt
-    val syntaxColor: Int,
+    val syntaxColor: Int = color(context, R.color.markdown_syntax),
 
     @ColorInt
-    val blockQuoteIndentationRuleColor: Int,
+    val blockQuoteIndentationRuleColor: Int = color(context, R.color.markdown_blockquote_indentation_rule),
 
     @ColorInt
-    val blockQuoteTextColor: Int,
-
-    /** Gap before a block of ordered/unordered list. */
-    @Px
-    val listBlockIndentationMargin: Int,
+    val blockQuoteTextColor: Int = color(context, R.color.markdown_blockquote_text),
 
     /** Width of a block-quote's vertical line/stripe/rule. */
     @Px
-    val blockQuoteVerticalRuleStrokeWidth: Int,
+    val blockQuoteVerticalRuleStrokeWidth: Int = dimensPx(context, R.dimen.markdown_blockquote_vertical_rule_stroke_width),
+
+    /** Gap before a block of ordered/unordered list. */
+    @Px
+    val listBlockIndentationMargin: Int = dimensPx(context, R.dimen.markdown_text_block_indentation_margin),
 
     @ColorInt
-    val linkUrlColor: Int,
+    val linkUrlColor: Int = color(context, R.color.markdown_link_url),
 
     @ColorInt
-    val linkTextColor: Int,
+    val linkTextColor: Int = color(context, R.color.markdown_link_text),
 
     @ColorInt
-    val horizontalRuleColor: Int,
+    val horizontalRuleColor: Int = color(context, R.color.markdown_horizontal_rule),
 
     @Px
-    val horizontalRuleStrokeWidth: Int,
+    val horizontalRuleStrokeWidth: Int = dimensPx(context, R.dimen.markdown_horizontal_rule_stroke_width),
 
     @ColorInt
-    val inlineCodeBackgroundColor: Int
+    val inlineCodeBackgroundColor: Int = color(context, R.color.markdown_inline_code_background)
 )
+
+val color = { context: Context, colorResId: Int -> ContextCompat.getColor(context, colorResId) }
+val dimensPx = { context: Context, dimenResId: Int -> context.resources.getDimensionPixelSize(dimenResId) }
