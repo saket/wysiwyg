@@ -60,7 +60,7 @@ class MarkdownNodeTreeVisitor(
       .blockQuoteColor(styles.blockQuoteIndentationRuleColor)
       .blockQuoteWidth(styles.blockQuoteVerticalRuleStrokeWidth)
       .blockMargin(styles.listBlockIndentationMargin)
-      .codeBackgroundColor(styles.inlineCodeBackgroundColor)
+      .codeBackgroundColor(styles.codeBackgroundColor)
       .build()
 
   private lateinit var writer: MarkdownHintsSpanWriter

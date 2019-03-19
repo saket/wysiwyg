@@ -54,7 +54,7 @@ class EditorActivity : AppCompatActivity(), OnLinkInsertListener {
         listBlockIndentationMargin = dimensPx(R.dimen.markdown_text_block_indentation_margin),
         horizontalRuleColor = color(R.color.markdown_horizontal_rule),
         horizontalRuleStrokeWidth = dimensPx(R.dimen.markdown_horizontal_rule_stroke_width),
-        inlineCodeBackgroundColor = color(R.color.markdown_inline_code_background))
+        codeBackgroundColor = color(R.color.markdown_code_background))
   }
 
   override fun onLinkInsert(link: Link) {

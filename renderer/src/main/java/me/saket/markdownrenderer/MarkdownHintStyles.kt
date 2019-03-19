@@ -45,7 +45,7 @@ data class MarkdownHintStyles(
     val horizontalRuleStrokeWidth: Int = dimensPx(context, R.dimen.markdown_horizontal_rule_stroke_width),
 
     @ColorInt
-    val inlineCodeBackgroundColor: Int = color(context, R.color.markdown_inline_code_background)
+    val codeBackgroundColor: Int = color(context, R.color.markdown_code_background)
 )
 
 val color = { context: Context, colorResId: Int -> ContextCompat.getColor(context, colorResId) }
