@@ -38,9 +38,15 @@ class MarkdownHints(
       val spanWriter = parser.parseSpans(editable)
 
       uiExecutor.execute {
-        editText.suspendTextWatcherAndRun(textWatcher) {
-          parser.removeSpans(editable)
-          spanWriter.writeTo(editable)
+        // Because the text is being parsed in background, it is possible that
+        // the text is changing faster than they get processed.
+        val isStale = editable.length != editText.text.length
+
+        if (isStale.not()) {
+          editText.suspendTextWatcherAndRun(textWatcher) {
+            parser.removeSpans(editable)
+            spanWriter.writeTo(editable)
+          }
         }
       }
     }.get()
