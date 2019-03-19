@@ -7,12 +7,16 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 /**
- * Usage: EditText#addTextChangedListener(new MarkdownHints(EditText, HighlightOptions, SpanPool));
+ * Highlights markdown syntax in real-time.
+ *
+ * Usage:
+ * val markdownHints = new MarkdownHints(EditText, MarkdownParser))
+ * editText.addTextChangedListener(markdownHints.textWatcher())
  */
 class MarkdownHints(
     private val editText: EditText,
     private val parser: MarkdownParser
-) : SimpleTextWatcher(), View.OnAttachStateChangeListener {
+) : View.OnAttachStateChangeListener {
 
   private val bgExecutor: ExecutorService = Executors.newSingleThreadExecutor()
   private val uiExecutor = UiThreadExecutor()
@@ -27,16 +31,20 @@ class MarkdownHints(
     bgExecutor.shutdownNow()
   }
 
-  override fun afterTextChanged(editable: Editable) {
-    bgExecutor.submit {
-      val spanWriter = parser.parseSpans(editable)
+  fun textWatcher(): SimpleTextWatcher {
+    return object : SimpleTextWatcher() {
+      override fun afterTextChanged(editable: Editable) {
+        bgExecutor.submit {
+          val spanWriter = parser.parseSpans(editable)
 
-      uiExecutor.execute {
-        editText.suspendTextWatcherAndRun(this) {
-          parser.removeSpans(editable)
-          spanWriter.writeTo(editable)
-        }
+          uiExecutor.execute {
+            editText.suspendTextWatcherAndRun(this) {
+              parser.removeSpans(editable)
+              spanWriter.writeTo(editable)
+            }
+          }
+        }.get()
       }
-    }.get()
+    }
   }
 }

@@ -24,7 +24,8 @@ class EditorActivity : AppCompatActivity(), OnLinkInsertListener {
     setContentView(R.layout.activity_editor)
 
     val markdownParser = FlexmarkMarkdownParser(markdownHintStyles(), MarkdownSpanPool())
-    editorEditText.addTextChangedListener(MarkdownHints(editorEditText, markdownParser))
+    val markdownHints = MarkdownHints(editorEditText, markdownParser)
+    editorEditText.addTextChangedListener(markdownHints.textWatcher())
 
     formatToolbarView.onMarkdownSyntaxApplied = { syntax -> syntax.insert(editorEditText) }
     formatToolbarView.onInsertLinkClicked = {
