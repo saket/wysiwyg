@@ -20,10 +20,6 @@ android {
   }
 }
 
-repositories {
-  maven { url 'https://jitpack.io' }
-}
-
 dependencies {
   implementation "androidx.appcompat:appcompat:$versions.androidX"
   implementation "androidx.annotation:annotation:$versions.androidX"
