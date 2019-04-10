@@ -78,8 +78,8 @@ class MarkdownNodeTreeVisitor(
   private fun visitChildren(parent: Node) {
     var node: Node? = parent.firstChild
     while (node != null) {
-      // A subclass of this visitor might modify the node, resulting in getNext returning a different node or no
-      // node after visiting it. So get the next node before visiting.
+      // A subclass of this visitor might modify the node, resulting in getNext returning a
+      // different node or no node after visiting it. So get the next node before visiting.
       val next = node.next
 
       when (node) {
