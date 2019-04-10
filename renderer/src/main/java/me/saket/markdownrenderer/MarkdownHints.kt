@@ -34,13 +34,15 @@ class MarkdownHints(
   }
 
   fun textWatcher() = AfterTextChange { editable, textWatcher ->
+    val textLengthToParse = editable.length
+
     bgExecutor.submit {
       val spanWriter = parser.parseSpans(editable)
 
       uiExecutor.execute {
         // Because the text is parsed in background, it is possible
         // that the text changes faster than they get processed.
-        val isStale = editable.length != editText.text.length
+        val isStale = textLengthToParse != editText.text.length
 
         if (isStale.not()) {
           editText.suspendTextWatcherAndRun(textWatcher) {
