@@ -32,7 +32,7 @@ import timber.log.Timber
  * To support:
  * - Superscript
  */
-class MarkdownNodeTreeVisitor(
+class FlexmarkNodeTreeVisitor(
     private val spanPool: MarkdownSpanPool,
     private val styles: MarkdownHintStyles
 ) {

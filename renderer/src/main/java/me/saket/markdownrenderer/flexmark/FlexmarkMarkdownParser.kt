@@ -31,7 +31,7 @@ class FlexmarkMarkdownParser(
     private val spanPool: MarkdownSpanPool
 ) : MarkdownParser {
 
-  private val markdownNodeTreeVisitor = MarkdownNodeTreeVisitor(spanPool, styles)
+  private val markdownNodeTreeVisitor = FlexmarkNodeTreeVisitor(spanPool, styles)
 
   private val parser: Parser = Parser.builder()
       .extensions(listOf<Extension>(StrikethroughExtension.create()))
