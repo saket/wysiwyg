@@ -41,11 +41,11 @@ class FlexmarkMarkdownParser(
   private val parser: Parser
 
   init {
-    val extensions = if (styles.supportUnderlineSpan) {
-      listOf(UnderlineExtension.create(), StrikethroughExtension.create())
-    } else {
-      listOf(StrikethroughExtension.create())
+    val extensions = mutableListOf(StrikethroughExtension.create())
+    if (styles.supportUnderlineSpan) {
+      extensions.add(UnderlineExtension.create())
     }
+
     parser = Parser.builder(dataOptions)
         .extensions(extensions)
         .build()
