@@ -45,7 +45,10 @@ data class MarkdownHintStyles(
     val horizontalRuleStrokeWidth: Int = dimensPx(context, R.dimen.markdown_horizontal_rule_stroke_width),
 
     @ColorInt
-    val codeBackgroundColor: Int = color(context, R.color.markdown_code_background)
+    val codeBackgroundColor: Int = color(context, R.color.markdown_code_background),
+
+    /** Enables/Disables support for Underline span. This also disables use of "_" for markdown emphasis */
+    val supportUnderlineSpan: Boolean = true
 )
 
 val color = { context: Context, colorResId: Int -> ContextCompat.getColor(context, colorResId) }

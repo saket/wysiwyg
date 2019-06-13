@@ -24,6 +24,7 @@ import com.vladsch.flexmark.util.sequence.SubSequence
 import me.saket.markdownrenderer.MarkdownHintStyles
 import me.saket.markdownrenderer.MarkdownHintsSpanWriter
 import me.saket.markdownrenderer.MarkdownSpanPool
+import me.saket.markdownrenderer.flexmark.nodes.Underline
 import me.saket.markdownrenderer.spans.HorizontalRuleSpan
 import ru.noties.markwon.core.MarkwonTheme
 import timber.log.Timber
@@ -86,7 +87,8 @@ class FlexmarkNodeTreeVisitor(
         is Emphasis -> highlightItalics(node)
         is StrongEmphasis -> highlightBold(node)
         is Strikethrough -> highlightStrikeThrough(node)
-        is Heading ->
+        is Underline -> highlightUnderline(node)
+        is Heading -> {
           // Setext styles aren't supported. Setext-style headers are "underlined" using equal signs
           // (for first-level headers) and dashes (for second-level headers). For example:
           // This is an H1
@@ -96,11 +98,11 @@ class FlexmarkNodeTreeVisitor(
           // -------------
           if (node.isAtxHeading) {
             highlightHeading(node)
-
           } else {
             // Reddit allows thematic breaks without a leading new line. So we'll manually support this.
             highlightThematicBreakWithoutLeadingNewLine(node)
           }
+        }
         is Link -> highlightLink(node)
         is Code -> highlightInlineCode(node)
         is IndentedCodeBlock -> highlightIndentedCodeBlock(node)
@@ -114,8 +116,7 @@ class FlexmarkNodeTreeVisitor(
         is BlockQuote -> highlightBlockQuote(node)
         is ListBlock -> highlightListBlock(node)
         is ListItem -> highlightListItem(node)
-        // a.k.a. horizontal rule.
-        is ThematicBreak -> highlightThematicBreak(node)
+        is ThematicBreak -> highlightThematicBreak(node) // a.k.a. horizontal rule.
         is Document, is Text, is Paragraph, is SoftLineBreak -> {
           // Ignored.
         }
@@ -177,6 +178,11 @@ class FlexmarkNodeTreeVisitor(
   private fun highlightStrikeThrough(strikethrough: Strikethrough) {
     writer.add(spanPool.strikethrough(), strikethrough.startOffset, strikethrough.endOffset)
     highlightMarkdownSyntax(strikethrough)
+  }
+
+  private fun highlightUnderline(underline: Underline) {
+    writer.add(spanPool.underline(), underline.startOffset, underline.endOffset)
+    highlightMarkdownSyntax(underline)
   }
 
   private fun highlightBlockQuote(blockQuote: BlockQuote) {

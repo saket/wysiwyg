@@ -25,7 +25,8 @@ class MarkdownFormatToolbarView(context: Context, attrs: AttributeSet) : Horizon
         R.id.textformattoolbar_quote to Quote,
         R.id.textformattoolbar_inline_code to InlineCode,
         R.id.textformattoolbar_header to Heading,
-        R.id.textformattoolbar_thematic_break to ThematicBreak
+        R.id.textformattoolbar_thematic_break to ThematicBreak,
+        R.id.textformattoolbar_underline to Underline
     )
 
     markdownSyntaxActions.entries.forEach { (buttonId, syntax) ->

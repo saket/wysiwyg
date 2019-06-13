@@ -3,14 +3,13 @@ package me.saket.markdownrenderer.spans
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.text.style.LineBackgroundSpan
-import androidx.annotation.ColorInt
 import androidx.annotation.Px
 
 /**
  * @param text Used for calculating the left offset to avoid drawing under the text.
  */
 class HorizontalRuleSpan(
-    @ColorInt val text: CharSequence,
+    val text: CharSequence,
     @Px val ruleColor: Int,
     @Px val ruleStrokeWidth: Int,
     val mode: Mode

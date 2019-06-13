@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<HorizontalScrollView android:id="@+id/composereply_bottombar"
-  xmlns:android="http://schemas.android.com/apk/res/android"
+<HorizontalScrollView xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:tools="http://schemas.android.com/tools"
   android:layout_width="match_parent"
   android:layout_height="match_parent"
@@ -34,6 +33,12 @@
       style="@style/DankTextFormatToolbarButton"
       android:contentDescription="@string/cd_textformat_strikethrough"
       android:src="@drawable/ic_strikethrough_s_black_24dp" />
+
+    <ImageButton
+      android:id="@+id/textformattoolbar_underline"
+      style="@style/DankTextFormatToolbarButton"
+      android:contentDescription="@string/cd_textformat_strikethrough"
+      android:src="@drawable/ic_format_underlined_24dp" />
 
     <ImageButton
       android:id="@+id/textformattoolbar_inline_code"

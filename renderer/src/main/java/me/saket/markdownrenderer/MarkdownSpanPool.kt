@@ -8,6 +8,7 @@ import android.text.style.StrikethroughSpan
 import android.text.style.StyleSpan
 import android.text.style.SuperscriptSpan
 import android.text.style.TypefaceSpan
+import android.text.style.UnderlineSpan
 import androidx.annotation.ColorInt
 import androidx.annotation.Px
 import me.saket.markdownrenderer.spans.HeadingSpanWithLevel
@@ -16,7 +17,6 @@ import me.saket.markdownrenderer.spans.IndentedCodeBlockSpan
 import me.saket.markdownrenderer.spans.InlineCodeSpan
 import ru.noties.markwon.core.MarkwonTheme
 import ru.noties.markwon.core.spans.BlockQuoteSpan
-import java.util.HashMap
 import java.util.Stack
 
 /**
@@ -28,6 +28,7 @@ class MarkdownSpanPool {
   private val italicsSpans = Stack<StyleSpan>()
   private val boldSpans = Stack<StyleSpan>()
   private val strikethroughSpans = Stack<StrikethroughSpan>()
+  private val underlineSpans = Stack<UnderlineSpan>()
   private val monospaceTypefaceSpans = Stack<TypefaceSpan>()
   private val foregroundColorSpans = HashMap<Int, ForegroundColorSpan>()
   private val inlineCodeSpans = Stack<InlineCodeSpan>()
@@ -80,6 +81,13 @@ class MarkdownSpanPool {
     }
   }
 
+  fun underline(): UnderlineSpan {
+    return when {
+      underlineSpans.empty() -> UnderlineSpan()
+      else -> underlineSpans.pop()
+    }
+  }
+
   fun monospaceTypeface(): TypefaceSpan {
     return when {
       monospaceTypefaceSpans.empty() -> TypefaceSpan("monospace")
@@ -116,7 +124,7 @@ class MarkdownSpanPool {
   }
 
   /**
-   * @param text See [HorizontalRuleSpan.HorizontalRuleSpan].
+   * @param text See [HorizontalRuleSpan].
    */
   fun horizontalRule(text: CharSequence, @ColorInt ruleColor: Int, @Px ruleStrokeWidth: Int, mode: HorizontalRuleSpan.Mode): HorizontalRuleSpan {
     val key = text.toString() + "_" + ruleColor + "_" + ruleStrokeWidth + "_" + mode
@@ -131,6 +139,7 @@ class MarkdownSpanPool {
       is StyleSpan -> recycle(span)
       is ForegroundColorSpan -> recycle(span)
       is StrikethroughSpan -> recycle(span)
+      is UnderlineSpan -> recycle(span)
       is TypefaceSpan -> recycle(span)
       is HeadingSpanWithLevel -> recycle(span)
       is SuperscriptSpan -> recycle(span)
@@ -143,7 +152,7 @@ class MarkdownSpanPool {
     }
   }
 
-  fun recycle(span: StyleSpan) {
+  private fun recycle(span: StyleSpan) {
     when {
       span.style == Typeface.ITALIC -> italicsSpans.push(span)
       span.style == Typeface.BOLD -> boldSpans.add(span)
@@ -151,48 +160,52 @@ class MarkdownSpanPool {
     }
   }
 
-  fun recycle(span: ForegroundColorSpan) {
+  private fun recycle(span: ForegroundColorSpan) {
     val key = span.foregroundColor
     foregroundColorSpans[key] = span
   }
 
-  fun recycle(span: InlineCodeSpan) {
+  private fun recycle(span: InlineCodeSpan) {
     inlineCodeSpans.push(span)
   }
 
-  fun recycle(span: IndentedCodeBlockSpan) {
+  private fun recycle(span: IndentedCodeBlockSpan) {
     indentedCodeSpans.push(span)
   }
 
-  fun recycle(span: StrikethroughSpan) {
+  private fun recycle(span: StrikethroughSpan) {
     strikethroughSpans.push(span)
   }
 
-  fun recycle(span: TypefaceSpan) {
+  private fun recycle(span: UnderlineSpan) {
+    underlineSpans.push(span)
+  }
+
+  private fun recycle(span: TypefaceSpan) {
     if (span.family != "monospace") {
       throw UnsupportedOperationException("Only monospace typeface spans exist in this pool.")
     }
     monospaceTypefaceSpans.push(span)
   }
 
-  fun recycle(span: HeadingSpanWithLevel) {
+  private fun recycle(span: HeadingSpanWithLevel) {
     headingSpans[span.level] = span
   }
 
-  fun recycle(span: SuperscriptSpan) {
+  private fun recycle(span: SuperscriptSpan) {
     superscriptSpans.push(span)
   }
 
-  fun recycle(span: BlockQuoteSpan) {
+  private fun recycle(span: BlockQuoteSpan) {
     quoteSpans.push(span)
   }
 
-  fun recycle(span: LeadingMarginSpan.Standard) {
+  private fun recycle(span: LeadingMarginSpan.Standard) {
     val key = span.getLeadingMargin(true /* irrelevant */)
     leadingMarginSpans[key] = span
   }
 
-  fun recycle(span: HorizontalRuleSpan) {
+  private fun recycle(span: HorizontalRuleSpan) {
     val key = span.text.toString() + "_" + span.ruleColor + "_" + span.ruleStrokeWidth + "_" + span.mode
     horizontalRuleSpans[key] = span
   }

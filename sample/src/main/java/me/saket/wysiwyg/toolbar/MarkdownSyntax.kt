@@ -101,6 +101,7 @@ object ThematicBreak : MarkdownSyntax() {
 object Bold : SymmetricMarkdownSyntax("**")
 object Italic : SymmetricMarkdownSyntax("*")
 object StrikeThrough : SymmetricMarkdownSyntax("~~")
+object Underline : SymmetricMarkdownSyntax("_")
 object InlineCode : SymmetricMarkdownSyntax("`")
 object Quote : CompoundableMarkdownSyntax("> ")
 object Heading : CompoundableMarkdownSyntax("# ")

@@ -7,14 +7,16 @@ import android.text.style.StrikethroughSpan
 import android.text.style.StyleSpan
 import android.text.style.SuperscriptSpan
 import android.text.style.TypefaceSpan
-import com.vladsch.flexmark.Extension
+import android.text.style.UnderlineSpan
 import com.vladsch.flexmark.ext.gfm.strikethrough.StrikethroughExtension
 import com.vladsch.flexmark.parser.Parser
+import com.vladsch.flexmark.util.options.MutableDataSet
 import com.vladsch.flexmark.util.sequence.SubSequence
 import me.saket.markdownrenderer.MarkdownHintStyles
 import me.saket.markdownrenderer.MarkdownHintsSpanWriter
 import me.saket.markdownrenderer.MarkdownParser
 import me.saket.markdownrenderer.MarkdownSpanPool
+import me.saket.markdownrenderer.flexmark.nodes.UnderlineExtension
 import me.saket.markdownrenderer.spans.HeadingSpanWithLevel
 import me.saket.markdownrenderer.spans.HorizontalRuleSpan
 import me.saket.markdownrenderer.spans.IndentedCodeBlockSpan
@@ -33,9 +35,21 @@ class FlexmarkMarkdownParser(
 
   private val markdownNodeTreeVisitor = FlexmarkNodeTreeVisitor(spanPool, styles)
 
-  private val parser: Parser = Parser.builder()
-      .extensions(listOf<Extension>(StrikethroughExtension.create()))
-      .build()
+  private val dataOptions = MutableDataSet()
+      .set(Parser.UNDERSCORE_DELIMITER_PROCESSOR, !styles.supportUnderlineSpan)
+
+  private val parser: Parser
+
+  init {
+    val extensions = if (styles.supportUnderlineSpan) {
+      listOf(UnderlineExtension.create(), StrikethroughExtension.create())
+    } else {
+      listOf(StrikethroughExtension.create())
+    }
+    parser = Parser.builder(dataOptions)
+        .extensions(extensions)
+        .build()
+  }
 
   override fun parseSpans(text: Spannable): MarkdownHintsSpanWriter {
     // Instead of creating immutable CharSequences, Flexmark uses SubSequence that
@@ -61,7 +75,7 @@ class FlexmarkMarkdownParser(
   override fun removeSpans(text: Spannable) {
     val spans = text.getSpans(0, text.length, Any::class.java)
     for (span in spans) {
-      if (span.javaClass in FlexmarkMarkdownParser.SUPPORTED_MARKDOWN_SPANS) {
+      if (span.javaClass in SUPPORTED_MARKDOWN_SPANS) {
         text.removeSpan(span)
         spanPool.recycle(span)
       }
@@ -75,6 +89,7 @@ class FlexmarkMarkdownParser(
       SUPPORTED_MARKDOWN_SPANS.add(StyleSpan::class.java)
       SUPPORTED_MARKDOWN_SPANS.add(ForegroundColorSpan::class.java)
       SUPPORTED_MARKDOWN_SPANS.add(StrikethroughSpan::class.java)
+      SUPPORTED_MARKDOWN_SPANS.add(UnderlineSpan::class.java)
       SUPPORTED_MARKDOWN_SPANS.add(TypefaceSpan::class.java)
       SUPPORTED_MARKDOWN_SPANS.add(HeadingSpanWithLevel::class.java)
       SUPPORTED_MARKDOWN_SPANS.add(SuperscriptSpan::class.java)
