@@ -7,6 +7,8 @@ import android.text.style.StrikethroughSpan
 import android.text.style.StyleSpan
 import android.text.style.SuperscriptSpan
 import android.text.style.TypefaceSpan
+import androidx.annotation.UiThread
+import androidx.annotation.WorkerThread
 import com.vladsch.flexmark.Extension
 import com.vladsch.flexmark.ext.gfm.strikethrough.StrikethroughExtension
 import com.vladsch.flexmark.parser.Parser
@@ -24,11 +26,11 @@ import java.util.HashSet
 
 /**
  * Usage:
- * FlexmarkMarkdownParser(MarkdownHintStyles(context), MarkdownSpanPool())
+ * FlexmarkMarkdownParser(MarkdownHintStyles, MarkdownSpanPool)
  */
 class FlexmarkMarkdownParser(
-    styles: MarkdownHintStyles,
-    private val spanPool: MarkdownSpanPool
+  styles: MarkdownHintStyles,
+  private val spanPool: MarkdownSpanPool
 ) : MarkdownParser {
 
   private val markdownNodeTreeVisitor = FlexmarkNodeTreeVisitor(spanPool, styles)
@@ -37,6 +39,7 @@ class FlexmarkMarkdownParser(
       .extensions(listOf<Extension>(StrikethroughExtension.create()))
       .build()
 
+  @WorkerThread
   override fun parseSpans(text: Spannable): MarkdownHintsSpanWriter {
     // Instead of creating immutable CharSequences, Flexmark uses SubSequence that
     // maintains a mutable text and changes its visible window whenever a new
@@ -58,10 +61,11 @@ class FlexmarkMarkdownParser(
    * Called on every text change so that stale spans can
    * be removed before applying new ones.
    */
+  @UiThread
   override fun removeSpans(text: Spannable) {
     val spans = text.getSpans(0, text.length, Any::class.java)
     for (span in spans) {
-      if (span.javaClass in FlexmarkMarkdownParser.SUPPORTED_MARKDOWN_SPANS) {
+      if (span.javaClass in SUPPORTED_MARKDOWN_SPANS) {
         text.removeSpan(span)
         spanPool.recycle(span)
       }
