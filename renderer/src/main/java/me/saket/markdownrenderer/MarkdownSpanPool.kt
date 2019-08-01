@@ -23,7 +23,7 @@ import java.util.Stack
  * Pool for reusing spans instead of creating and throwing them on every text change.
  */
 @SuppressLint("UseSparseArrays")
-class MarkdownSpanPool {
+open class MarkdownSpanPool {
 
   private val italicsSpans = Stack<StyleSpan>()
   private val boldSpans = Stack<StyleSpan>()
@@ -38,77 +38,77 @@ class MarkdownSpanPool {
   private val leadingMarginSpans = HashMap<Int, LeadingMarginSpan.Standard>()
   private val horizontalRuleSpans = HashMap<String, HorizontalRuleSpan>()
 
-  fun italics(): StyleSpan {
+  open fun italics(): Any {
     return when {
       italicsSpans.empty() -> StyleSpan(Typeface.ITALIC)
       else -> italicsSpans.pop()
     }
   }
 
-  fun bold(): StyleSpan {
+  open fun bold(): Any {
     return when {
       boldSpans.empty() -> StyleSpan(Typeface.BOLD)
       else -> boldSpans.pop()
     }
   }
 
-  fun foregroundColor(@ColorInt color: Int): ForegroundColorSpan {
+  open fun foregroundColor(@ColorInt color: Int): Any {
     return when {
       foregroundColorSpans.containsKey(color) -> foregroundColorSpans.remove(color)!!
       else -> ForegroundColorSpan(color)
     }
   }
 
-  fun inlineCode(markwonTheme: MarkwonTheme): InlineCodeSpan {
+  open fun inlineCode(markwonTheme: MarkwonTheme): Any {
     return when {
       inlineCodeSpans.empty() -> InlineCodeSpan(markwonTheme)
       else -> inlineCodeSpans.pop()
     }
   }
 
-  fun indentedCodeBlock(markwonTheme: MarkwonTheme): IndentedCodeBlockSpan {
+  open fun indentedCodeBlock(markwonTheme: MarkwonTheme): Any {
     return when {
       indentedCodeSpans.empty() -> IndentedCodeBlockSpan(markwonTheme)
       else -> indentedCodeSpans.pop()
     }
   }
 
-  fun strikethrough(): StrikethroughSpan {
+  open fun strikethrough(): Any {
     return when {
       strikethroughSpans.empty() -> StrikethroughSpan()
       else -> strikethroughSpans.pop()
     }
   }
 
-  fun monospaceTypeface(): TypefaceSpan {
+  open fun monospaceTypeface(): Any {
     return when {
       monospaceTypefaceSpans.empty() -> TypefaceSpan("monospace")
       else -> monospaceTypefaceSpans.pop()
     }
   }
 
-  fun heading(level: Int, markwonTheme: MarkwonTheme): HeadingSpanWithLevel {
+  open fun heading(level: Int, markwonTheme: MarkwonTheme): Any {
     return when {
       headingSpans.containsKey(level) -> headingSpans.remove(level)!!
       else -> HeadingSpanWithLevel(markwonTheme, level)
     }
   }
 
-  fun superscript(): SuperscriptSpan {
+  open fun superscript(): Any {
     return when {
       superscriptSpans.empty() -> SuperscriptSpan()
       else -> superscriptSpans.pop()
     }
   }
 
-  fun quote(markwonTheme: MarkwonTheme): BlockQuoteSpan {
+  open fun quote(markwonTheme: MarkwonTheme): Any {
     return when {
       quoteSpans.empty() -> BlockQuoteSpan(markwonTheme)
       else -> quoteSpans.pop()
     }
   }
 
-  fun leadingMargin(margin: Int): LeadingMarginSpan.Standard {
+  open fun leadingMargin(margin: Int): Any {
     return when {
       leadingMarginSpans.containsKey(margin) -> leadingMarginSpans.remove(margin)!!
       else -> LeadingMarginSpan.Standard(margin)
@@ -118,7 +118,12 @@ class MarkdownSpanPool {
   /**
    * @param text See [HorizontalRuleSpan.HorizontalRuleSpan].
    */
-  fun horizontalRule(text: CharSequence, @ColorInt ruleColor: Int, @Px ruleStrokeWidth: Int, mode: HorizontalRuleSpan.Mode): HorizontalRuleSpan {
+  open fun horizontalRule(
+    text: CharSequence,
+    @ColorInt ruleColor: Int,
+    @Px ruleStrokeWidth: Int,
+    mode: HorizontalRuleSpan.Mode
+  ): Any {
     val key = text.toString() + "_" + ruleColor + "_" + ruleStrokeWidth + "_" + mode
     return when {
       horizontalRuleSpans.containsKey(key) -> horizontalRuleSpans.remove(key)!!
@@ -126,7 +131,7 @@ class MarkdownSpanPool {
     }
   }
 
-  fun recycle(span: Any) {
+  open fun recycle(span: Any) {
     when (span) {
       is StyleSpan -> recycle(span)
       is ForegroundColorSpan -> recycle(span)
@@ -143,7 +148,7 @@ class MarkdownSpanPool {
     }
   }
 
-  fun recycle(span: StyleSpan) {
+  private fun recycle(span: StyleSpan) {
     when {
       span.style == Typeface.ITALIC -> italicsSpans.push(span)
       span.style == Typeface.BOLD -> boldSpans.add(span)
@@ -151,48 +156,48 @@ class MarkdownSpanPool {
     }
   }
 
-  fun recycle(span: ForegroundColorSpan) {
+  private fun recycle(span: ForegroundColorSpan) {
     val key = span.foregroundColor
     foregroundColorSpans[key] = span
   }
 
-  fun recycle(span: InlineCodeSpan) {
+  private fun recycle(span: InlineCodeSpan) {
     inlineCodeSpans.push(span)
   }
 
-  fun recycle(span: IndentedCodeBlockSpan) {
+  private fun recycle(span: IndentedCodeBlockSpan) {
     indentedCodeSpans.push(span)
   }
 
-  fun recycle(span: StrikethroughSpan) {
+  private fun recycle(span: StrikethroughSpan) {
     strikethroughSpans.push(span)
   }
 
-  fun recycle(span: TypefaceSpan) {
+  private fun recycle(span: TypefaceSpan) {
     if (span.family != "monospace") {
       throw UnsupportedOperationException("Only monospace typeface spans exist in this pool.")
     }
     monospaceTypefaceSpans.push(span)
   }
 
-  fun recycle(span: HeadingSpanWithLevel) {
+  private fun recycle(span: HeadingSpanWithLevel) {
     headingSpans[span.level] = span
   }
 
-  fun recycle(span: SuperscriptSpan) {
+  private fun recycle(span: SuperscriptSpan) {
     superscriptSpans.push(span)
   }
 
-  fun recycle(span: BlockQuoteSpan) {
+  private fun recycle(span: BlockQuoteSpan) {
     quoteSpans.push(span)
   }
 
-  fun recycle(span: LeadingMarginSpan.Standard) {
+  private fun recycle(span: LeadingMarginSpan.Standard) {
     val key = span.getLeadingMargin(true /* irrelevant */)
     leadingMarginSpans[key] = span
   }
 
-  fun recycle(span: HorizontalRuleSpan) {
+  private fun recycle(span: HorizontalRuleSpan) {
     val key = span.text.toString() + "_" + span.ruleColor + "_" + span.ruleStrokeWidth + "_" + span.mode
     horizontalRuleSpans[key] = span
   }
