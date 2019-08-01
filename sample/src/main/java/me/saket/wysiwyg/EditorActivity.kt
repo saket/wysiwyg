@@ -13,6 +13,8 @@ import me.saket.wysiwyg.toolbar.AddLinkDialog
 import me.saket.wysiwyg.toolbar.Link
 import me.saket.wysiwyg.toolbar.MarkdownFormatToolbarView
 import me.saket.wysiwyg.toolbar.OnLinkInsertListener
+import kotlin.math.max
+import kotlin.math.min
 
 class EditorActivity : AppCompatActivity(), OnLinkInsertListener {
 
@@ -30,8 +32,8 @@ class EditorActivity : AppCompatActivity(), OnLinkInsertListener {
     formatToolbarView.onMarkdownSyntaxApplied = { syntax -> syntax.insert(editorEditText) }
     formatToolbarView.onInsertLinkClicked = {
       // selectionStart can be lesser than selectionEnd if the selection was made right-to-left.
-      val selectionStart = Math.min(editorEditText.selectionStart, editorEditText.selectionEnd)
-      val selectionEnd = Math.max(editorEditText.selectionStart, editorEditText.selectionEnd)
+      val selectionStart = min(editorEditText.selectionStart, editorEditText.selectionEnd)
+      val selectionEnd = max(editorEditText.selectionStart, editorEditText.selectionEnd)
 
       // preFilledTitle will be empty when there's no text selected.
       val preFilledTitle = editorEditText.text.subSequence(selectionStart, selectionEnd)
