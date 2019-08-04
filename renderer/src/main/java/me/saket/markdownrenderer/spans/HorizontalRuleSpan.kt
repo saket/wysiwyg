@@ -3,23 +3,21 @@ package me.saket.markdownrenderer.spans
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.text.style.LineBackgroundSpan
-import androidx.annotation.ColorInt
 import androidx.annotation.Px
 
 /**
- * @param text Used for calculating the left offset to avoid drawing under the text.
+ * @param syntax Used for calculating the left offset to avoid drawing under the text.
  */
 class HorizontalRuleSpan(
-    @ColorInt val text: CharSequence,
-    @Px val ruleColor: Int,
-    @Px val ruleStrokeWidth: Int,
-    val mode: Mode
-) : LineBackgroundSpan {
+  val syntax: CharSequence,
+  @Px val ruleColor: Int,
+  @Px val ruleStrokeWidth: Int,
+  val mode: Mode
+) : LineBackgroundSpan, WysiwygSpan {
 
-  private var leftOffset = -1f
+  private var offsetForSyntax = -1f
 
   enum class Mode {
-
     HYPHENS {
       override val topOffsetFactor = 0.07f
     },
@@ -40,19 +38,30 @@ class HorizontalRuleSpan(
   }
 
   override fun drawBackground(
-      canvas: Canvas, paint: Paint, left: Int, right: Int, top: Int, baseline: Int, bottom: Int, ignored: CharSequence,
-      start: Int, end: Int, lineNumber: Int
+    canvas: Canvas,
+    paint: Paint,
+    left: Int,
+    right: Int,
+    top: Int,
+    baseline: Int,
+    bottom: Int,
+    ignored: CharSequence,
+    start: Int,
+    end: Int,
+    lineNumber: Int
   ) {
     val originalPaintColor = paint.color
     paint.color = ruleColor
     paint.strokeWidth = ruleStrokeWidth.toFloat()
 
-    if (leftOffset == -1f) {
-      leftOffset = paint.measureText(text.toString())
+    if (offsetForSyntax == -1f) {
+      offsetForSyntax = paint.measureText(syntax.toString())
     }
 
     val lineCenter = ((top + bottom) / 2 + paint.textSize * mode.topOffsetFactor).toInt()
-    canvas.drawLine(left + leftOffset, lineCenter.toFloat(), right.toFloat(), lineCenter.toFloat(), paint)
+    canvas.drawLine(
+        left + offsetForSyntax, lineCenter.toFloat(), right.toFloat(), lineCenter.toFloat(), paint
+    )
 
     paint.color = originalPaintColor
   }

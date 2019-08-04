@@ -5,9 +5,8 @@ import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import kotterknife.bindView
-import me.saket.markdownrenderer.MarkdownHintStyles
 import me.saket.markdownrenderer.MarkdownHints
-import me.saket.markdownrenderer.MarkdownSpanPool
+import me.saket.markdownrenderer.WysiwygTheme
 import me.saket.markdownrenderer.flexmark.FlexmarkMarkdownParser
 import me.saket.wysiwyg.toolbar.AddLinkDialog
 import me.saket.wysiwyg.toolbar.Link
@@ -25,7 +24,7 @@ class EditorActivity : AppCompatActivity(), OnLinkInsertListener {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_editor)
 
-    val markdownParser = FlexmarkMarkdownParser(markdownHintStyles(), MarkdownSpanPool())
+    val markdownParser = FlexmarkMarkdownParser(markdownHintStyles())
     val markdownHints = MarkdownHints(editorEditText, markdownParser)
     editorEditText.addTextChangedListener(markdownHints.textWatcher())
 
@@ -41,11 +40,11 @@ class EditorActivity : AppCompatActivity(), OnLinkInsertListener {
     }
   }
 
-  private fun markdownHintStyles(): MarkdownHintStyles {
+  private fun markdownHintStyles(): WysiwygTheme {
     val color = { colorResId: Int -> ContextCompat.getColor(this, colorResId) }
     val dimensPx = { dimenResId: Int -> resources.getDimensionPixelSize(dimenResId) }
 
-    return MarkdownHintStyles(
+    return WysiwygTheme(
         context = this,
         syntaxColor = color(R.color.markdown_syntax),
         blockQuoteIndentationRuleColor = color(R.color.markdown_blockquote_indentation_rule),

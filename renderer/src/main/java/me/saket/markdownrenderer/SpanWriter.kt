@@ -2,15 +2,16 @@ package me.saket.markdownrenderer
 
 import android.text.Spannable
 import android.text.Spanned
+import me.saket.markdownrenderer.spans.WysiwygSpan
 
 /**
  * Inserts spans to [Spannable].
  */
-class MarkdownHintsSpanWriter {
+class SpanWriter {
 
   private val spans = mutableListOf<Triple<Any, Int, Int>>()
 
-  fun add(span: Any, start: Int, end: Int): MarkdownHintsSpanWriter {
+  fun add(span: WysiwygSpan, start: Int, end: Int): SpanWriter {
     spans.add(Triple(span, start, end))
     return this
   }

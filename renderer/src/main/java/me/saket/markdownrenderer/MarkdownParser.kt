@@ -11,7 +11,7 @@ import me.saket.markdownrenderer.flexmark.FlexmarkMarkdownParser
 interface MarkdownParser {
 
   @WorkerThread
-  fun parseSpans(text: Spannable): MarkdownHintsSpanWriter
+  fun parseSpans(text: Spannable): SpanWriter
 
   /**
    * Called on every text change so that stale spans can

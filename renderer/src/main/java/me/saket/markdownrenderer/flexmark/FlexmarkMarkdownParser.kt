@@ -1,46 +1,45 @@
 package me.saket.markdownrenderer.flexmark
 
 import android.text.Spannable
-import android.text.style.ForegroundColorSpan
-import android.text.style.LeadingMarginSpan
-import android.text.style.StrikethroughSpan
-import android.text.style.StyleSpan
-import android.text.style.SuperscriptSpan
-import android.text.style.TypefaceSpan
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
 import com.vladsch.flexmark.Extension
 import com.vladsch.flexmark.ext.gfm.strikethrough.StrikethroughExtension
 import com.vladsch.flexmark.parser.Parser
 import com.vladsch.flexmark.util.sequence.SubSequence
-import me.saket.markdownrenderer.MarkdownHintStyles
-import me.saket.markdownrenderer.MarkdownHintsSpanWriter
 import me.saket.markdownrenderer.MarkdownParser
-import me.saket.markdownrenderer.MarkdownSpanPool
-import me.saket.markdownrenderer.spans.HeadingSpanWithLevel
-import me.saket.markdownrenderer.spans.HorizontalRuleSpan
-import me.saket.markdownrenderer.spans.IndentedCodeBlockSpan
-import me.saket.markdownrenderer.spans.InlineCodeSpan
-import ru.noties.markwon.core.spans.BlockQuoteSpan
-import java.util.HashSet
+import me.saket.markdownrenderer.SpanWriter
+import me.saket.markdownrenderer.WysiwygTheme
+import me.saket.markdownrenderer.spans.WysiwygSpan
+import me.saket.markdownrenderer.spans.pool.SpanPool
+import kotlin.LazyThreadSafetyMode.NONE
 
 /**
  * Usage:
- * FlexmarkMarkdownParser(MarkdownHintStyles, MarkdownSpanPool)
+ * FlexmarkMarkdownParser(WysiwygTheme, MarkdownSpanPool)
  */
-class FlexmarkMarkdownParser(
-  styles: MarkdownHintStyles,
-  private val spanPool: MarkdownSpanPool
+open class FlexmarkMarkdownParser(
+  private val styles: WysiwygTheme,
+  private val syntaxStylers: FlexmarkSyntaxStylers = FlexmarkSyntaxStylers(),
+  private val pool: SpanPool = SpanPool()
 ) : MarkdownParser {
 
-  private val markdownNodeTreeVisitor = FlexmarkNodeTreeVisitor(spanPool, styles)
+  private val markdownNodeTreeVisitor by lazy(NONE) { treeVisitor() }
+  private val parser: Parser by lazy(NONE) { buildParser() }
 
-  private val parser: Parser = Parser.builder()
-      .extensions(listOf<Extension>(StrikethroughExtension.create()))
-      .build()
+  open fun treeVisitor() =
+    FlexmarkNodeTreeVisitor(syntaxStylers, styles, pool)
+
+  open fun buildParser(): Parser =
+    Parser.builder()
+        .extensions(supportedParserExtensions())
+        .build()
+
+  open fun supportedParserExtensions() =
+    listOf<Extension>(StrikethroughExtension.create())
 
   @WorkerThread
-  override fun parseSpans(text: Spannable): MarkdownHintsSpanWriter {
+  override fun parseSpans(text: Spannable): SpanWriter {
     // Instead of creating immutable CharSequences, Flexmark uses SubSequence that
     // maintains a mutable text and changes its visible window whenever a new
     // text is required to reduce object creation. SubSequence.of() internally skips
@@ -51,7 +50,7 @@ class FlexmarkMarkdownParser(
     // bounds (start, end) become larger than the actual text.
     val immutableText = SubSequence.of(text.toString())
 
-    val spanWriter = MarkdownHintsSpanWriter()
+    val spanWriter = SpanWriter()
     val markdownRootNode = parser.parse(immutableText)
     markdownNodeTreeVisitor.visit(markdownRootNode, spanWriter)
     return spanWriter
@@ -65,28 +64,10 @@ class FlexmarkMarkdownParser(
   override fun removeSpans(text: Spannable) {
     val spans = text.getSpans(0, text.length, Any::class.java)
     for (span in spans) {
-      if (span.javaClass in SUPPORTED_MARKDOWN_SPANS) {
+      if (span is WysiwygSpan) {
         text.removeSpan(span)
-        spanPool.recycle(span)
+        pool.recycle(span)
       }
-    }
-  }
-
-  companion object {
-    val SUPPORTED_MARKDOWN_SPANS: MutableSet<Any> = HashSet()
-
-    init {
-      SUPPORTED_MARKDOWN_SPANS.add(StyleSpan::class.java)
-      SUPPORTED_MARKDOWN_SPANS.add(ForegroundColorSpan::class.java)
-      SUPPORTED_MARKDOWN_SPANS.add(StrikethroughSpan::class.java)
-      SUPPORTED_MARKDOWN_SPANS.add(TypefaceSpan::class.java)
-      SUPPORTED_MARKDOWN_SPANS.add(HeadingSpanWithLevel::class.java)
-      SUPPORTED_MARKDOWN_SPANS.add(SuperscriptSpan::class.java)
-      SUPPORTED_MARKDOWN_SPANS.add(BlockQuoteSpan::class.java)
-      SUPPORTED_MARKDOWN_SPANS.add(LeadingMarginSpan.Standard::class.java)
-      SUPPORTED_MARKDOWN_SPANS.add(HorizontalRuleSpan::class.java)
-      SUPPORTED_MARKDOWN_SPANS.add(InlineCodeSpan::class.java)
-      SUPPORTED_MARKDOWN_SPANS.add(IndentedCodeBlockSpan::class.java)
     }
   }
 }
