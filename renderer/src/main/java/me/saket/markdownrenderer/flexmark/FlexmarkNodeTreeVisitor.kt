@@ -71,9 +71,6 @@ open class FlexmarkNodeTreeVisitor(
     }
 
 //    when (node) {
-//      is Emphasis -> highlightItalics(node)
-//      is StrongEmphasis -> highlightBold(node)
-//      is Strikethrough -> highlightStrikeThrough(node)
 //      is Heading ->
 //        // Setext styles aren't supported. Setext-style headers are "underlined" using equal signs
 //        // (for first-level headers) and dashes (for second-level headers). For example:
@@ -157,11 +154,6 @@ open class FlexmarkNodeTreeVisitor(
 //  private fun highlightFencedCodeBlock(indentedCodeBlock: FencedCodeBlock) {
 //    writer.add(spanPool.indentedCodeBlock(markwonTheme), indentedCodeBlock.startOffset, indentedCodeBlock.endOffset)
 //    writer.add(spanPool.monospaceTypeface(), indentedCodeBlock.startOffset, indentedCodeBlock.endOffset)
-//  }
-//
-//  private fun highlightStrikeThrough(strikethrough: Strikethrough) {
-//    writer.add(spanPool.strikethrough(), strikethrough.startOffset, strikethrough.endOffset)
-//    highlightMarkdownSyntax(strikethrough)
 //  }
 //
 //  private fun highlightBlockQuote(blockQuote: BlockQuote) {
