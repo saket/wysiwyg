@@ -47,7 +47,15 @@ data class WysiwygTheme(
 
     @ColorInt
     val codeBackgroundColor: Int = color(context, R.color.markdown_code_background)
-)
+) {
+    val markwonTheme = MarkwonTheme.builderWithDefaults(context)
+        .headingBreakHeight(0)
+        .blockQuoteColor(blockQuoteIndentationRuleColor)
+        .blockQuoteWidth(blockQuoteVerticalRuleStrokeWidth)
+        .blockMargin(listBlockIndentationMargin)
+        .codeBackgroundColor(codeBackgroundColor)
+        .build()
+}
 
 val color = { context: Context, colorResId: Int -> ContextCompat.getColor(context, colorResId) }
 val dimensPx = { context: Context, dimenResId: Int -> context.resources.getDimensionPixelSize(dimenResId) }

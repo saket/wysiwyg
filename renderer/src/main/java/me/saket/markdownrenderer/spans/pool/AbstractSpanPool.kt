@@ -1,6 +1,7 @@
 package me.saket.markdownrenderer.spans.pool
 
 import me.saket.markdownrenderer.spans.WysiwygSpan
+import timber.log.Timber
 import java.util.Stack
 import kotlin.DeprecationLevel.WARNING
 
@@ -15,8 +16,14 @@ abstract class AbstractSpanPool {
   ): T {
     val similarSpans = spans.getOrElse(clazz) { Stack() }
     return when {
-      similarSpans.isEmpty() -> default()
-      else -> similarSpans.pop() as T
+      similarSpans.isEmpty() -> {
+        Timber.i("Similar spans empty: $similarSpans, Getting default.")
+        default()
+      }
+      else -> {
+        Timber.i("Similar spans available: $similarSpans")
+        similarSpans.pop() as T
+      }
     }
   }
 

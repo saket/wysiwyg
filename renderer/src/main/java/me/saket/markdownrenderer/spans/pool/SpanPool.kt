@@ -83,7 +83,7 @@ open class SpanPool : AbstractSpanPool() {
     @ColorInt ruleColor: Int,
     @Px ruleStrokeWidth: Int,
     mode: Mode
-  ): Any {
+  ): HorizontalRuleSpan {
     val key = "${text}_${ruleColor}_${ruleStrokeWidth}_$mode"
     return when {
       horizontalRuleSpans.containsKey(key) -> horizontalRuleSpans.remove(key)!!
