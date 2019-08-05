@@ -10,23 +10,19 @@ import me.saket.markdownrenderer.SpanWriter
 import me.saket.markdownrenderer.WysiwygTheme
 import me.saket.markdownrenderer.spans.WysiwygSpan
 import me.saket.markdownrenderer.spans.pool.SpanPool
-import kotlin.LazyThreadSafetyMode.NONE
 
 /**
  * Usage:
  * FlexmarkMarkdownParser(WysiwygTheme, MarkdownSpanPool)
  */
-open class FlexmarkMarkdownParser(
-  private val theme: WysiwygTheme,
-  private val pool: SpanPool = SpanPool()
+class FlexmarkMarkdownParser(
+  theme: WysiwygTheme,
+  pool: SpanPool = SpanPool()
 ) : MarkdownParser {
 
   private val syntaxStylers: FlexmarkSyntaxStylers = FlexmarkSyntaxStylers()
-  private val markdownNodeTreeVisitor by lazy(NONE) { treeVisitor() }
+  private val markdownNodeTreeVisitor = FlexmarkNodeTreeVisitor(syntaxStylers, theme, pool)
   private val parser: Parser = syntaxStylers.buildParser()
-
-  open fun treeVisitor() =
-    FlexmarkNodeTreeVisitor(syntaxStylers, theme, pool)
 
   @WorkerThread
   override fun parseSpans(text: Spannable): SpanWriter {
