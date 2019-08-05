@@ -1,13 +1,14 @@
 package me.saket.markdownrenderer.spans.pool
 
 import me.saket.markdownrenderer.spans.WysiwygSpan
-import timber.log.Timber
 import java.util.Stack
 import kotlin.DeprecationLevel.WARNING
 
+typealias Recycler = (WysiwygSpan) -> Unit
+
 @Suppress("UNCHECKED_CAST", "DEPRECATION")
 abstract class AbstractSpanPool {
-  private val spans = mutableMapOf<Class<*>, Stack<Any>>()
+  private val spans = mutableMapOf<Class<*>, Stack<WysiwygSpan>>()
 
   @Deprecated(message = "Use get<T>() instead", level = WARNING)
   open fun <T : WysiwygSpan> get(
@@ -16,14 +17,8 @@ abstract class AbstractSpanPool {
   ): T {
     val similarSpans = spans.getOrElse(clazz) { Stack() }
     return when {
-      similarSpans.isEmpty() -> {
-        Timber.i("Similar spans empty: $similarSpans, Getting default.")
-        default()
-      }
-      else -> {
-        Timber.i("Similar spans available: $similarSpans")
-        similarSpans.pop() as T
-      }
+      similarSpans.isEmpty() -> default()
+      else -> similarSpans.pop() as T
     }
   }
 

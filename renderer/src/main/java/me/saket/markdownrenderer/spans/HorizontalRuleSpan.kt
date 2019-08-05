@@ -4,15 +4,17 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.text.style.LineBackgroundSpan
 import androidx.annotation.Px
+import me.saket.markdownrenderer.spans.pool.Recycler
 
 /**
  * @param syntax Used for calculating the left offset to avoid drawing under the text.
  */
 class HorizontalRuleSpan(
-  val syntax: CharSequence,
   @Px val ruleColor: Int,
-  @Px val ruleStrokeWidth: Int,
-  val mode: Mode
+  @Px val ruleThickness: Float,
+  val syntax: CharSequence,
+  val mode: Mode,
+  val recycler: Recycler
 ) : LineBackgroundSpan, WysiwygSpan {
 
   private var offsetForSyntax = -1f
@@ -52,7 +54,7 @@ class HorizontalRuleSpan(
   ) {
     val originalPaintColor = paint.color
     paint.color = ruleColor
-    paint.strokeWidth = ruleStrokeWidth.toFloat()
+    paint.strokeWidth = ruleThickness
 
     if (offsetForSyntax == -1f) {
       offsetForSyntax = paint.measureText(syntax.toString())
@@ -64,5 +66,9 @@ class HorizontalRuleSpan(
     )
 
     paint.color = originalPaintColor
+  }
+
+  override fun recycle() {
+    recycler(this)
   }
 }

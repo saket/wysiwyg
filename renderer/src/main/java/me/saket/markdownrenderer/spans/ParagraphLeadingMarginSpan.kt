@@ -4,8 +4,9 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.text.Layout
 import android.text.style.LeadingMarginSpan
+import me.saket.markdownrenderer.spans.pool.Recycler
 
-class ParagraphLeadingMarginSpan : LeadingMarginSpan, WysiwygSpan {
+class ParagraphLeadingMarginSpan(val recycler: Recycler) : LeadingMarginSpan, WysiwygSpan {
 
   var margin: Int = 0
 
@@ -27,4 +28,8 @@ class ParagraphLeadingMarginSpan : LeadingMarginSpan, WysiwygSpan {
     first: Boolean,
     layout: Layout?
   ) = Unit
+
+  override fun recycle() {
+    recycler(this)
+  }
 }

@@ -66,7 +66,7 @@ open class FlexmarkMarkdownParser(
     for (span in spans) {
       if (span is WysiwygSpan) {
         text.removeSpan(span)
-        pool.recycle(span)
+        span.recycle()
       }
     }
   }

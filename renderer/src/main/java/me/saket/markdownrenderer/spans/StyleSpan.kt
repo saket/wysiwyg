@@ -5,11 +5,12 @@ import android.graphics.Paint
 import android.graphics.Typeface
 import android.text.TextPaint
 import android.text.style.MetricAffectingSpan
+import me.saket.markdownrenderer.spans.pool.Recycler
 
 /**
  * Copy of [android.text.style.StyleSpan].
  */
-class StyleSpan : MetricAffectingSpan(), WysiwygSpan {
+class StyleSpan(val recycler: Recycler) : MetricAffectingSpan(), WysiwygSpan {
 
   @get:JvmName("style")
   var style: Int = Typeface.NORMAL
@@ -48,5 +49,9 @@ class StyleSpan : MetricAffectingSpan(), WysiwygSpan {
     }
 
     paint.typeface = tf
+  }
+
+  override fun recycle() {
+    recycler(this)
   }
 }

@@ -2,9 +2,10 @@ package me.saket.markdownrenderer.spans
 
 import android.text.TextPaint
 import android.text.style.MetricAffectingSpan
+import me.saket.markdownrenderer.spans.pool.Recycler
 import ru.noties.markwon.core.MarkwonTheme
 
-class InlineCodeSpan : MetricAffectingSpan(), WysiwygSpan {
+class InlineCodeSpan(val recycler: Recycler) : MetricAffectingSpan(), WysiwygSpan {
 
   lateinit var theme: MarkwonTheme
 
@@ -19,5 +20,9 @@ class InlineCodeSpan : MetricAffectingSpan(), WysiwygSpan {
 
   private fun apply(p: TextPaint) {
     theme.applyCodeTextStyle(p)
+  }
+
+  override fun recycle() {
+    recycler(this)
   }
 }

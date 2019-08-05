@@ -7,6 +7,7 @@ import android.text.Layout
 import android.text.TextPaint
 import android.text.style.LeadingMarginSpan
 import android.text.style.MetricAffectingSpan
+import me.saket.markdownrenderer.spans.pool.Recycler
 import ru.noties.markwon.core.MarkwonTheme
 import ru.noties.markwon.utils.LeadingMarginUtils
 
@@ -14,7 +15,9 @@ import ru.noties.markwon.utils.LeadingMarginUtils
  * Copied from Markwon.
  * https://github.com/noties/Markwon/blob/822f16510e91d38f2a139e325aa3744b654805e1/markwon-core/src/main/java/io/noties/markwon/core/spans/HeadingSpan.java
  */
-class HeadingSpanWithLevel : MetricAffectingSpan(), LeadingMarginSpan, WysiwygSpan {
+class HeadingSpanWithLevel(val recycler: Recycler) : MetricAffectingSpan(),
+    LeadingMarginSpan,
+    WysiwygSpan {
 
   lateinit var theme: MarkwonTheme
   var level: Int = 0
@@ -62,6 +65,10 @@ class HeadingSpanWithLevel : MetricAffectingSpan(), LeadingMarginSpan, WysiwygSp
         c.drawRect(rect, paint)
       }
     }
+  }
+
+  override fun recycle() {
+    recycler(this)
   }
 
   companion object {

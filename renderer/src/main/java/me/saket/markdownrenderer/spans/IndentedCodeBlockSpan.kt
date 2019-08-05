@@ -7,13 +7,16 @@ import android.text.Layout
 import android.text.TextPaint
 import android.text.style.LeadingMarginSpan
 import android.text.style.MetricAffectingSpan
+import me.saket.markdownrenderer.spans.pool.Recycler
 import ru.noties.markwon.core.MarkwonTheme
 
 /**
  * Copied from Markwon.
  * https://github.com/noties/Markwon/blob/822f16510e91d38f2a139e325aa3744b654805e1/markwon-core/src/main/java/io/noties/markwon/core/spans/CodeBlockSpan.java
  */
-class IndentedCodeBlockSpan : MetricAffectingSpan(), LeadingMarginSpan, WysiwygSpan {
+class IndentedCodeBlockSpan(val recycler: Recycler) : MetricAffectingSpan(),
+    LeadingMarginSpan,
+    WysiwygSpan {
 
   lateinit var theme: MarkwonTheme
   private val rect = COMMON_RECT
@@ -51,6 +54,10 @@ class IndentedCodeBlockSpan : MetricAffectingSpan(), LeadingMarginSpan, WysiwygS
     c.drawRect(rect, paint)
   }
 
+  override fun recycle() {
+    recycler(this)
+  }
+  
   companion object {
     val COMMON_RECT = Rect()
     val COMMON_PAINT = Paint()

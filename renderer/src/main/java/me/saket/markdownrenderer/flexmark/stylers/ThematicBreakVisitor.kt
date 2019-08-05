@@ -1,16 +1,23 @@
 package me.saket.markdownrenderer.flexmark.stylers
 
+import androidx.annotation.ColorInt
+import androidx.annotation.Px
 import com.vladsch.flexmark.ast.ThematicBreak
 import com.vladsch.flexmark.util.sequence.SubSequence
 import me.saket.markdownrenderer.SpanWriter
 import me.saket.markdownrenderer.WysiwygTheme
 import me.saket.markdownrenderer.flexmark.NodeVisitor
+import me.saket.markdownrenderer.spans.HorizontalRuleSpan
+import me.saket.markdownrenderer.spans.HorizontalRuleSpan.Mode
 import me.saket.markdownrenderer.spans.HorizontalRuleSpan.Mode.ASTERISKS
 import me.saket.markdownrenderer.spans.HorizontalRuleSpan.Mode.HYPHENS
 import me.saket.markdownrenderer.spans.HorizontalRuleSpan.Mode.UNDERSCORES
+import me.saket.markdownrenderer.spans.pool.Recycler
 import me.saket.markdownrenderer.spans.pool.SpanPool
 
 class ThematicBreakVisitor : NodeVisitor<ThematicBreak> {
+
+  private val horizontalRuleSpansPool = ThematicSpanPool()
 
   override fun visit(
     node: ThematicBreak,
@@ -38,10 +45,10 @@ class ThematicBreakVisitor : NodeVisitor<ThematicBreak> {
     // Caching mutable BasedSequence isn't a good idea.
     val immutableThematicBreakChars = thematicBreakSyntax.toString()
 
-    val hrSpan = pool.horizontalRule(
-        text = immutableThematicBreakChars,
+    val hrSpan = horizontalRuleSpansPool.get(
         ruleColor = theme.horizontalRuleColor,
-        ruleStrokeWidth = theme.horizontalRuleStrokeWidth,
+        ruleThickness = theme.horizontalRuleStrokeWidth.toFloat(),
+        syntax = immutableThematicBreakChars,
         mode = ruleMode
     )
     writer.add(hrSpan, node.startOffset, node.endOffset)
@@ -50,4 +57,40 @@ class ThematicBreakVisitor : NodeVisitor<ThematicBreak> {
   companion object {
     private val FOUR_ASTERISKS_HORIZONTAL_RULE = SubSequence.of("****")
   }
+}
+
+internal class ThematicSpanPool {
+  private val pool = mutableMapOf<String, HorizontalRuleSpan>()
+
+  private val recycler: Recycler = { span ->
+    require(span is HorizontalRuleSpan)
+    pool[recyclingKey(span)] = span
+  }
+
+  /**
+   * @param syntax See [HorizontalRuleSpan.syntax].
+   */
+  internal fun get(
+    @ColorInt ruleColor: Int,
+    @Px ruleThickness: Float,
+    syntax: CharSequence,
+    mode: Mode
+  ): HorizontalRuleSpan {
+    val key = recyclingKey(syntax, ruleColor, ruleThickness, mode)
+    return pool.remove(key) ?: HorizontalRuleSpan(ruleColor, ruleThickness, syntax, mode, recycler)
+  }
+
+  private fun recyclingKey(span: HorizontalRuleSpan) = recyclingKey(
+      span.syntax,
+      span.ruleColor,
+      span.ruleThickness,
+      span.mode
+  )
+
+  private fun recyclingKey(
+    syntax: CharSequence,
+    ruleColor: Int,
+    ruleThickness: Float,
+    mode: Mode
+  ) = "${syntax}_${ruleColor}_${ruleThickness}_$mode"
 }
