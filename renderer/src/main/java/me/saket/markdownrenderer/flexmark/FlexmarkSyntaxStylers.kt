@@ -48,11 +48,26 @@ class FlexmarkSyntaxStylers {
     add(FencedCodeBlock::class.java, FencedCodeBlockVisitor())
   }
 
+  /**
+   * Because multiple [FlexmarkSyntaxStyler] could be present for the same [node] and
+   * [FlexmarkSyntaxStyler] are allowed to have a missing visitor, this tries finds
+   * the first NodeVisitor that can read [node].
+   */
   fun nodeVisitor(node: Node): NodeVisitor<Node> {
-    val nodeStylers = stylers[node::class.java] as Collection<FlexmarkSyntaxStyler<Node>>?
-    return nodeStylers
-        ?.firstOrNull { it.visitor(node) != null }
-        ?.visitor(node) ?: NodeVisitor.EMPTY
+    val nodeStylers = stylers[node::class.java] as List<FlexmarkSyntaxStyler<Node>>?
+
+    if (nodeStylers != null) {
+      // Intentionally using for-i loop instead of for-each or
+      // anything else that creates a new Iterator under the hood.
+      for (i in 0 until nodeStylers.size) {
+        val nodeVisitor = nodeStylers[i].visitor(node)
+        if (nodeVisitor != null) {
+          return nodeVisitor
+        }
+      }
+    }
+
+    return NodeVisitor.EMPTY
   }
 
   fun <T : Node> add(
@@ -74,8 +89,9 @@ class FlexmarkSyntaxStylers {
     stylers[nodeType] = stylers[nodeType]?.plus(styler) ?: listOf(styler)
   }
 
-  fun buildParser(): Parser =
-    FlexmarkParserBuilder()
+  fun buildParser(): Parser {
+    return FlexmarkParserBuilder()
         .addExtension(StrikethroughExtension.create())
         .build()
+  }
 }
