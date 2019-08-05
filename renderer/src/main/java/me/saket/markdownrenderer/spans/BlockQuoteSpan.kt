@@ -6,7 +6,7 @@ import android.graphics.Rect
 import android.text.Layout
 import android.text.style.LeadingMarginSpan
 import me.saket.markdownrenderer.spans.pool.Recycler
-import ru.noties.markwon.core.MarkwonTheme
+import io.noties.markwon.core.MarkwonTheme
 import kotlin.math.max
 import kotlin.math.min
 

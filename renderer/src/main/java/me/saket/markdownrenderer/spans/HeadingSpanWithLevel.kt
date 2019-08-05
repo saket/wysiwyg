@@ -8,8 +8,8 @@ import android.text.TextPaint
 import android.text.style.LeadingMarginSpan
 import android.text.style.MetricAffectingSpan
 import me.saket.markdownrenderer.spans.pool.Recycler
-import ru.noties.markwon.core.MarkwonTheme
-import ru.noties.markwon.utils.LeadingMarginUtils
+import io.noties.markwon.core.MarkwonTheme
+import io.noties.markwon.utils.LeadingMarginUtils
 
 /**
  * Copied from Markwon.

@@ -3,7 +3,7 @@ package me.saket.markdownrenderer.spans
 import android.text.TextPaint
 import android.text.style.MetricAffectingSpan
 import me.saket.markdownrenderer.spans.pool.Recycler
-import ru.noties.markwon.core.MarkwonTheme
+import io.noties.markwon.core.MarkwonTheme
 
 class InlineCodeSpan(
   val theme: MarkwonTheme,

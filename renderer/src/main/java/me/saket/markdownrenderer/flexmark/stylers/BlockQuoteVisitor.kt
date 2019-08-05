@@ -8,7 +8,7 @@ import me.saket.markdownrenderer.flexmark.NodeVisitor
 import me.saket.markdownrenderer.spans.BlockQuoteSpan
 import me.saket.markdownrenderer.spans.pool.SpanPool
 import me.saket.markdownrenderer.spans.pool.foregroundColor
-import ru.noties.markwon.core.MarkwonTheme
+import io.noties.markwon.core.MarkwonTheme
 
 class BlockQuoteVisitor : NodeVisitor<BlockQuote> {
 

@@ -6,7 +6,7 @@ import me.saket.markdownrenderer.WysiwygTheme
 import me.saket.markdownrenderer.spans.InlineCodeSpan
 import me.saket.markdownrenderer.spans.pool.SpanPool
 import me.saket.markdownrenderer.spans.pool.monospaceTypeface
-import ru.noties.markwon.core.MarkwonTheme
+import io.noties.markwon.core.MarkwonTheme
 
 class InlineCodeVisitor : DelimitedNodeVisitor<Code>() {
 

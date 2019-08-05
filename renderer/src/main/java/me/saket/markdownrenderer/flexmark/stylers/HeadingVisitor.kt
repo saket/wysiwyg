@@ -8,7 +8,7 @@ import me.saket.markdownrenderer.flexmark.NodeVisitor
 import me.saket.markdownrenderer.spans.HeadingSpanWithLevel
 import me.saket.markdownrenderer.spans.pool.SpanPool
 import me.saket.markdownrenderer.spans.pool.foregroundColor
-import ru.noties.markwon.core.MarkwonTheme
+import io.noties.markwon.core.MarkwonTheme
 
 @Suppress("SpellCheckingInspection")
 class HeadingVisitor : FlexmarkSyntaxStyler<Heading> {

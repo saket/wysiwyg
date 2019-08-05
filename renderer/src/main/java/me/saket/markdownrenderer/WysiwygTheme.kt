@@ -4,7 +4,7 @@ import android.content.Context
 import android.os.Build
 import androidx.annotation.ColorInt
 import androidx.annotation.Px
-import ru.noties.markwon.core.MarkwonTheme
+import io.noties.markwon.core.MarkwonTheme
 
 /**
  * Colors and dimensions to use for highlighting markdown syntax.
