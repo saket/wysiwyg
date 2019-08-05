@@ -29,7 +29,7 @@ interface NodeVisitor<in T : Node> {
         theme: WysiwygTheme,
         parentVisitor: FlexmarkNodeTreeVisitor
       ) {
-        parentVisitor.visitChildren(node)
+        parentVisitor.visitChildren(node, writer)
       }
     }
   }
@@ -47,7 +47,7 @@ abstract class SimpleFlexmarkSyntaxStyler<in T : Node> : FlexmarkSyntaxStyler<T>
       parentVisitor: FlexmarkNodeTreeVisitor
     ) {
       visit(node, pool, writer, theme)
-      parentVisitor.visitChildren(node)
+      parentVisitor.visitChildren(node, writer)
     }
   }
 

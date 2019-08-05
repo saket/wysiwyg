@@ -16,14 +16,13 @@ import me.saket.markdownrenderer.spans.StrikethroughSpan
 import me.saket.markdownrenderer.spans.StyleSpan
 import me.saket.markdownrenderer.spans.WysiwygSpan
 import ru.noties.markwon.core.MarkwonTheme
-import java.util.HashMap
 
 /**
+ * Pool for reusing spans instead of creating and throwing them on every text change.
  * TODO: Convert all these to extension functions?
  */
 open class SpanPool : AbstractSpanPool() {
-  private val horizontalRuleSpans =
-    HashMap<String, HorizontalRuleSpan>()
+  private val horizontalRuleSpans = mutableMapOf<String, HorizontalRuleSpan>()
 
   open fun italics() =
     get { StyleSpan() }.apply {
@@ -101,8 +100,7 @@ open class SpanPool : AbstractSpanPool() {
   }
 
   private fun recycle(span: HorizontalRuleSpan) {
-    val key =
-      span.syntax.toString() + "_" + span.ruleColor + "_" + span.ruleStrokeWidth + "_" + span.mode
+    val key = "${span.syntax}_${span.ruleColor}_${span.ruleStrokeWidth}_${span.mode}"
     horizontalRuleSpans[key] = span
   }
 }

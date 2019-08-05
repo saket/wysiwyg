@@ -29,7 +29,7 @@ class FencedCodeBlockStyler : FlexmarkSyntaxStyler<FencedCodeBlock> {
       ) {
         writer.add(pool.indentedCodeBlock(theme.markwonTheme), node.startOffset, node.endOffset)
         writer.add(pool.monospaceTypeface(), node.startOffset, node.endOffset)
-        parentVisitor.visitChildren(node)
+        parentVisitor.visitChildren(node, writer)
       }
     }
 }
