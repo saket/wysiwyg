@@ -5,7 +5,7 @@ import me.saket.markdownrenderer.SpanWriter
 import me.saket.markdownrenderer.WysiwygTheme
 import me.saket.markdownrenderer.spans.pool.SpanPool
 
-open class FlexmarkNodeTreeVisitor(
+class FlexmarkNodeTreeVisitor(
     private val stylers: FlexmarkSyntaxStylers,
     private val theme: WysiwygTheme,
     private val pool: SpanPool
@@ -15,7 +15,7 @@ open class FlexmarkNodeTreeVisitor(
     visitChildren(markdownRootNode, hintsWriter)
   }
 
-  open fun visitChildren(
+  fun visitChildren(
     parent: Node,
     writer: SpanWriter
   ) {

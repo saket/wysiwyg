@@ -29,7 +29,7 @@ import me.saket.markdownrenderer.flexmark.stylers.StrongEmphasisVisitor
 import me.saket.markdownrenderer.flexmark.stylers.ThematicBreakVisitor
 
 @Suppress("UNCHECKED_CAST")
-internal class FlexmarkSyntaxStylers {
+class FlexmarkSyntaxStylers {
 
   private val stylers = mutableMapOf<Class<*>, List<FlexmarkSyntaxStyler<*>>>()
 
