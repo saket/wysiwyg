@@ -36,10 +36,6 @@ class SpanPool(val theme: WysiwygTheme) {
     spans[span.javaClass] = similarSpans
   }
 
-  fun clear() {
-    spans.clear()
-  }
-
   /**
    * Offers `get<WysiwygSpan>()` instead of `get(WysiwygSpan::class.java)`.
    */
