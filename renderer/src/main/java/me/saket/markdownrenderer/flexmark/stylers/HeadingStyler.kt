@@ -39,6 +39,7 @@ class HeadingStyler : FlexmarkSyntaxStyler<Heading> {
           node.startOffset,
           node.startOffset + node.openingMarker.length
       )
+      parentVisitor.visitChildren(node, writer)
     }
   }
 }
