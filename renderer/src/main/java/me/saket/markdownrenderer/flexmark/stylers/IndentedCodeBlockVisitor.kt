@@ -5,6 +5,8 @@ import me.saket.markdownrenderer.SpanWriter
 import me.saket.markdownrenderer.WysiwygTheme
 import me.saket.markdownrenderer.flexmark.NodeVisitor
 import me.saket.markdownrenderer.spans.pool.SpanPool
+import me.saket.markdownrenderer.spans.pool.indentedCodeBlock
+import me.saket.markdownrenderer.spans.pool.monospaceTypeface
 
 class IndentedCodeBlockVisitor : NodeVisitor<IndentedCodeBlock> {
 

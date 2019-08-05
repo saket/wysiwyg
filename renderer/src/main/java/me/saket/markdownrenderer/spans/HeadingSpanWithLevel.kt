@@ -15,11 +15,11 @@ import ru.noties.markwon.utils.LeadingMarginUtils
  * Copied from Markwon.
  * https://github.com/noties/Markwon/blob/822f16510e91d38f2a139e325aa3744b654805e1/markwon-core/src/main/java/io/noties/markwon/core/spans/HeadingSpan.java
  */
-class HeadingSpanWithLevel(val recycler: Recycler) : MetricAffectingSpan(),
-    LeadingMarginSpan,
-    WysiwygSpan {
+class HeadingSpanWithLevel(
+  val theme: MarkwonTheme,
+  val recycler: Recycler
+) : MetricAffectingSpan(), LeadingMarginSpan, WysiwygSpan {
 
-  lateinit var theme: MarkwonTheme
   var level: Int = 0
 
   private val rect = COMMON_RECT

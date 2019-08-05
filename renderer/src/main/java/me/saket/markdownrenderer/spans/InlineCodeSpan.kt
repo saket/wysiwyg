@@ -5,9 +5,10 @@ import android.text.style.MetricAffectingSpan
 import me.saket.markdownrenderer.spans.pool.Recycler
 import ru.noties.markwon.core.MarkwonTheme
 
-class InlineCodeSpan(val recycler: Recycler) : MetricAffectingSpan(), WysiwygSpan {
-
-  lateinit var theme: MarkwonTheme
+class InlineCodeSpan(
+  val theme: MarkwonTheme,
+  val recycler: Recycler
+) : MetricAffectingSpan(), WysiwygSpan {
 
   override fun updateMeasureState(textPaint: TextPaint) {
     apply(textPaint)

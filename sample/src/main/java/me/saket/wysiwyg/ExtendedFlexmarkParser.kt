@@ -46,7 +46,7 @@ class ExtendedFlexmarkParser(
 //  }
 //
 //  override fun nodeVisitor(
-//    pool: AbstractSpanPool
+//    pool: RealSpanPool
 //  ): NodeVisitor? {
 //    return object : NodeVisitor {
 //      override fun visit(

@@ -6,6 +6,8 @@ import me.saket.markdownrenderer.WysiwygTheme
 import me.saket.markdownrenderer.flexmark.FlexmarkSyntaxStyler
 import me.saket.markdownrenderer.flexmark.NodeVisitor
 import me.saket.markdownrenderer.spans.pool.SpanPool
+import me.saket.markdownrenderer.spans.pool.indentedCodeBlock
+import me.saket.markdownrenderer.spans.pool.monospaceTypeface
 
 class FencedCodeBlockVisitor : FlexmarkSyntaxStyler<FencedCodeBlock> {
 

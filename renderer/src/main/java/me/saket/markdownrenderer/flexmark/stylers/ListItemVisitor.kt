@@ -5,6 +5,7 @@ import me.saket.markdownrenderer.SpanWriter
 import me.saket.markdownrenderer.WysiwygTheme
 import me.saket.markdownrenderer.flexmark.NodeVisitor
 import me.saket.markdownrenderer.spans.pool.SpanPool
+import me.saket.markdownrenderer.spans.pool.foregroundColor
 
 class ListItemVisitor : NodeVisitor<ListItem> {
 

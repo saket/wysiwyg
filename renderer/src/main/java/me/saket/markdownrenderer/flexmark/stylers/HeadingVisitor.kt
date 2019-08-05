@@ -3,10 +3,11 @@ package me.saket.markdownrenderer.flexmark.stylers
 import com.vladsch.flexmark.ast.Heading
 import me.saket.markdownrenderer.SpanWriter
 import me.saket.markdownrenderer.WysiwygTheme
-import me.saket.markdownrenderer.flexmark.FlexmarkNodeTreeVisitor
 import me.saket.markdownrenderer.flexmark.FlexmarkSyntaxStyler
 import me.saket.markdownrenderer.flexmark.NodeVisitor
+import me.saket.markdownrenderer.spans.HeadingSpanWithLevel
 import me.saket.markdownrenderer.spans.pool.SpanPool
+import ru.noties.markwon.core.MarkwonTheme
 
 @Suppress("SpellCheckingInspection")
 class HeadingVisitor : FlexmarkSyntaxStyler<Heading> {
@@ -40,4 +41,12 @@ class HeadingVisitor : FlexmarkSyntaxStyler<Heading> {
       )
     }
   }
+
+  private fun SpanPool.heading(
+    level: Int,
+    markwonTheme: MarkwonTheme
+  ) =
+    get { HeadingSpanWithLevel(markwonTheme, recycler) }.apply {
+      this.level = level
+    }
 }

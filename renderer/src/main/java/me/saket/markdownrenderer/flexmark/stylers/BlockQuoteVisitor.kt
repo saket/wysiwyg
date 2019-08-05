@@ -5,7 +5,10 @@ import com.vladsch.flexmark.ast.Node
 import me.saket.markdownrenderer.SpanWriter
 import me.saket.markdownrenderer.WysiwygTheme
 import me.saket.markdownrenderer.flexmark.NodeVisitor
+import me.saket.markdownrenderer.spans.BlockQuoteSpan
 import me.saket.markdownrenderer.spans.pool.SpanPool
+import me.saket.markdownrenderer.spans.pool.foregroundColor
+import ru.noties.markwon.core.MarkwonTheme
 
 class BlockQuoteVisitor : NodeVisitor<BlockQuote> {
 
@@ -39,4 +42,9 @@ class BlockQuoteVisitor : NodeVisitor<BlockQuote> {
         node.endOffset
     )
   }
+
+  private fun SpanPool.quote(markwonTheme: MarkwonTheme) =
+    get { BlockQuoteSpan(recycler) }.apply {
+      this.theme = markwonTheme
+    }
 }

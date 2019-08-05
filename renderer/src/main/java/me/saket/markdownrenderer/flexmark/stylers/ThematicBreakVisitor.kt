@@ -14,6 +14,7 @@ import me.saket.markdownrenderer.spans.HorizontalRuleSpan.Mode.HYPHENS
 import me.saket.markdownrenderer.spans.HorizontalRuleSpan.Mode.UNDERSCORES
 import me.saket.markdownrenderer.spans.pool.Recycler
 import me.saket.markdownrenderer.spans.pool.SpanPool
+import me.saket.markdownrenderer.spans.pool.foregroundColor
 
 class ThematicBreakVisitor : NodeVisitor<ThematicBreak> {
 

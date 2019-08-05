@@ -14,11 +14,11 @@ import ru.noties.markwon.core.MarkwonTheme
  * Copied from Markwon.
  * https://github.com/noties/Markwon/blob/822f16510e91d38f2a139e325aa3744b654805e1/markwon-core/src/main/java/io/noties/markwon/core/spans/CodeBlockSpan.java
  */
-class IndentedCodeBlockSpan(val recycler: Recycler) : MetricAffectingSpan(),
-    LeadingMarginSpan,
-    WysiwygSpan {
+class IndentedCodeBlockSpan(
+  val theme: MarkwonTheme,
+  val recycler: Recycler
+) : MetricAffectingSpan(), LeadingMarginSpan, WysiwygSpan {
 
-  lateinit var theme: MarkwonTheme
   private val rect = COMMON_RECT
   private val paint = COMMON_PAINT
 
@@ -57,7 +57,7 @@ class IndentedCodeBlockSpan(val recycler: Recycler) : MetricAffectingSpan(),
   override fun recycle() {
     recycler(this)
   }
-  
+
   companion object {
     val COMMON_RECT = Rect()
     val COMMON_PAINT = Paint()
