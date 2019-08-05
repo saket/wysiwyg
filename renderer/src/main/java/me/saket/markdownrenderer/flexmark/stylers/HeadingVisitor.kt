@@ -5,10 +5,11 @@ import me.saket.markdownrenderer.SpanWriter
 import me.saket.markdownrenderer.WysiwygTheme
 import me.saket.markdownrenderer.flexmark.FlexmarkSyntaxStyler
 import me.saket.markdownrenderer.flexmark.NodeVisitor
-import me.saket.markdownrenderer.spans.HeadingSpanWithLevel
+import me.saket.markdownrenderer.spans.HeadingLevel
+import me.saket.markdownrenderer.spans.HeadingSpan
+import me.saket.markdownrenderer.spans.headingLevel
 import me.saket.markdownrenderer.spans.pool.SpanPool
 import me.saket.markdownrenderer.spans.pool.foregroundColor
-import io.noties.markwon.core.MarkwonTheme
 
 @Suppress("SpellCheckingInspection")
 class HeadingVisitor : FlexmarkSyntaxStyler<Heading> {
@@ -34,7 +35,7 @@ class HeadingVisitor : FlexmarkSyntaxStyler<Heading> {
       writer: SpanWriter,
       theme: WysiwygTheme
     ) {
-      writer.add(pool.heading(node.level, theme.markwonTheme), node.startOffset, node.endOffset)
+      writer.add(pool.heading(node.headingLevel, theme), node.startOffset, node.endOffset)
       writer.add(
           pool.foregroundColor(theme.syntaxColor),
           node.startOffset,
@@ -44,10 +45,10 @@ class HeadingVisitor : FlexmarkSyntaxStyler<Heading> {
   }
 
   private fun SpanPool.heading(
-    level: Int,
-    markwonTheme: MarkwonTheme
+    level: HeadingLevel,
+    theme: WysiwygTheme
   ) =
-    get { HeadingSpanWithLevel(markwonTheme, recycler) }.apply {
+    get { HeadingSpan(theme, recycler) }.apply {
       this.level = level
     }
 }
