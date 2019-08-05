@@ -1,81 +1,66 @@
 package me.saket.markdownrenderer
 
 import android.content.Context
-import android.os.Build
+import android.graphics.Color
+import android.util.TypedValue
 import androidx.annotation.ColorInt
 import androidx.annotation.Px
-import io.noties.markwon.core.MarkwonTheme
 
 /**
  * Colors and dimensions to use for highlighting markdown syntax.
  */
 data class WysiwygTheme(
 
-  /** Used for resolving default colors and dimensions in [MarkwonTheme.builderWithDefaults]. */
+  /** Used for resolving default colors and dimensions. */
   val context: Context,
 
   /** Color used for highlighting '**', '~~' and other syntax characters. */
   @ColorInt
-  val syntaxColor: Int = color(context, R.color.markdown_syntax),
+  val syntaxColor: Int = color("#78909C"),
 
   @ColorInt
-  val blockQuoteVerticalRuleColor: Int = color(
-      context, R.color.markdown_blockquote_vertical_rule
-  ),
+  val blockQuoteVerticalRuleColor: Int = color("#78909C"),
 
   @ColorInt
-  val blockQuoteTextColor: Int = color(context, R.color.markdown_blockquote_text),
+  val blockQuoteTextColor: Int = color("#9E9E9E"),
 
   /** Width of a block-quote's vertical line/stripe/rule. */
   @Px
-  val blockQuoteVerticalRuleStrokeWidth: Int = dimensPx(
-      context, R.dimen.markdown_blockquote_vertical_rule_stroke_width
-  ),
+  val blockQuoteVerticalRuleStrokeWidth: Int = dip(context, 4).toInt(),
 
+  /** Gap before a block-quote. */
   @Px
-  val blockQuoteIndentationMargin: Int = dimensPx(
-      context, R.dimen.markdown_blockquote_indentation_margin
-  ),
+  val blockQuoteIndentationMargin: Int = dip(context, 24).toInt(),
 
   /** Gap before a block of ordered/unordered list. */
   @Px
-  val listBlockIndentationMargin: Int = dimensPx(
-      context, R.dimen.markdown_text_block_indentation_margin
-  ),
+  val listBlockIndentationMargin: Int = dip(context, 24).toInt(),
 
   @ColorInt
-  val linkUrlColor: Int = color(context, R.color.markdown_link_url),
+  val linkUrlColor: Int = color("#9E9E9E"),
 
   @ColorInt
-  val linkTextColor: Int = color(context, R.color.markdown_link_text),
+  val linkTextColor: Int = color("#1DE9B6"),
 
+  /** Thematic break a.k.a. horizontal rule. */
   @ColorInt
-  val thematicBreakColor: Int = color(context, R.color.markdown_thematic_break),
+  val thematicBreakColor: Int = color("#616161"),
 
   @Px
-  val thematicBreakThickness: Float = dimensPxFloat(
-      context, R.dimen.markdown_thematic_break_thickness
-  ),
+  val thematicBreakThickness: Float = dip(context, 4),
 
   @ColorInt
-  val codeBackgroundColor: Int = color(context, R.color.markdown_code_background),
+  val codeBackgroundColor: Int = color("#424242"),
 
   @Px
-  val codeBlockMargin: Int = dimensPx(context, R.dimen.markdown_code_block_margin)
+  val codeBlockMargin: Int = dip(context, 8).toInt()
 )
 
-@Suppress("DEPRECATION")
-private val color = { context: Context, colorResId: Int ->
-  when {
-    Build.VERSION.SDK_INT >= 23 -> context.resources.getColor(colorResId, context.theme)
-    else -> context.resources.getColor(colorResId)
-  }
-}
+private fun color(hex: String) = Color.parseColor(hex)
 
-private val dimensPx = { context: Context, dimenResId: Int ->
-  context.resources.getDimensionPixelSize(dimenResId)
-}
-
-private val dimensPxFloat = { context: Context, dimenResId: Int ->
-  context.resources.getDimension(dimenResId)
-}
+private fun dip(context: Context, @Px px: Int): Float =
+  TypedValue.applyDimension(
+      TypedValue.COMPLEX_UNIT_DIP,
+      px.toFloat(),
+      context.resources.displayMetrics
+  )
