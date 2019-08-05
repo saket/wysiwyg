@@ -2,7 +2,6 @@ package me.saket.markdownrenderer.flexmark
 
 import com.vladsch.flexmark.util.ast.Node
 import me.saket.markdownrenderer.SpanWriter
-import me.saket.markdownrenderer.WysiwygTheme
 import me.saket.markdownrenderer.spans.pool.SpanPool
 
 interface FlexmarkSyntaxStyler<in T : Node> {
@@ -14,8 +13,7 @@ interface NodeVisitor<in T : Node> {
   fun visit(
     node: T,
     pool: SpanPool,
-    writer: SpanWriter,
-    theme: WysiwygTheme
+    writer: SpanWriter
   )
 
   /**
@@ -26,10 +24,9 @@ interface NodeVisitor<in T : Node> {
     node: T,
     pool: SpanPool,
     writer: SpanWriter,
-    theme: WysiwygTheme,
     parentVisitor: FlexmarkNodeTreeVisitor
   ) {
-    visit(node, pool, writer, theme)
+    visit(node, pool, writer)
     parentVisitor.visitChildren(node, writer)
   }
 
@@ -38,8 +35,7 @@ interface NodeVisitor<in T : Node> {
       override fun visit(
         node: Node,
         pool: SpanPool,
-        writer: SpanWriter,
-        theme: WysiwygTheme
+        writer: SpanWriter
       ) = Unit
     }
   }

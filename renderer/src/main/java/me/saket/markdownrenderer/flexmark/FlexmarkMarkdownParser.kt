@@ -15,13 +15,11 @@ import me.saket.markdownrenderer.spans.pool.SpanPool
  * Usage:
  * FlexmarkMarkdownParser(WysiwygTheme, MarkdownSpanPool)
  */
-class FlexmarkMarkdownParser(
-  theme: WysiwygTheme,
-  pool: SpanPool = SpanPool()
-) : MarkdownParser {
+class FlexmarkMarkdownParser(theme: WysiwygTheme) : MarkdownParser {
 
+  private val pool: SpanPool = SpanPool(theme)
   private val syntaxStylers: FlexmarkSyntaxStylers = FlexmarkSyntaxStylers()
-  private val markdownNodeTreeVisitor = FlexmarkNodeTreeVisitor(syntaxStylers, theme, pool)
+  private val markdownNodeTreeVisitor = FlexmarkNodeTreeVisitor(syntaxStylers, pool)
   private val parser: Parser = syntaxStylers.buildParser()
 
   @WorkerThread

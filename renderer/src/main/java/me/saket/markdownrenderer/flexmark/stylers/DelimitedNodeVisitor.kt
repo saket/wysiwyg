@@ -3,7 +3,6 @@ package me.saket.markdownrenderer.flexmark.stylers
 import com.vladsch.flexmark.ast.DelimitedNode
 import com.vladsch.flexmark.util.ast.Node
 import me.saket.markdownrenderer.SpanWriter
-import me.saket.markdownrenderer.WysiwygTheme
 import me.saket.markdownrenderer.flexmark.NodeVisitor
 import me.saket.markdownrenderer.spans.pool.SpanPool
 import me.saket.markdownrenderer.spans.pool.foregroundColor
@@ -14,12 +13,11 @@ abstract class DelimitedNodeVisitor<T>
   override fun visit(
     node: T,
     pool: SpanPool,
-    writer: SpanWriter,
-    theme: WysiwygTheme
+    writer: SpanWriter
   ) {
     if (node.openingMarker.isNotEmpty()) {
       writer.add(
-          pool.foregroundColor(theme.syntaxColor),
+          pool.foregroundColor(pool.theme.syntaxColor),
           node.startOffset,
           node.startOffset + node.openingMarker.length
       )
@@ -27,7 +25,7 @@ abstract class DelimitedNodeVisitor<T>
 
     if (node.closingMarker.isNotEmpty()) {
       writer.add(
-          pool.foregroundColor(theme.syntaxColor),
+          pool.foregroundColor(pool.theme.syntaxColor),
           node.endOffset - node.closingMarker.length,
           node.endOffset
       )

@@ -1,7 +1,6 @@
 package me.saket.markdownrenderer.spans.pool
 
 import androidx.annotation.ColorInt
-import me.saket.markdownrenderer.WysiwygTheme
 import me.saket.markdownrenderer.spans.ForegroundColorSpan
 import me.saket.markdownrenderer.spans.IndentedCodeBlockSpan
 import me.saket.markdownrenderer.spans.MonospaceTypefaceSpan
@@ -11,7 +10,7 @@ fun SpanPool.foregroundColor(@ColorInt color: Int) =
     this.color = color
   }
 
-fun SpanPool.indentedCodeBlock(theme: WysiwygTheme) =
+fun SpanPool.indentedCodeBlock() =
   get { IndentedCodeBlockSpan(theme, recycler) }
 
 fun SpanPool.monospaceTypeface() =

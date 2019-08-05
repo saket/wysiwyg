@@ -2,13 +2,11 @@ package me.saket.markdownrenderer.flexmark
 
 import com.vladsch.flexmark.util.ast.Node
 import me.saket.markdownrenderer.SpanWriter
-import me.saket.markdownrenderer.WysiwygTheme
 import me.saket.markdownrenderer.spans.pool.SpanPool
 
 class FlexmarkNodeTreeVisitor(
-    private val stylers: FlexmarkSyntaxStylers,
-    private val theme: WysiwygTheme,
-    private val pool: SpanPool
+  private val stylers: FlexmarkSyntaxStylers,
+  private val pool: SpanPool
 ) {
 
   fun visit(markdownRootNode: Node, hintsWriter: SpanWriter) {
@@ -26,7 +24,7 @@ class FlexmarkNodeTreeVisitor(
       val next = node.next
 
       val visitor = stylers.nodeVisitor(node)
-      visitor.visitWithChildren(node, pool, writer, theme, this)
+      visitor.visitWithChildren(node, pool, writer, this)
 
       node = next
     }

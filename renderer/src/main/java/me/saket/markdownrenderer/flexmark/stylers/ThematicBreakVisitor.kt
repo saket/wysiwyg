@@ -1,7 +1,5 @@
 package me.saket.markdownrenderer.flexmark.stylers
 
-import androidx.annotation.ColorInt
-import androidx.annotation.Px
 import com.vladsch.flexmark.ast.ThematicBreak
 import com.vladsch.flexmark.util.sequence.SubSequence
 import me.saket.markdownrenderer.SpanWriter
@@ -23,10 +21,9 @@ class ThematicBreakVisitor : NodeVisitor<ThematicBreak> {
   override fun visit(
     node: ThematicBreak,
     pool: SpanPool,
-    writer: SpanWriter,
-    theme: WysiwygTheme
+    writer: SpanWriter
   ) {
-    writer.add(pool.foregroundColor(theme.syntaxColor), node.startOffset, node.endOffset)
+    writer.add(pool.foregroundColor(pool.theme.syntaxColor), node.startOffset, node.endOffset)
 
     val thematicBreakSyntax = node.chars
     val clashesWithBoldSyntax = FOUR_ASTERISKS_HORIZONTAL_RULE == thematicBreakSyntax
@@ -47,7 +44,7 @@ class ThematicBreakVisitor : NodeVisitor<ThematicBreak> {
     val immutableThematicBreakChars = thematicBreakSyntax.toString()
 
     val hrSpan = thematicBreakSpansPool.get(
-        theme = theme,
+        theme = pool.theme,
         syntax = immutableThematicBreakChars,
         mode = ruleMode
     )
@@ -81,5 +78,8 @@ internal class ThematicSpanPool {
 
   private fun recyclingKey(span: ThematicBreakSpan) = recyclingKey(span.syntax, span.mode)
 
-  private fun recyclingKey(syntax: CharSequence, mode: Mode) = "${syntax}_$mode"
+  private fun recyclingKey(
+    syntax: CharSequence,
+    mode: Mode
+  ) = "${syntax}_$mode"
 }

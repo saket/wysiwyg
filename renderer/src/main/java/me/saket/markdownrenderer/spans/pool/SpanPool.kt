@@ -2,6 +2,7 @@
 
 package me.saket.markdownrenderer.spans.pool
 
+import me.saket.markdownrenderer.WysiwygTheme
 import me.saket.markdownrenderer.spans.WysiwygSpan
 import java.util.Stack
 import kotlin.DeprecationLevel.WARNING
@@ -11,7 +12,7 @@ typealias Recycler = (WysiwygSpan) -> Unit
 /**
  * Pool for reusing spans instead of creating and throwing them on every text change.
  */
-class SpanPool {
+class SpanPool(val theme: WysiwygTheme) {
 
   val recycler: Recycler = this::recycle
 

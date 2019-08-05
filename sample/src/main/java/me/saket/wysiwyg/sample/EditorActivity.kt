@@ -20,7 +20,7 @@ class EditorActivity : AppCompatActivity(), OnLinkInsertListener {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_editor)
 
-    val markdownParser = FlexmarkMarkdownParser(markdownHintStyles())
+    val markdownParser = FlexmarkMarkdownParser(markdownHintTheme())
     val markdownHints = Wysiwyg(editorEditText, markdownParser)
     editorEditText.addTextChangedListener(markdownHints.textWatcher())
 
@@ -36,7 +36,7 @@ class EditorActivity : AppCompatActivity(), OnLinkInsertListener {
     }
   }
 
-  private fun markdownHintStyles(): WysiwygTheme {
+  private fun markdownHintTheme(): WysiwygTheme {
     val color = { colorResId: Int -> ContextCompat.getColor(this, colorResId) }
     val dimensPx = { dimenResId: Int -> resources.getDimensionPixelSize(dimenResId) }
 

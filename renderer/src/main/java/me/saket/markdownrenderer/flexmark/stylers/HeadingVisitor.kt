@@ -2,7 +2,6 @@ package me.saket.markdownrenderer.flexmark.stylers
 
 import com.vladsch.flexmark.ast.Heading
 import me.saket.markdownrenderer.SpanWriter
-import me.saket.markdownrenderer.WysiwygTheme
 import me.saket.markdownrenderer.flexmark.FlexmarkSyntaxStyler
 import me.saket.markdownrenderer.flexmark.NodeVisitor
 import me.saket.markdownrenderer.spans.HeadingLevel
@@ -32,22 +31,18 @@ class HeadingVisitor : FlexmarkSyntaxStyler<Heading> {
     override fun visit(
       node: Heading,
       pool: SpanPool,
-      writer: SpanWriter,
-      theme: WysiwygTheme
+      writer: SpanWriter
     ) {
-      writer.add(pool.heading(node.headingLevel, theme), node.startOffset, node.endOffset)
+      writer.add(pool.heading(node.headingLevel), node.startOffset, node.endOffset)
       writer.add(
-          pool.foregroundColor(theme.syntaxColor),
+          pool.foregroundColor(pool.theme.syntaxColor),
           node.startOffset,
           node.startOffset + node.openingMarker.length
       )
     }
   }
 
-  private fun SpanPool.heading(
-    level: HeadingLevel,
-    theme: WysiwygTheme
-  ) =
+  private fun SpanPool.heading(level: HeadingLevel) =
     get { HeadingSpan(theme, recycler) }.apply {
       this.level = level
     }

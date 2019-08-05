@@ -3,7 +3,6 @@ package me.saket.markdownrenderer.flexmark.stylers
 import com.vladsch.flexmark.ast.BlockQuote
 import com.vladsch.flexmark.util.ast.Node
 import me.saket.markdownrenderer.SpanWriter
-import me.saket.markdownrenderer.WysiwygTheme
 import me.saket.markdownrenderer.flexmark.NodeVisitor
 import me.saket.markdownrenderer.spans.BlockQuoteSpan
 import me.saket.markdownrenderer.spans.pool.SpanPool
@@ -14,8 +13,7 @@ class BlockQuoteVisitor : NodeVisitor<BlockQuote> {
   override fun visit(
     node: BlockQuote,
     pool: SpanPool,
-    writer: SpanWriter,
-    theme: WysiwygTheme
+    writer: SpanWriter
   ) {
     // Android requires quote spans to be inserted at the starting of the line. Nested
     // quote spans are otherwise not rendered correctly. Calculate the offset for this
@@ -28,20 +26,19 @@ class BlockQuoteVisitor : NodeVisitor<BlockQuote> {
     }
 
     // Quote's vertical rule.
-    val quoteSpan = pool.quote(theme)
+    val quoteSpan = pool.quote()
     writer.add(quoteSpan, node.startOffset - nestedParents, node.endOffset)
 
     // Quote markers ('>').
     val markerStartOffset = node.startOffset - nestedParents
-    writer.add(pool.foregroundColor(theme.syntaxColor), markerStartOffset, node.startOffset + 1)
+    writer.add(pool.foregroundColor(pool.theme.syntaxColor), markerStartOffset, node.startOffset + 1)
 
     // Text color.
     writer.add(
-        pool.foregroundColor(theme.blockQuoteTextColor), node.startOffset - nestedParents,
+        pool.foregroundColor(pool.theme.blockQuoteTextColor), node.startOffset - nestedParents,
         node.endOffset
     )
   }
 
-  private fun SpanPool.quote(theme: WysiwygTheme) =
-    get { BlockQuoteSpan(theme, recycler) }
+  private fun SpanPool.quote() = get { BlockQuoteSpan(theme, recycler) }
 }
