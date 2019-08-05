@@ -1,19 +1,6 @@
 apply plugin: 'java-library'
 apply plugin: 'kotlin'
 
-buildscript {
-  repositories {
-    mavenCentral()
-  }
-  dependencies {
-    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$versions.kotlin"
-  }
-}
-
-repositories {
-  mavenCentral()
-}
-
 compileKotlin {
   kotlinOptions {
     jvmTarget = "1.8"
