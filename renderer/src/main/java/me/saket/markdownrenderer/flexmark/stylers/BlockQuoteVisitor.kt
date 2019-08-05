@@ -1,7 +1,7 @@
 package me.saket.markdownrenderer.flexmark.stylers
 
 import com.vladsch.flexmark.ast.BlockQuote
-import com.vladsch.flexmark.ast.Node
+import com.vladsch.flexmark.util.ast.Node
 import me.saket.markdownrenderer.SpanWriter
 import me.saket.markdownrenderer.WysiwygTheme
 import me.saket.markdownrenderer.flexmark.NodeVisitor

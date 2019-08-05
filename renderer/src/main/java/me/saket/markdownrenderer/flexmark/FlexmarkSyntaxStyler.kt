@@ -1,6 +1,6 @@
 package me.saket.markdownrenderer.flexmark
 
-import com.vladsch.flexmark.ast.Node
+import com.vladsch.flexmark.util.ast.Node
 import me.saket.markdownrenderer.SpanWriter
 import me.saket.markdownrenderer.WysiwygTheme
 import me.saket.markdownrenderer.spans.pool.SpanPool

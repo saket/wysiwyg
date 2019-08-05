@@ -1,11 +1,11 @@
 package me.saket.markdownrenderer.flexmark
 
-import com.vladsch.flexmark.Extension
 import com.vladsch.flexmark.parser.LinkRefProcessorFactory
 import com.vladsch.flexmark.parser.Parser
 import com.vladsch.flexmark.parser.delimiter.DelimiterProcessor
-import com.vladsch.flexmark.util.options.DataKey
-import com.vladsch.flexmark.util.options.MutableDataSet
+import com.vladsch.flexmark.util.builder.Extension
+import com.vladsch.flexmark.util.data.DataKey
+import com.vladsch.flexmark.util.data.MutableDataSet
 
 /**
  * Wrapper around [Parser] because its builder doesn't allow updating [Parser.options].
@@ -22,7 +22,10 @@ class FlexmarkParserBuilder {
     return this
   }
 
-  fun <T> addOption(key: DataKey<T>, value: T): FlexmarkParserBuilder {
+  fun <T> addOption(
+    key: DataKey<T>,
+    value: T
+  ): FlexmarkParserBuilder {
     options.set(key, value)
     return this
   }

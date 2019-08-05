@@ -9,12 +9,12 @@ import com.vladsch.flexmark.ast.IndentedCodeBlock
 import com.vladsch.flexmark.ast.Link
 import com.vladsch.flexmark.ast.ListBlock
 import com.vladsch.flexmark.ast.ListItem
-import com.vladsch.flexmark.ast.Node
 import com.vladsch.flexmark.ast.StrongEmphasis
 import com.vladsch.flexmark.ast.ThematicBreak
 import com.vladsch.flexmark.ext.gfm.strikethrough.Strikethrough
 import com.vladsch.flexmark.ext.gfm.strikethrough.StrikethroughExtension
 import com.vladsch.flexmark.parser.Parser
+import com.vladsch.flexmark.util.ast.Node
 import me.saket.markdownrenderer.flexmark.stylers.BlockQuoteVisitor
 import me.saket.markdownrenderer.flexmark.stylers.EmphasisVisitor
 import me.saket.markdownrenderer.flexmark.stylers.FencedCodeBlockVisitor
