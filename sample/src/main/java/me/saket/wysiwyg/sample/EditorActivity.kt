@@ -1,4 +1,4 @@
-package me.saket.wysiwyg
+package me.saket.wysiwyg.sample
 
 import android.os.Bundle
 import android.widget.EditText
@@ -8,10 +8,6 @@ import kotterknife.bindView
 import me.saket.markdownrenderer.Wysiwyg
 import me.saket.markdownrenderer.WysiwygTheme
 import me.saket.markdownrenderer.flexmark.FlexmarkMarkdownParser
-import me.saket.wysiwyg.toolbar.AddLinkDialog
-import me.saket.wysiwyg.toolbar.Link
-import me.saket.wysiwyg.toolbar.MarkdownFormatToolbarView
-import me.saket.wysiwyg.toolbar.OnLinkInsertListener
 import kotlin.math.max
 import kotlin.math.min
 

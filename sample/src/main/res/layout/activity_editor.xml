@@ -4,7 +4,7 @@
   android:layout_width="match_parent"
   android:layout_height="match_parent"
   android:orientation="vertical"
-  tools:context="me.saket.wysiwyg.EditorActivity">
+  tools:context="me.saket.wysiwyg.sample.EditorActivity">
 
   <TextView
     android:id="@+id/editor_toolbar"
@@ -41,7 +41,7 @@
       tools:ignore="HardcodedText,UnusedAttribute" />
   </ScrollView>
 
-  <me.saket.wysiwyg.toolbar.MarkdownFormatToolbarView
+  <me.saket.wysiwyg.sample.MarkdownFormatToolbarView
     android:id="@+id/editor_format_toolbar"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"

@@ -1,4 +1,4 @@
-package me.saket.wysiwyg
+package me.saket.wysiwyg.sample
 
 //class CustomParser(
 //  private val pool: CustomPool

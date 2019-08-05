@@ -1,4 +1,4 @@
-package me.saket.wysiwyg
+package me.saket.wysiwyg.sample
 
 import android.app.Application
 import timber.log.Timber

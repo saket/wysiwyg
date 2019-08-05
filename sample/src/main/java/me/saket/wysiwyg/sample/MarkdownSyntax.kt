@@ -1,4 +1,4 @@
-package me.saket.wysiwyg.toolbar
+package me.saket.wysiwyg.sample
 
 import android.widget.EditText
 

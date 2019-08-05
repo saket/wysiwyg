@@ -1,4 +1,4 @@
-package me.saket.wysiwyg.toolbar
+package me.saket.wysiwyg.sample
 
 import android.annotation.SuppressLint
 import android.app.Dialog
@@ -12,8 +12,8 @@ import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentManager
-import me.saket.wysiwyg.R
 
+@SuppressLint("StaticFieldLeak")
 class AddLinkDialog : DialogFragment() {
 
   private lateinit var titleEditText: EditText

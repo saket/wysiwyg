@@ -11,7 +11,7 @@ android {
   compileSdkVersion versions.compileSdk
 
   defaultConfig {
-    applicationId "me.saket.Wysiwyg"
+    applicationId "me.saket.wysiwyg.sample"
     minSdkVersion versions.minSdk
     targetSdkVersion versions.compileSdk
     versionCode 1
