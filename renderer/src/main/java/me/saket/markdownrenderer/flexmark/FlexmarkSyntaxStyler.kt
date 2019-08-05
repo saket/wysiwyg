@@ -38,18 +38,16 @@ interface NodeVisitor<in T : Node> {
 @Suppress("UNCHECKED_CAST")
 abstract class SimpleFlexmarkSyntaxStyler<in T : Node> : FlexmarkSyntaxStyler<T> {
 
-  override fun visitor(node: T): NodeVisitor<T>? {
-    return object : NodeVisitor<T> {
-      override fun visit(
-        node: T,
-        pool: SpanPool,
-        writer: SpanWriter,
-        theme: WysiwygTheme,
-        parentVisitor: FlexmarkNodeTreeVisitor
-      ) {
-        visit(node, pool, writer, theme)
-        parentVisitor.visitChildren(node)
-      }
+  override fun visitor(node: T) = object : NodeVisitor<T> {
+    override fun visit(
+      node: T,
+      pool: SpanPool,
+      writer: SpanWriter,
+      theme: WysiwygTheme,
+      parentVisitor: FlexmarkNodeTreeVisitor
+    ) {
+      visit(node, pool, writer, theme)
+      parentVisitor.visitChildren(node)
     }
   }
 

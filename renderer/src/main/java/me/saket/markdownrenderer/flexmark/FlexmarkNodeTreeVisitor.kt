@@ -2,6 +2,8 @@ package me.saket.markdownrenderer.flexmark
 
 import androidx.annotation.ColorInt
 import androidx.annotation.Px
+import com.vladsch.flexmark.ast.Code
+import com.vladsch.flexmark.ast.DelimitedNode
 import com.vladsch.flexmark.ast.Node
 import com.vladsch.flexmark.util.sequence.SubSequence
 import me.saket.markdownrenderer.SpanWriter
@@ -71,31 +73,6 @@ open class FlexmarkNodeTreeVisitor(
     }
 
 //    when (node) {
-//      is Heading ->
-//        // Setext styles aren't supported. Setext-style headers are "underlined" using equal signs
-//        // (for first-level headers) and dashes (for second-level headers). For example:
-//        // This is an H1
-//        // =============
-//        //
-//        // This is an H2
-//        // -------------
-//        if (node.isAtxHeading) {
-//          highlightHeading(node)
-//
-//        } else {
-//          // Reddit allows thematic breaks without a leading new line. So we'll manually support this.
-//          highlightThematicBreakWithoutLeadingNewLine(node)
-//        }
-//      is Link -> highlightLink(node)
-//      is Code -> highlightInlineCode(node)
-//      is IndentedCodeBlock -> highlightIndentedCodeBlock(node)
-//      is FencedCodeBlock -> {
-//        if (node.openingMarker.contains('~')) {
-//          // Ignore. Messes with strikethrough.
-//        } else {
-//          highlightFencedCodeBlock(node)
-//        }
-//      }
 //      is BlockQuote -> highlightBlockQuote(node)
 //      is ListBlock -> highlightListBlock(node)
 //      is ListItem -> highlightListItem(node)
@@ -109,53 +86,24 @@ open class FlexmarkNodeTreeVisitor(
 //    visitChildren(node)
   }
 
-//  private fun <T> highlightMarkdownSyntax(delimitedNode: T) where T : Node, T : DelimitedNode {
-//    if (delimitedNode.openingMarker.isNotEmpty()) {
-//      writer.add(
-//          spanPool.foregroundColor(syntaxColor),
-//          delimitedNode.startOffset,
-//          delimitedNode.startOffset + delimitedNode.openingMarker.length
-//      )
-//    }
-//
-//    if (delimitedNode.closingMarker.isNotEmpty()) {
-//      writer.add(
-//          spanPool.foregroundColor(syntaxColor),
-//          delimitedNode.endOffset - delimitedNode.closingMarker.length,
-//          delimitedNode.endOffset
-//      )
-//    }
-//  }
+  private fun <T> highlightMarkdownSyntax(delimitedNode: T) where T : Node, T : DelimitedNode {
+    if (delimitedNode.openingMarker.isNotEmpty()) {
+      writer.add(
+          spanPool.foregroundColor(syntaxColor),
+          delimitedNode.startOffset,
+          delimitedNode.startOffset + delimitedNode.openingMarker.length
+      )
+    }
 
-//  private fun highlightItalics(emphasis: Emphasis) {
-//    writer.add(spanPool.italics(), emphasis.startOffset, emphasis.endOffset)
-//    highlightMarkdownSyntax(emphasis)
-//  }
+    if (delimitedNode.closingMarker.isNotEmpty()) {
+      writer.add(
+          spanPool.foregroundColor(syntaxColor),
+          delimitedNode.endOffset - delimitedNode.closingMarker.length,
+          delimitedNode.endOffset
+      )
+    }
+  }
 
-//  private fun highlightBold(strongEmphasis: StrongEmphasis) {
-//    writer.add(spanPool.bold(), strongEmphasis.startOffset, strongEmphasis.endOffset)
-//    highlightMarkdownSyntax(strongEmphasis)
-//  }
-
-//  private fun highlightInlineCode(code: Code) {
-//    writer.add(spanPool.inlineCode(markwonTheme), code.startOffset, code.endOffset)
-//    writer.add(spanPool.monospaceTypeface(), code.startOffset, code.endOffset)
-//    highlightMarkdownSyntax(code)
-//  }
-//
-//  private fun highlightIndentedCodeBlock(indentedCodeBlock: IndentedCodeBlock) {
-//    // A LineBackgroundSpan needs to start at the starting of the line.
-//    val lineStartOffset = indentedCodeBlock.startOffset - 4
-//
-//    writer.add(spanPool.indentedCodeBlock(markwonTheme), lineStartOffset, indentedCodeBlock.endOffset)
-//    writer.add(spanPool.monospaceTypeface(), indentedCodeBlock.startOffset, indentedCodeBlock.endOffset)
-//  }
-//
-//  private fun highlightFencedCodeBlock(indentedCodeBlock: FencedCodeBlock) {
-//    writer.add(spanPool.indentedCodeBlock(markwonTheme), indentedCodeBlock.startOffset, indentedCodeBlock.endOffset)
-//    writer.add(spanPool.monospaceTypeface(), indentedCodeBlock.startOffset, indentedCodeBlock.endOffset)
-//  }
-//
 //  private fun highlightBlockQuote(blockQuote: BlockQuote) {
 //    // Android seems to require quote spans to be inserted at the starting of the line.
 //    // Otherwise, nested quote spans aren't rendered correctly. Calculate the offset for
