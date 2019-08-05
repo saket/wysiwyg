@@ -12,10 +12,10 @@ import java.util.concurrent.Executors
  * Highlights markdown syntax in real-time.
  *
  * Usage:
- * val markdownHints = MarkdownHints(EditText, MarkdownParser))
+ * val markdownHints = Wysiwyg(EditText, MarkdownParser))
  * editText.addTextChangedListener(markdownHints.textWatcher())
  */
-class MarkdownHints(
+class Wysiwyg(
     private val editText: EditText,
     private val parser: MarkdownParser
 ) {

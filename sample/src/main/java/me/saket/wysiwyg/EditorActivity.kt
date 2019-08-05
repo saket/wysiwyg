@@ -5,7 +5,7 @@ import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import kotterknife.bindView
-import me.saket.markdownrenderer.MarkdownHints
+import me.saket.markdownrenderer.Wysiwyg
 import me.saket.markdownrenderer.WysiwygTheme
 import me.saket.markdownrenderer.flexmark.FlexmarkMarkdownParser
 import me.saket.wysiwyg.toolbar.AddLinkDialog
@@ -25,7 +25,7 @@ class EditorActivity : AppCompatActivity(), OnLinkInsertListener {
     setContentView(R.layout.activity_editor)
 
     val markdownParser = FlexmarkMarkdownParser(markdownHintStyles())
-    val markdownHints = MarkdownHints(editorEditText, markdownParser)
+    val markdownHints = Wysiwyg(editorEditText, markdownParser)
     editorEditText.addTextChangedListener(markdownHints.textWatcher())
 
     formatToolbarView.onMarkdownSyntaxApplied = { syntax -> syntax.insert(editorEditText) }
