@@ -21,7 +21,6 @@ android {
 }
 
 dependencies {
-  implementation "androidx.appcompat:appcompat:$versions.androidX"
   implementation "androidx.annotation:annotation:$versions.androidX"
   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$versions.kotlin"
 
