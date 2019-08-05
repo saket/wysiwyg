@@ -13,6 +13,8 @@ import com.vladsch.flexmark.ast.Node
 import com.vladsch.flexmark.ast.StrongEmphasis
 import com.vladsch.flexmark.ast.ThematicBreak
 import com.vladsch.flexmark.ext.gfm.strikethrough.Strikethrough
+import com.vladsch.flexmark.ext.gfm.strikethrough.StrikethroughExtension
+import com.vladsch.flexmark.parser.Parser
 import me.saket.markdownrenderer.flexmark.stylers.BlockQuoteVisitor
 import me.saket.markdownrenderer.flexmark.stylers.EmphasisVisitor
 import me.saket.markdownrenderer.flexmark.stylers.FencedCodeBlockVisitor
@@ -71,4 +73,9 @@ class FlexmarkSyntaxStylers {
   ) {
     stylers[nodeType] = stylers[nodeType]?.plus(styler) ?: listOf(styler)
   }
+
+  fun buildParser(): Parser =
+    FlexmarkParserBuilder()
+        .addExtension(StrikethroughExtension.create())
+        .build()
 }

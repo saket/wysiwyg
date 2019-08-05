@@ -3,8 +3,6 @@ package me.saket.markdownrenderer.flexmark
 import android.text.Spannable
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
-import com.vladsch.flexmark.Extension
-import com.vladsch.flexmark.ext.gfm.strikethrough.StrikethroughExtension
 import com.vladsch.flexmark.parser.Parser
 import com.vladsch.flexmark.util.sequence.SubSequence
 import me.saket.markdownrenderer.MarkdownParser
@@ -25,18 +23,10 @@ open class FlexmarkMarkdownParser(
 ) : MarkdownParser {
 
   private val markdownNodeTreeVisitor by lazy(NONE) { treeVisitor() }
-  private val parser: Parser by lazy(NONE) { buildParser() }
+  private val parser: Parser = syntaxStylers.buildParser()
 
   open fun treeVisitor() =
     FlexmarkNodeTreeVisitor(syntaxStylers, theme, pool)
-
-  open fun buildParser(): Parser =
-    Parser.builder()
-        .extensions(supportedParserExtensions())
-        .build()
-
-  open fun supportedParserExtensions() =
-    listOf<Extension>(StrikethroughExtension.create())
 
   @WorkerThread
   override fun parseSpans(text: Spannable): SpanWriter {
