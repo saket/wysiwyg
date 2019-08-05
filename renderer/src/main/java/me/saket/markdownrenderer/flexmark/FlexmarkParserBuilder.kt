@@ -1,7 +1,6 @@
 package me.saket.markdownrenderer.flexmark
 
 import com.vladsch.flexmark.Extension
-import com.vladsch.flexmark.ext.gfm.strikethrough.StrikethroughExtension
 import com.vladsch.flexmark.parser.LinkRefProcessorFactory
 import com.vladsch.flexmark.parser.Parser
 import com.vladsch.flexmark.parser.delimiter.DelimiterProcessor
@@ -18,24 +17,19 @@ class FlexmarkParserBuilder {
   private var delimiterProcessor: DelimiterProcessor? = null
   private var linkRefProcessorFactory: LinkRefProcessorFactory? = null
 
-  init {
-    // TODO: move this elsewhere.
-    FlexmarkParserBuilder()
-        .addExtension(StrikethroughExtension.create())
-        .build()
-  }
-
   fun addExtension(extension: Extension): FlexmarkParserBuilder {
     extensions += extension
     return this
   }
 
-  fun <T> addOption(key: DataKey<T>, value: T) {
+  fun <T> addOption(key: DataKey<T>, value: T): FlexmarkParserBuilder {
     options.set(key, value)
+    return this
   }
 
-  fun delimiterProcessor(processor: DelimiterProcessor?) {
+  fun setDelimiterProcessor(processor: DelimiterProcessor?): FlexmarkParserBuilder {
     this.delimiterProcessor = processor
+    return this
   }
 
   fun build(): Parser {

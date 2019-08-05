@@ -1,14 +1,13 @@
 package me.saket.markdownrenderer.flexmark
 
 import com.vladsch.flexmark.ast.Node
-import com.vladsch.flexmark.parser.Parser
 import me.saket.markdownrenderer.SpanWriter
 import me.saket.markdownrenderer.WysiwygTheme
 import me.saket.markdownrenderer.spans.pool.SpanPool
 
 interface FlexmarkSyntaxStyler<in T : Node> {
   fun visitor(node: T): NodeVisitor<T>?
-  fun buildParser(): Parser = TODO()
+  fun buildParser(builder: FlexmarkParserBuilder) = Unit
 }
 
 interface NodeVisitor<in T : Node> {
