@@ -19,7 +19,7 @@ class IndentedCodeBlockVisitor : NodeVisitor<IndentedCodeBlock> {
     // A LineBackgroundSpan needs to start at the starting of the line.
     val lineStartOffset = node.startOffset - 4
 
-    writer.add(pool.indentedCodeBlock(theme.markwonTheme), lineStartOffset, node.endOffset)
+    writer.add(pool.indentedCodeBlock(theme), lineStartOffset, node.endOffset)
     writer.add(pool.monospaceTypeface(), node.startOffset, node.endOffset)
   }
 }

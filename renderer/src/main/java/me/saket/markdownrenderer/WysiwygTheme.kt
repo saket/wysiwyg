@@ -51,7 +51,10 @@ data class WysiwygTheme(
   val thematicBreakThickness: Int = dimensPx(context, R.dimen.markdown_thematic_break_thickness),
 
   @ColorInt
-  val codeBackgroundColor: Int = color(context, R.color.markdown_code_background)
+  val codeBackgroundColor: Int = color(context, R.color.markdown_code_background),
+
+  @Px
+  val codeBlockMargin: Int = dimensPx(context, R.dimen.markdown_code_block_margin)
 ) {
   val markwonTheme = MarkwonTheme.builderWithDefaults(context)
       .headingBreakHeight(0)
@@ -59,6 +62,7 @@ data class WysiwygTheme(
       .blockQuoteWidth(blockQuoteVerticalRuleStrokeWidth)
       .blockMargin(listBlockIndentationMargin)
       .codeBackgroundColor(codeBackgroundColor)
+      .codeBlockMargin(codeBlockMargin)
       .build()
 }
 

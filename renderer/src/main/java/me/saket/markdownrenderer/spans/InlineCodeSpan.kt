@@ -6,6 +6,9 @@ import android.text.style.MetricAffectingSpan
 import me.saket.markdownrenderer.WysiwygTheme
 import me.saket.markdownrenderer.spans.pool.Recycler
 
+/**
+ * Copied from https://github.com/noties/Markwon.
+ */
 class InlineCodeSpan(
   val theme: WysiwygTheme,
   val recycler: Recycler
@@ -32,6 +35,6 @@ class InlineCodeSpan(
   }
 
   companion object {
-    const val CODE_DEFINITION_TEXT_SIZE_RATIO = .87f
+    internal const val CODE_DEFINITION_TEXT_SIZE_RATIO = .87f
   }
 }

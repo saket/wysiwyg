@@ -27,7 +27,7 @@ class FencedCodeBlockVisitor : FlexmarkSyntaxStyler<FencedCodeBlock> {
         writer: SpanWriter,
         theme: WysiwygTheme
       ) {
-        writer.add(pool.indentedCodeBlock(theme.markwonTheme), node.startOffset, node.endOffset)
+        writer.add(pool.indentedCodeBlock(theme), node.startOffset, node.endOffset)
         writer.add(pool.monospaceTypeface(), node.startOffset, node.endOffset)
       }
     }
