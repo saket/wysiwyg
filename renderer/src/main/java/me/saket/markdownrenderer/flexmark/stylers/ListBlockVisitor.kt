@@ -3,10 +3,10 @@ package me.saket.markdownrenderer.flexmark.stylers
 import com.vladsch.flexmark.ast.ListBlock
 import me.saket.markdownrenderer.SpanWriter
 import me.saket.markdownrenderer.WysiwygTheme
-import me.saket.markdownrenderer.flexmark.SimpleFlexmarkSyntaxStyler
+import me.saket.markdownrenderer.flexmark.NodeVisitor
 import me.saket.markdownrenderer.spans.pool.SpanPool
 
-class ListBlockStyler : SimpleFlexmarkSyntaxStyler<ListBlock>() {
+class ListBlockVisitor : NodeVisitor<ListBlock> {
 
   override fun visit(
     node: ListBlock,

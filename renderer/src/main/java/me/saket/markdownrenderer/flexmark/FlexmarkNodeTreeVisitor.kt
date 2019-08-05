@@ -5,27 +5,16 @@ import me.saket.markdownrenderer.SpanWriter
 import me.saket.markdownrenderer.WysiwygTheme
 import me.saket.markdownrenderer.spans.pool.SpanPool
 
-/**
- * To support:
- * - Superscript
- */
 open class FlexmarkNodeTreeVisitor(
     private val stylers: FlexmarkSyntaxStylers,
     private val theme: WysiwygTheme,
     private val pool: SpanPool
 ) {
 
-  private lateinit var writer: SpanWriter
-
   fun visit(markdownRootNode: Node, hintsWriter: SpanWriter) {
     visitChildren(markdownRootNode, hintsWriter)
   }
 
-  /**
-   * Visit the child nodes.
-   *
-   * @param parent the parent node whose children should be visited
-   */
   open fun visitChildren(
     parent: Node,
     writer: SpanWriter
@@ -37,7 +26,7 @@ open class FlexmarkNodeTreeVisitor(
       val next = node.next
 
       val visitor = stylers.nodeVisitor(node)
-      visitor.visit(node, pool, this.writer, theme, this)
+      visitor.visitWithChildren(node, pool, writer, theme, this)
 
       node = next
     }

@@ -16,9 +16,19 @@ interface NodeVisitor<in T : Node> {
     node: T,
     pool: SpanPool,
     writer: SpanWriter,
+    theme: WysiwygTheme
+  )
+
+  fun visitWithChildren(
+    node: T,
+    pool: SpanPool,
+    writer: SpanWriter,
     theme: WysiwygTheme,
     parentVisitor: FlexmarkNodeTreeVisitor
-  )
+  ) {
+    visit(node, pool, writer, theme)
+    parentVisitor.visitChildren(node, writer)
+  }
 
   companion object {
     val EMPTY = object : NodeVisitor<Node> {
@@ -26,35 +36,8 @@ interface NodeVisitor<in T : Node> {
         node: Node,
         pool: SpanPool,
         writer: SpanWriter,
-        theme: WysiwygTheme,
-        parentVisitor: FlexmarkNodeTreeVisitor
-      ) {
-        parentVisitor.visitChildren(node, writer)
-      }
+        theme: WysiwygTheme
+      ) = Unit
     }
   }
-}
-
-@Suppress("UNCHECKED_CAST")
-abstract class SimpleFlexmarkSyntaxStyler<in T : Node> : FlexmarkSyntaxStyler<T> {
-
-  override fun visitor(node: T) = object : NodeVisitor<T> {
-    override fun visit(
-      node: T,
-      pool: SpanPool,
-      writer: SpanWriter,
-      theme: WysiwygTheme,
-      parentVisitor: FlexmarkNodeTreeVisitor
-    ) {
-      visit(node, pool, writer, theme)
-      parentVisitor.visitChildren(node, writer)
-    }
-  }
-
-  abstract fun visit(
-    node: T,
-    pool: SpanPool,
-    writer: SpanWriter,
-    theme: WysiwygTheme
-  )
 }

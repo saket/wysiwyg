@@ -4,10 +4,10 @@ import com.vladsch.flexmark.ast.BlockQuote
 import com.vladsch.flexmark.ast.Node
 import me.saket.markdownrenderer.SpanWriter
 import me.saket.markdownrenderer.WysiwygTheme
-import me.saket.markdownrenderer.flexmark.SimpleFlexmarkSyntaxStyler
+import me.saket.markdownrenderer.flexmark.NodeVisitor
 import me.saket.markdownrenderer.spans.pool.SpanPool
 
-class BlockQuoteStyler : SimpleFlexmarkSyntaxStyler<BlockQuote>() {
+class BlockQuoteVisitor : NodeVisitor<BlockQuote> {
 
   override fun visit(
     node: BlockQuote,

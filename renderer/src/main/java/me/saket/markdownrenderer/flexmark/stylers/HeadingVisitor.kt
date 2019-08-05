@@ -9,7 +9,7 @@ import me.saket.markdownrenderer.flexmark.NodeVisitor
 import me.saket.markdownrenderer.spans.pool.SpanPool
 
 @Suppress("SpellCheckingInspection")
-class HeadingStyler : FlexmarkSyntaxStyler<Heading> {
+class HeadingVisitor : FlexmarkSyntaxStyler<Heading> {
 
   override fun visitor(node: Heading): NodeVisitor<Heading>? {
     // Setext styles aren't supported. Setext-style headers are "underlined" using "="
@@ -30,8 +30,7 @@ class HeadingStyler : FlexmarkSyntaxStyler<Heading> {
       node: Heading,
       pool: SpanPool,
       writer: SpanWriter,
-      theme: WysiwygTheme,
-      parentVisitor: FlexmarkNodeTreeVisitor
+      theme: WysiwygTheme
     ) {
       writer.add(pool.heading(node.level, theme.markwonTheme), node.startOffset, node.endOffset)
       writer.add(
@@ -39,7 +38,6 @@ class HeadingStyler : FlexmarkSyntaxStyler<Heading> {
           node.startOffset,
           node.startOffset + node.openingMarker.length
       )
-      parentVisitor.visitChildren(node, writer)
     }
   }
 }

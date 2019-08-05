@@ -4,11 +4,11 @@ import com.vladsch.flexmark.ast.DelimitedNode
 import com.vladsch.flexmark.ast.Node
 import me.saket.markdownrenderer.SpanWriter
 import me.saket.markdownrenderer.WysiwygTheme
-import me.saket.markdownrenderer.flexmark.SimpleFlexmarkSyntaxStyler
+import me.saket.markdownrenderer.flexmark.NodeVisitor
 import me.saket.markdownrenderer.spans.pool.SpanPool
 
 abstract class DelimitedNodeVisitor<T>
-  : SimpleFlexmarkSyntaxStyler<T>() where T : Node, T : DelimitedNode {
+  : NodeVisitor<T> where T : Node, T : DelimitedNode {
 
   override fun visit(
     node: T,

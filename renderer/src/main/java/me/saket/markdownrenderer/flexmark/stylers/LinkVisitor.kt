@@ -3,10 +3,10 @@ package me.saket.markdownrenderer.flexmark.stylers
 import com.vladsch.flexmark.ast.Link
 import me.saket.markdownrenderer.SpanWriter
 import me.saket.markdownrenderer.WysiwygTheme
-import me.saket.markdownrenderer.flexmark.SimpleFlexmarkSyntaxStyler
+import me.saket.markdownrenderer.flexmark.NodeVisitor
 import me.saket.markdownrenderer.spans.pool.SpanPool
 
-class LinkStyler : SimpleFlexmarkSyntaxStyler<Link>() {
+class LinkVisitor : NodeVisitor<Link> {
 
   override fun visit(
     node: Link,

@@ -3,10 +3,10 @@ package me.saket.markdownrenderer.flexmark.stylers
 import com.vladsch.flexmark.ast.IndentedCodeBlock
 import me.saket.markdownrenderer.SpanWriter
 import me.saket.markdownrenderer.WysiwygTheme
-import me.saket.markdownrenderer.flexmark.SimpleFlexmarkSyntaxStyler
+import me.saket.markdownrenderer.flexmark.NodeVisitor
 import me.saket.markdownrenderer.spans.pool.SpanPool
 
-class IndentedCodeBlockStyler : SimpleFlexmarkSyntaxStyler<IndentedCodeBlock>() {
+class IndentedCodeBlockVisitor : NodeVisitor<IndentedCodeBlock> {
 
   override fun visit(
     node: IndentedCodeBlock,

@@ -13,41 +13,62 @@ import com.vladsch.flexmark.ast.Node
 import com.vladsch.flexmark.ast.StrongEmphasis
 import com.vladsch.flexmark.ast.ThematicBreak
 import com.vladsch.flexmark.ext.gfm.strikethrough.Strikethrough
-import me.saket.markdownrenderer.flexmark.stylers.BlockQuoteStyler
-import me.saket.markdownrenderer.flexmark.stylers.EmphasisStyler
-import me.saket.markdownrenderer.flexmark.stylers.FencedCodeBlockStyler
-import me.saket.markdownrenderer.flexmark.stylers.HeadingStyler
-import me.saket.markdownrenderer.flexmark.stylers.IndentedCodeBlockStyler
-import me.saket.markdownrenderer.flexmark.stylers.InlineCodeStyler
-import me.saket.markdownrenderer.flexmark.stylers.LinkStyler
-import me.saket.markdownrenderer.flexmark.stylers.ListBlockStyler
-import me.saket.markdownrenderer.flexmark.stylers.ListItemStyler
-import me.saket.markdownrenderer.flexmark.stylers.StrikethroughStyler
-import me.saket.markdownrenderer.flexmark.stylers.StrongEmphasisStyler
-import me.saket.markdownrenderer.flexmark.stylers.ThematicBreakStyler
+import me.saket.markdownrenderer.flexmark.stylers.BlockQuoteVisitor
+import me.saket.markdownrenderer.flexmark.stylers.EmphasisVisitor
+import me.saket.markdownrenderer.flexmark.stylers.FencedCodeBlockVisitor
+import me.saket.markdownrenderer.flexmark.stylers.HeadingVisitor
+import me.saket.markdownrenderer.flexmark.stylers.IndentedCodeBlockVisitor
+import me.saket.markdownrenderer.flexmark.stylers.InlineCodeVisitor
+import me.saket.markdownrenderer.flexmark.stylers.LinkVisitor
+import me.saket.markdownrenderer.flexmark.stylers.ListBlockVisitor
+import me.saket.markdownrenderer.flexmark.stylers.ListItemVisitor
+import me.saket.markdownrenderer.flexmark.stylers.StrikethroughVisitor
+import me.saket.markdownrenderer.flexmark.stylers.StrongEmphasisVisitor
+import me.saket.markdownrenderer.flexmark.stylers.ThematicBreakVisitor
 
 @Suppress("UNCHECKED_CAST")
 class FlexmarkSyntaxStylers {
 
-  private val stylers: Map<Class<*>, List<FlexmarkSyntaxStyler<*>>> = mapOf(
-      Emphasis::class.java to listOf(EmphasisStyler()),
-      StrongEmphasis::class.java to listOf(StrongEmphasisStyler()),
-      Link::class.java to listOf(LinkStyler()),
-      Strikethrough::class.java to listOf(StrikethroughStyler()),
-      Heading::class.java to listOf(HeadingStyler()),
-      Code::class.java to listOf(InlineCodeStyler()),
-      IndentedCodeBlock::class.java to listOf(IndentedCodeBlockStyler()),
-      FencedCodeBlock::class.java to listOf(FencedCodeBlockStyler()),
-      BlockQuote::class.java to listOf(BlockQuoteStyler()),
-      ListBlock::class.java to listOf(ListBlockStyler()),
-      ListItem::class.java to listOf(ListItemStyler()),
-      ThematicBreak::class.java to listOf(ThematicBreakStyler())
-  )
+  private val stylers = mutableMapOf<Class<*>, List<FlexmarkSyntaxStyler<*>>>()
+
+  init {
+    add(Emphasis::class.java, EmphasisVisitor())
+    add(StrongEmphasis::class.java, StrongEmphasisVisitor())
+    add(Link::class.java, LinkVisitor())
+    add(Strikethrough::class.java, StrikethroughVisitor())
+    add(Code::class.java, InlineCodeVisitor())
+    add(IndentedCodeBlock::class.java, IndentedCodeBlockVisitor())
+    add(BlockQuote::class.java, BlockQuoteVisitor())
+    add(ListBlock::class.java, ListBlockVisitor())
+    add(ListItem::class.java, ListItemVisitor())
+    add(ThematicBreak::class.java, ThematicBreakVisitor())
+    add(Heading::class.java, HeadingVisitor())
+    add(FencedCodeBlock::class.java, FencedCodeBlockVisitor())
+  }
 
   fun nodeVisitor(node: Node): NodeVisitor<Node> {
-    val nodeStylers = stylers[node::class.java] as Set<FlexmarkSyntaxStyler<Node>>?
+    val nodeStylers = stylers[node::class.java] as Collection<FlexmarkSyntaxStyler<Node>>?
     return nodeStylers
         ?.firstOrNull { it.visitor(node) != null }
         ?.visitor(node) ?: NodeVisitor.EMPTY
+  }
+
+  fun <T : Node> add(
+    nodeType: Class<T>,
+    visitor: NodeVisitor<T>
+  ) {
+    add(
+        nodeType = nodeType,
+        styler = object : FlexmarkSyntaxStyler<T> {
+          override fun visitor(node: T) = visitor
+        }
+    )
+  }
+
+  fun <T : Node> add(
+    nodeType: Class<T>,
+    styler: FlexmarkSyntaxStyler<T>
+  ) {
+    stylers[nodeType] = stylers[nodeType]?.plus(styler) ?: listOf(styler)
   }
 }

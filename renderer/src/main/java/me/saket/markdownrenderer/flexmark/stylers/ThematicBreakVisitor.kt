@@ -4,13 +4,13 @@ import com.vladsch.flexmark.ast.ThematicBreak
 import com.vladsch.flexmark.util.sequence.SubSequence
 import me.saket.markdownrenderer.SpanWriter
 import me.saket.markdownrenderer.WysiwygTheme
-import me.saket.markdownrenderer.flexmark.SimpleFlexmarkSyntaxStyler
+import me.saket.markdownrenderer.flexmark.NodeVisitor
 import me.saket.markdownrenderer.spans.HorizontalRuleSpan.Mode.ASTERISKS
 import me.saket.markdownrenderer.spans.HorizontalRuleSpan.Mode.HYPHENS
 import me.saket.markdownrenderer.spans.HorizontalRuleSpan.Mode.UNDERSCORES
 import me.saket.markdownrenderer.spans.pool.SpanPool
 
-class ThematicBreakStyler : SimpleFlexmarkSyntaxStyler<ThematicBreak>() {
+class ThematicBreakVisitor : NodeVisitor<ThematicBreak> {
 
   override fun visit(
     node: ThematicBreak,
