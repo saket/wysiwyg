@@ -1,4 +1,4 @@
-@file:Suppress("UNCHECKED_CAST", "DEPRECATION")
+@file:Suppress("UNCHECKED_CAST", "DEPRECATION", "unused")
 
 package me.saket.markdownrenderer.spans.pool
 
@@ -33,6 +33,10 @@ class SpanPool {
     val similarSpans = spans.getOrElse(span.javaClass) { Stack() }
     similarSpans.add(span)
     spans[span.javaClass] = similarSpans
+  }
+
+  fun clear() {
+    spans.clear()
   }
 
   /**
