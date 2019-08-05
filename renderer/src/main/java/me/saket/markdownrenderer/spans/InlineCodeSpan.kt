@@ -1,14 +1,17 @@
 package me.saket.markdownrenderer.spans
 
+import android.graphics.Typeface
 import android.text.TextPaint
 import android.text.style.MetricAffectingSpan
+import me.saket.markdownrenderer.WysiwygTheme
 import me.saket.markdownrenderer.spans.pool.Recycler
-import io.noties.markwon.core.MarkwonTheme
 
 class InlineCodeSpan(
-  val theme: MarkwonTheme,
+  val theme: WysiwygTheme,
   val recycler: Recycler
 ) : MetricAffectingSpan(), WysiwygSpan {
+
+  private val codeBackgroundColor = theme.codeBackgroundColor
 
   override fun updateMeasureState(textPaint: TextPaint) {
     apply(textPaint)
@@ -16,14 +19,19 @@ class InlineCodeSpan(
 
   override fun updateDrawState(textPaint: TextPaint) {
     apply(textPaint)
-    textPaint.bgColor = theme.getCodeBackgroundColor(textPaint)
+    textPaint.bgColor = codeBackgroundColor
   }
 
-  private fun apply(p: TextPaint) {
-    theme.applyCodeTextStyle(p)
+  private fun apply(paint: TextPaint) {
+    paint.typeface = Typeface.MONOSPACE
+    paint.textSize = paint.textSize * CODE_DEFINITION_TEXT_SIZE_RATIO
   }
 
   override fun recycle() {
     recycler(this)
+  }
+
+  companion object {
+    const val CODE_DEFINITION_TEXT_SIZE_RATIO = .87f
   }
 }
