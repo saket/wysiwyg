@@ -19,7 +19,7 @@ import kotlin.LazyThreadSafetyMode.NONE
  * FlexmarkMarkdownParser(WysiwygTheme, MarkdownSpanPool)
  */
 open class FlexmarkMarkdownParser(
-  private val styles: WysiwygTheme,
+  private val theme: WysiwygTheme,
   private val syntaxStylers: FlexmarkSyntaxStylers = FlexmarkSyntaxStylers(),
   private val pool: SpanPool = SpanPool()
 ) : MarkdownParser {
@@ -28,7 +28,7 @@ open class FlexmarkMarkdownParser(
   private val parser: Parser by lazy(NONE) { buildParser() }
 
   open fun treeVisitor() =
-    FlexmarkNodeTreeVisitor(syntaxStylers, styles, pool)
+    FlexmarkNodeTreeVisitor(syntaxStylers, theme, pool)
 
   open fun buildParser(): Parser =
     Parser.builder()

@@ -5,7 +5,7 @@ import me.saket.markdownrenderer.SpanWriter
 import me.saket.markdownrenderer.WysiwygTheme
 import me.saket.markdownrenderer.spans.pool.SpanPool
 
-class InlineCodeStyler : DelimitedNodeStyler<Code>() {
+class InlineCodeStyler : DelimitedNodeVisitor<Code>() {
 
   override fun visit(
     node: Code,

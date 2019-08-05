@@ -7,7 +7,6 @@ import androidx.core.content.ContextCompat
 import ru.noties.markwon.core.MarkwonTheme
 
 /**
- * TODO: Rename to MarkdownHintTheme.
  * Colors and dimensions to use for highlighting markdown syntax.
  */
 data class WysiwygTheme(

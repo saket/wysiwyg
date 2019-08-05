@@ -11,7 +11,7 @@ import me.saket.markdownrenderer.spans.pool.SpanPool
  */
 open class FlexmarkNodeTreeVisitor(
     private val stylers: FlexmarkSyntaxStylers,
-    private val styles: WysiwygTheme,
+    private val theme: WysiwygTheme,
     private val pool: SpanPool
 ) {
 
@@ -37,7 +37,7 @@ open class FlexmarkNodeTreeVisitor(
       val next = node.next
 
       val visitor = stylers.nodeVisitor(node)
-      visitor.visit(node, pool, this.writer, styles, this)
+      visitor.visit(node, pool, this.writer, theme, this)
 
       node = next
     }

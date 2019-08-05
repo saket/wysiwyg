@@ -12,8 +12,8 @@ import me.saket.markdownrenderer.flexmark.FlexmarkMarkdownParser
  * FYI: Add WYSIWYG as api.
  */
 class ExtendedFlexmarkParser(
-  styles: WysiwygTheme
-) : FlexmarkMarkdownParser(styles) {
+  theme: WysiwygTheme
+) : FlexmarkMarkdownParser(theme) {
 
 //  private val stylers = emptyList<FlexmarkSyntaxStyler<Any>>()
 //

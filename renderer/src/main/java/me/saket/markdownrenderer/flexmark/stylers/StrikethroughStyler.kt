@@ -5,7 +5,7 @@ import me.saket.markdownrenderer.SpanWriter
 import me.saket.markdownrenderer.WysiwygTheme
 import me.saket.markdownrenderer.spans.pool.SpanPool
 
-class StrikethroughStyler : DelimitedNodeStyler<Strikethrough>() {
+class StrikethroughStyler : DelimitedNodeVisitor<Strikethrough>() {
 
   override fun visit(
     node: Strikethrough,

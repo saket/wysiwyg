@@ -12,6 +12,7 @@ import com.vladsch.flexmark.ast.ListItem
 import com.vladsch.flexmark.ast.Node
 import com.vladsch.flexmark.ast.StrongEmphasis
 import com.vladsch.flexmark.ast.ThematicBreak
+import com.vladsch.flexmark.ext.gfm.strikethrough.Strikethrough
 import me.saket.markdownrenderer.flexmark.stylers.BlockQuoteStyler
 import me.saket.markdownrenderer.flexmark.stylers.EmphasisStyler
 import me.saket.markdownrenderer.flexmark.stylers.FencedCodeBlockStyler
@@ -21,6 +22,7 @@ import me.saket.markdownrenderer.flexmark.stylers.InlineCodeStyler
 import me.saket.markdownrenderer.flexmark.stylers.LinkStyler
 import me.saket.markdownrenderer.flexmark.stylers.ListBlockStyler
 import me.saket.markdownrenderer.flexmark.stylers.ListItemStyler
+import me.saket.markdownrenderer.flexmark.stylers.StrikethroughStyler
 import me.saket.markdownrenderer.flexmark.stylers.StrongEmphasisStyler
 import me.saket.markdownrenderer.flexmark.stylers.ThematicBreakStyler
 
@@ -31,6 +33,7 @@ class FlexmarkSyntaxStylers {
       Emphasis::class.java to listOf(EmphasisStyler()),
       StrongEmphasis::class.java to listOf(StrongEmphasisStyler()),
       Link::class.java to listOf(LinkStyler()),
+      Strikethrough::class.java to listOf(StrikethroughStyler()),
       Heading::class.java to listOf(HeadingStyler()),
       Code::class.java to listOf(InlineCodeStyler()),
       IndentedCodeBlock::class.java to listOf(IndentedCodeBlockStyler()),

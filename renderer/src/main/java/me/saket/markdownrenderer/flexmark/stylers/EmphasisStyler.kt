@@ -5,7 +5,7 @@ import me.saket.markdownrenderer.SpanWriter
 import me.saket.markdownrenderer.WysiwygTheme
 import me.saket.markdownrenderer.spans.pool.SpanPool
 
-class EmphasisStyler : DelimitedNodeStyler<Emphasis>() {
+class EmphasisStyler : DelimitedNodeVisitor<Emphasis>() {
 
   override fun visit(
     node: Emphasis,

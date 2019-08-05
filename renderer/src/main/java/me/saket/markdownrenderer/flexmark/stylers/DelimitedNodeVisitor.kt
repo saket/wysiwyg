@@ -7,7 +7,7 @@ import me.saket.markdownrenderer.WysiwygTheme
 import me.saket.markdownrenderer.flexmark.SimpleFlexmarkSyntaxStyler
 import me.saket.markdownrenderer.spans.pool.SpanPool
 
-abstract class DelimitedNodeStyler<T>
+abstract class DelimitedNodeVisitor<T>
   : SimpleFlexmarkSyntaxStyler<T>() where T : Node, T : DelimitedNode {
 
   override fun visit(
