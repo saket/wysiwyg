@@ -47,8 +47,7 @@ class ThematicBreakVisitor : NodeVisitor<ThematicBreak> {
     val immutableThematicBreakChars = thematicBreakSyntax.toString()
 
     val hrSpan = thematicBreakSpansPool.get(
-        ruleColor = theme.thematicBreakColor,
-        ruleThickness = theme.thematicBreakThickness.toFloat(),
+        theme = theme,
         syntax = immutableThematicBreakChars,
         mode = ruleMode
     )
@@ -72,26 +71,15 @@ internal class ThematicSpanPool {
    * @param syntax See [ThematicBreakSpan.syntax].
    */
   internal fun get(
-    @ColorInt ruleColor: Int,
-    @Px ruleThickness: Float,
+    theme: WysiwygTheme,
     syntax: CharSequence,
     mode: Mode
   ): ThematicBreakSpan {
-    val key = recyclingKey(syntax, ruleColor, ruleThickness, mode)
-    return pool.remove(key) ?: ThematicBreakSpan(ruleColor, ruleThickness, syntax, mode, recycler)
+    val key = recyclingKey(syntax, mode)
+    return pool.remove(key) ?: ThematicBreakSpan(theme, syntax, mode, recycler)
   }
 
-  private fun recyclingKey(span: ThematicBreakSpan) = recyclingKey(
-      span.syntax,
-      span.ruleColor,
-      span.ruleThickness,
-      span.mode
-  )
+  private fun recyclingKey(span: ThematicBreakSpan) = recyclingKey(span.syntax, span.mode)
 
-  private fun recyclingKey(
-    syntax: CharSequence,
-    ruleColor: Int,
-    ruleThickness: Float,
-    mode: Mode
-  ) = "${syntax}_${ruleColor}_${ruleThickness}_$mode"
+  private fun recyclingKey(syntax: CharSequence, mode: Mode) = "${syntax}_$mode"
 }

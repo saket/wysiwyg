@@ -5,22 +5,23 @@ import android.graphics.Paint
 import android.graphics.Rect
 import android.text.Layout
 import android.text.style.LeadingMarginSpan
+import me.saket.markdownrenderer.WysiwygTheme
 import me.saket.markdownrenderer.spans.pool.Recycler
-import io.noties.markwon.core.MarkwonTheme
 import kotlin.math.max
 import kotlin.math.min
 
 /**
- * Copied from Markwon.
- * https://github.com/noties/Markwon/blob/822f16510e91d38f2a139e325aa3744b654805e1/markwon-core/src/main/java/io/noties/markwon/core/spans/BlockQuoteSpan.java
+ * Copied from https://github.com/noties/Markwon.
  */
-class BlockQuoteSpan(val recycler: Recycler) : LeadingMarginSpan, WysiwygSpan {
+class BlockQuoteSpan(
+  val theme: WysiwygTheme,
+  val recycler: Recycler
+) : LeadingMarginSpan, WysiwygSpan {
 
-  lateinit var theme: MarkwonTheme
-  private val rect = COMMON_RECT
-  private val paint = COMMON_PAINT
+  private val marginRect = COMMON_RECT
+  private val marginPaint = COMMON_PAINT
 
-  override fun getLeadingMargin(first: Boolean) = theme.blockMargin
+  override fun getLeadingMargin(first: Boolean) = theme.blockQuoteIndentationMargin
 
   override fun drawLeadingMargin(
     c: Canvas,
@@ -36,17 +37,17 @@ class BlockQuoteSpan(val recycler: Recycler) : LeadingMarginSpan, WysiwygSpan {
     first: Boolean,
     layout: Layout?
   ) {
-    val width = theme.blockQuoteWidth
-    paint.set(p)
-    theme.applyBlockQuoteStyle(paint)
+    marginPaint.set(p)
+    marginPaint.style = Paint.Style.FILL
+    marginPaint.color = theme.blockQuoteVerticalRuleColor
 
+    val width = theme.blockQuoteVerticalRuleStrokeWidth
     val l = x + dir * width
     val r = l + dir * width
     val left = min(l, r)
     val right = max(l, r)
-
-    rect.set(left, top, right, bottom)
-    c.drawRect(rect, paint)
+    marginRect.set(left, top, right, bottom)
+    c.drawRect(marginRect, marginPaint)
   }
 
   override fun recycle() {

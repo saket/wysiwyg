@@ -19,8 +19,8 @@ data class WysiwygTheme(
   val syntaxColor: Int = color(context, R.color.markdown_syntax),
 
   @ColorInt
-  val blockQuoteIndentationRuleColor: Int = color(
-      context, R.color.markdown_blockquote_indentation_rule
+  val blockQuoteVerticalRuleColor: Int = color(
+      context, R.color.markdown_blockquote_vertical_rule
   ),
 
   @ColorInt
@@ -30,6 +30,11 @@ data class WysiwygTheme(
   @Px
   val blockQuoteVerticalRuleStrokeWidth: Int = dimensPx(
       context, R.dimen.markdown_blockquote_vertical_rule_stroke_width
+  ),
+
+  @Px
+  val blockQuoteIndentationMargin: Int = dimensPx(
+      context, R.dimen.markdown_blockquote_indentation_margin
   ),
 
   /** Gap before a block of ordered/unordered list. */
@@ -48,23 +53,16 @@ data class WysiwygTheme(
   val thematicBreakColor: Int = color(context, R.color.markdown_thematic_break),
 
   @Px
-  val thematicBreakThickness: Int = dimensPx(context, R.dimen.markdown_thematic_break_thickness),
+  val thematicBreakThickness: Float = dimensPxFloat(
+      context, R.dimen.markdown_thematic_break_thickness
+  ),
 
   @ColorInt
   val codeBackgroundColor: Int = color(context, R.color.markdown_code_background),
 
   @Px
   val codeBlockMargin: Int = dimensPx(context, R.dimen.markdown_code_block_margin)
-) {
-  val markwonTheme = MarkwonTheme.builderWithDefaults(context)
-      .headingBreakHeight(0)
-      .blockQuoteColor(blockQuoteIndentationRuleColor)
-      .blockQuoteWidth(blockQuoteVerticalRuleStrokeWidth)
-      .blockMargin(listBlockIndentationMargin)
-      .codeBackgroundColor(codeBackgroundColor)
-      .codeBlockMargin(codeBlockMargin)
-      .build()
-}
+)
 
 @Suppress("DEPRECATION")
 private val color = { context: Context, colorResId: Int ->
@@ -76,4 +74,8 @@ private val color = { context: Context, colorResId: Int ->
 
 private val dimensPx = { context: Context, dimenResId: Int ->
   context.resources.getDimensionPixelSize(dimenResId)
+}
+
+private val dimensPxFloat = { context: Context, dimenResId: Int ->
+  context.resources.getDimension(dimenResId)
 }

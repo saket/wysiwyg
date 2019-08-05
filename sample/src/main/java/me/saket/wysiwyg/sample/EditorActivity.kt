@@ -43,14 +43,14 @@ class EditorActivity : AppCompatActivity(), OnLinkInsertListener {
     return WysiwygTheme(
         context = this,
         syntaxColor = color(R.color.markdown_syntax),
-        blockQuoteIndentationRuleColor = color(R.color.markdown_blockquote_indentation_rule),
+        blockQuoteVerticalRuleColor = color(R.color.markdown_blockquote_indentation_rule),
         blockQuoteTextColor = color(R.color.markdown_blockquote_text),
         blockQuoteVerticalRuleStrokeWidth = dimensPx(R.dimen.markdown_blockquote_vertical_rule_stroke_width),
         linkUrlColor = color(R.color.markdown_link_url),
         linkTextColor = color(R.color.markdown_link_text),
         listBlockIndentationMargin = dimensPx(R.dimen.markdown_text_block_indentation_margin),
         thematicBreakColor = color(R.color.markdown_horizontal_rule),
-        thematicBreakThickness = dimensPx(R.dimen.markdown_horizontal_rule_stroke_width),
+        thematicBreakThickness = dimensPx(R.dimen.markdown_horizontal_rule_stroke_width).toFloat(),
         codeBackgroundColor = color(R.color.markdown_code_background))
   }
 

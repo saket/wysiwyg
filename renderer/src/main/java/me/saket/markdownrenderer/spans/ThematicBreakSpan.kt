@@ -4,20 +4,22 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.text.style.LineBackgroundSpan
 import androidx.annotation.Px
+import me.saket.markdownrenderer.WysiwygTheme
 import me.saket.markdownrenderer.spans.pool.Recycler
 
 /**
  * @param syntax Used for calculating the left offset to avoid drawing under the text.
  */
 class ThematicBreakSpan(
-  @Px val ruleColor: Int,
-  @Px val ruleThickness: Float,
+  val theme: WysiwygTheme,
   val syntax: CharSequence,
   val mode: Mode,
   val recycler: Recycler
 ) : LineBackgroundSpan, WysiwygSpan {
 
   private var offsetForSyntax = -1f
+//  @Px val ruleColor: Int
+//  @Px val ruleThickness: Float
 
   /**
    * @param topOffsetFactor Used for centering the rule with the text.
@@ -42,8 +44,8 @@ class ThematicBreakSpan(
     lineNumber: Int
   ) {
     val originalPaintColor = paint.color
-    paint.color = ruleColor
-    paint.strokeWidth = ruleThickness
+    paint.color = theme.thematicBreakColor
+    paint.strokeWidth = theme.thematicBreakThickness
 
     if (offsetForSyntax == -1f) {
       offsetForSyntax = paint.measureText(syntax.toString())

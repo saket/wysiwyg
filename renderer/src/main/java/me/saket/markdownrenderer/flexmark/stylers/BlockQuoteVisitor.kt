@@ -8,7 +8,6 @@ import me.saket.markdownrenderer.flexmark.NodeVisitor
 import me.saket.markdownrenderer.spans.BlockQuoteSpan
 import me.saket.markdownrenderer.spans.pool.SpanPool
 import me.saket.markdownrenderer.spans.pool.foregroundColor
-import io.noties.markwon.core.MarkwonTheme
 
 class BlockQuoteVisitor : NodeVisitor<BlockQuote> {
 
@@ -29,7 +28,7 @@ class BlockQuoteVisitor : NodeVisitor<BlockQuote> {
     }
 
     // Quote's vertical rule.
-    val quoteSpan = pool.quote(theme.markwonTheme)
+    val quoteSpan = pool.quote(theme)
     writer.add(quoteSpan, node.startOffset - nestedParents, node.endOffset)
 
     // Quote markers ('>').
@@ -43,8 +42,6 @@ class BlockQuoteVisitor : NodeVisitor<BlockQuote> {
     )
   }
 
-  private fun SpanPool.quote(markwonTheme: MarkwonTheme) =
-    get { BlockQuoteSpan(recycler) }.apply {
-      this.theme = markwonTheme
-    }
+  private fun SpanPool.quote(theme: WysiwygTheme) =
+    get { BlockQuoteSpan(theme, recycler) }
 }
