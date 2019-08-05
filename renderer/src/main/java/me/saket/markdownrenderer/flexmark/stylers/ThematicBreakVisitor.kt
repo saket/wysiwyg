@@ -21,7 +21,7 @@ class ThematicBreakVisitor : NodeVisitor<ThematicBreak> {
     writer.add(pool.foregroundColor(theme.syntaxColor), node.startOffset, node.endOffset)
 
     val thematicBreakSyntax = node.chars
-    val clashesWithBoldSyntax = FOUR_ASTERISKS_HORIZONTAL_RULE != thematicBreakSyntax
+    val clashesWithBoldSyntax = FOUR_ASTERISKS_HORIZONTAL_RULE == thematicBreakSyntax
     if (clashesWithBoldSyntax) {
       return
     }
