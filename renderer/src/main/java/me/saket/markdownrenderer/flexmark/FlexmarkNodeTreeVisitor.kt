@@ -5,7 +5,7 @@ import me.saket.markdownrenderer.SpanWriter
 import me.saket.markdownrenderer.spans.pool.SpanPool
 
 class FlexmarkNodeTreeVisitor(
-  private val stylers: FlexmarkSyntaxStylers,
+  private val highlighters: FlexmarkSyntaxHighlighters,
   private val pool: SpanPool
 ) {
 
@@ -23,7 +23,7 @@ class FlexmarkNodeTreeVisitor(
       // different node or no node after visiting it. So get the next node before visiting.
       val next = node.next
 
-      val visitor = stylers.nodeVisitor(node)
+      val visitor = highlighters.nodeVisitor(node)
       visitor.visitWithChildren(node, pool, writer, this)
 
       node = next

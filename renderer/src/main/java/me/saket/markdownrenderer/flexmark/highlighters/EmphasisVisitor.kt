@@ -1,24 +1,24 @@
-package me.saket.markdownrenderer.flexmark.stylers
+package me.saket.markdownrenderer.flexmark.highlighters
 
 import android.graphics.Typeface
-import com.vladsch.flexmark.ast.StrongEmphasis
+import com.vladsch.flexmark.ast.Emphasis
 import me.saket.markdownrenderer.SpanWriter
 import me.saket.markdownrenderer.spans.StyleSpan
 import me.saket.markdownrenderer.spans.pool.SpanPool
 
-class StrongEmphasisVisitor : DelimitedNodeVisitor<StrongEmphasis>() {
+class EmphasisVisitor : DelimitedNodeVisitor<Emphasis>() {
 
   override fun visit(
-    node: StrongEmphasis,
+    node: Emphasis,
     pool: SpanPool,
     writer: SpanWriter
   ) {
-    writer.add(pool.bold(), node.startOffset, node.endOffset)
+    writer.add(pool.italics(), node.startOffset, node.endOffset)
     super.visit(node, pool, writer)
   }
 
-  private fun SpanPool.bold() =
+  private fun SpanPool.italics() =
     get { StyleSpan(recycler) }.apply {
-      style = Typeface.BOLD
+      style = Typeface.ITALIC
     }
 }

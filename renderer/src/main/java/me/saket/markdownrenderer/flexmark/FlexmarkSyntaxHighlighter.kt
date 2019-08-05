@@ -4,7 +4,7 @@ import com.vladsch.flexmark.util.ast.Node
 import me.saket.markdownrenderer.SpanWriter
 import me.saket.markdownrenderer.spans.pool.SpanPool
 
-interface FlexmarkSyntaxStyler<in T : Node> {
+interface FlexmarkSyntaxHighlighter<in T : Node> {
   fun visitor(node: T): NodeVisitor<T>?
   fun buildParser(builder: FlexmarkParserBuilder) = Unit
 }

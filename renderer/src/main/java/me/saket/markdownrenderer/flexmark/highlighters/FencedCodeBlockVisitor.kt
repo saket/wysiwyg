@@ -1,14 +1,14 @@
-package me.saket.markdownrenderer.flexmark.stylers
+package me.saket.markdownrenderer.flexmark.highlighters
 
 import com.vladsch.flexmark.ast.FencedCodeBlock
 import me.saket.markdownrenderer.SpanWriter
-import me.saket.markdownrenderer.flexmark.FlexmarkSyntaxStyler
+import me.saket.markdownrenderer.flexmark.FlexmarkSyntaxHighlighter
 import me.saket.markdownrenderer.flexmark.NodeVisitor
 import me.saket.markdownrenderer.spans.pool.SpanPool
 import me.saket.markdownrenderer.spans.pool.indentedCodeBlock
 import me.saket.markdownrenderer.spans.pool.monospaceTypeface
 
-class FencedCodeBlockVisitor : FlexmarkSyntaxStyler<FencedCodeBlock> {
+class FencedCodeBlockVisitor : FlexmarkSyntaxHighlighter<FencedCodeBlock> {
 
   override fun visitor(node: FencedCodeBlock): NodeVisitor<FencedCodeBlock>? {
     val clashesWithStrikethrough = node.openingMarker.contains('~')

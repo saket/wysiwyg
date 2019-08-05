@@ -15,23 +15,23 @@ import com.vladsch.flexmark.ext.gfm.strikethrough.Strikethrough
 import com.vladsch.flexmark.ext.gfm.strikethrough.StrikethroughExtension
 import com.vladsch.flexmark.parser.Parser
 import com.vladsch.flexmark.util.ast.Node
-import me.saket.markdownrenderer.flexmark.stylers.BlockQuoteVisitor
-import me.saket.markdownrenderer.flexmark.stylers.EmphasisVisitor
-import me.saket.markdownrenderer.flexmark.stylers.FencedCodeBlockVisitor
-import me.saket.markdownrenderer.flexmark.stylers.HeadingVisitor
-import me.saket.markdownrenderer.flexmark.stylers.IndentedCodeBlockVisitor
-import me.saket.markdownrenderer.flexmark.stylers.InlineCodeVisitor
-import me.saket.markdownrenderer.flexmark.stylers.LinkVisitor
-import me.saket.markdownrenderer.flexmark.stylers.ListBlockVisitor
-import me.saket.markdownrenderer.flexmark.stylers.ListItemVisitor
-import me.saket.markdownrenderer.flexmark.stylers.StrikethroughVisitor
-import me.saket.markdownrenderer.flexmark.stylers.StrongEmphasisVisitor
-import me.saket.markdownrenderer.flexmark.stylers.ThematicBreakVisitor
+import me.saket.markdownrenderer.flexmark.highlighters.BlockQuoteVisitor
+import me.saket.markdownrenderer.flexmark.highlighters.EmphasisVisitor
+import me.saket.markdownrenderer.flexmark.highlighters.FencedCodeBlockVisitor
+import me.saket.markdownrenderer.flexmark.highlighters.HeadingVisitor
+import me.saket.markdownrenderer.flexmark.highlighters.IndentedCodeBlockVisitor
+import me.saket.markdownrenderer.flexmark.highlighters.InlineCodeVisitor
+import me.saket.markdownrenderer.flexmark.highlighters.LinkVisitor
+import me.saket.markdownrenderer.flexmark.highlighters.ListBlockVisitor
+import me.saket.markdownrenderer.flexmark.highlighters.ListItemVisitor
+import me.saket.markdownrenderer.flexmark.highlighters.StrikethroughVisitor
+import me.saket.markdownrenderer.flexmark.highlighters.StrongEmphasisVisitor
+import me.saket.markdownrenderer.flexmark.highlighters.ThematicBreakVisitor
 
 @Suppress("UNCHECKED_CAST")
-class FlexmarkSyntaxStylers {
+class FlexmarkSyntaxHighlighters {
 
-  private val stylers = mutableMapOf<Class<out Node>, MutableList<FlexmarkSyntaxStyler<*>>>()
+  private val highlighters = mutableMapOf<Class<out Node>, MutableList<FlexmarkSyntaxHighlighter<*>>>()
 
   init {
     add(Emphasis::class.java, EmphasisVisitor())
@@ -49,18 +49,18 @@ class FlexmarkSyntaxStylers {
   }
 
   /**
-   * Because multiple [FlexmarkSyntaxStyler] could be present for the same [node] and
-   * [FlexmarkSyntaxStyler] are allowed to have a missing visitor, this tries finds
+   * Because multiple [FlexmarkSyntaxHighlighter] could be present for the same [node] and
+   * [FlexmarkSyntaxHighlighter] are allowed to have a missing visitor, this tries finds
    * the first NodeVisitor that can read [node].
    */
   fun nodeVisitor(node: Node): NodeVisitor<Node> {
-    val nodeStylers = stylers[node::class.java] as List<FlexmarkSyntaxStyler<Node>>?
+    val nodeHighlighters = highlighters[node::class.java] as List<FlexmarkSyntaxHighlighter<Node>>?
 
-    if (nodeStylers != null) {
+    if (nodeHighlighters != null) {
       // Intentionally using for-i loop instead of for-each or
       // anything else that creates a new Iterator under the hood.
-      for (i in 0 until nodeStylers.size) {
-        val nodeVisitor = nodeStylers[i].visitor(node)
+      for (i in 0 until nodeHighlighters.size) {
+        val nodeVisitor = nodeHighlighters[i].visitor(node)
         if (nodeVisitor != null) {
           return nodeVisitor
         }
@@ -76,7 +76,7 @@ class FlexmarkSyntaxStylers {
   ) {
     add(
         nodeType = nodeType,
-        styler = object : FlexmarkSyntaxStyler<T> {
+        highlighter = object : FlexmarkSyntaxHighlighter<T> {
           override fun visitor(node: T) = visitor
         }
     )
@@ -84,20 +84,20 @@ class FlexmarkSyntaxStylers {
 
   fun <T : Node> add(
     nodeType: Class<T>,
-    styler: FlexmarkSyntaxStyler<T>
+    highlighter: FlexmarkSyntaxHighlighter<T>
   ) {
-    if (nodeType in stylers) {
-      stylers[nodeType]!!.add(styler)
+    if (nodeType in highlighters) {
+      highlighters[nodeType]!!.add(highlighter)
     } else {
-      @Suppress("ReplacePutWithAssignment") // `stylers[key] = value` doesn't compile.
-      stylers.put(nodeType, mutableListOf(styler))
+      @Suppress("ReplacePutWithAssignment") // `highlighters[key] = value` doesn't compile.
+      highlighters.put(nodeType, mutableListOf(highlighter))
     }
   }
 
   fun buildParser(): Parser {
     val parserBuilder = FlexmarkParserBuilder()
 
-    val allStylers = stylers.flatMap { it.value }
+    val allStylers = highlighters.flatMap { it.value }
     for (styler in allStylers) {
       styler.buildParser(parserBuilder)
     }

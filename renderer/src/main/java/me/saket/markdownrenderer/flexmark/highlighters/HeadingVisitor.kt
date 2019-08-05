@@ -1,8 +1,8 @@
-package me.saket.markdownrenderer.flexmark.stylers
+package me.saket.markdownrenderer.flexmark.highlighters
 
 import com.vladsch.flexmark.ast.Heading
 import me.saket.markdownrenderer.SpanWriter
-import me.saket.markdownrenderer.flexmark.FlexmarkSyntaxStyler
+import me.saket.markdownrenderer.flexmark.FlexmarkSyntaxHighlighter
 import me.saket.markdownrenderer.flexmark.NodeVisitor
 import me.saket.markdownrenderer.spans.HeadingLevel
 import me.saket.markdownrenderer.spans.HeadingSpan
@@ -11,7 +11,7 @@ import me.saket.markdownrenderer.spans.pool.SpanPool
 import me.saket.markdownrenderer.spans.pool.foregroundColor
 
 @Suppress("SpellCheckingInspection")
-class HeadingVisitor : FlexmarkSyntaxStyler<Heading> {
+class HeadingVisitor : FlexmarkSyntaxHighlighter<Heading> {
 
   override fun visitor(node: Heading): NodeVisitor<Heading>? {
     // Setext styles aren't supported. Setext-style headers are "underlined" using "="

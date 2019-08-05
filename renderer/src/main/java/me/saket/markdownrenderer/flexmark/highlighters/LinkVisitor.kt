@@ -1,4 +1,4 @@
-package me.saket.markdownrenderer.flexmark.stylers
+package me.saket.markdownrenderer.flexmark.highlighters
 
 import com.vladsch.flexmark.ast.Link
 import me.saket.markdownrenderer.SpanWriter
