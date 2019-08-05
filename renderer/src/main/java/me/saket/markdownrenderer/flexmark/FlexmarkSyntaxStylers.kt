@@ -31,7 +31,7 @@ import me.saket.markdownrenderer.flexmark.stylers.ThematicBreakVisitor
 @Suppress("UNCHECKED_CAST")
 class FlexmarkSyntaxStylers {
 
-  private val stylers = mutableMapOf<Class<*>, List<FlexmarkSyntaxStyler<*>>>()
+  private val stylers = mutableMapOf<Class<out Node>, MutableList<FlexmarkSyntaxStyler<*>>>()
 
   init {
     add(Emphasis::class.java, EmphasisVisitor())
@@ -86,7 +86,12 @@ class FlexmarkSyntaxStylers {
     nodeType: Class<T>,
     styler: FlexmarkSyntaxStyler<T>
   ) {
-    stylers[nodeType] = stylers[nodeType]?.plus(styler) ?: listOf(styler)
+    if (nodeType in stylers) {
+      stylers[nodeType]!!.add(styler)
+    } else {
+      @Suppress("ReplacePutWithAssignment") // `stylers[key] = value` doesn't compile.
+      stylers.put(nodeType, mutableListOf(styler))
+    }
   }
 
   fun buildParser(): Parser {

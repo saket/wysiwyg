@@ -18,6 +18,10 @@ interface NodeVisitor<in T : Node> {
     theme: WysiwygTheme
   )
 
+  /**
+   * Override this if you don't want the default behavior of
+   * visiting children AFTER this [node]'s styling is applied.
+   */
   fun visitWithChildren(
     node: T,
     pool: SpanPool,
