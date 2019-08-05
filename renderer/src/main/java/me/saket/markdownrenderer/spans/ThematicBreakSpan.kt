@@ -19,24 +19,13 @@ class ThematicBreakSpan(
 
   private var offsetForSyntax = -1f
 
-  enum class Mode {
-    HYPHENS {
-      override val topOffsetFactor = 0.07f
-    },
-
-    ASTERISKS {
-      override val topOffsetFactor = -0.11f
-    },
-
-    UNDERSCORES {
-      override val topOffsetFactor = 0.42f
-    };
-
-    /**
-     * Used for centering the rule with the text.
-     */
-    open val topOffsetFactor: Float
-      get() = throw UnsupportedOperationException()
+  /**
+   * @param topOffsetFactor Used for centering the rule with the text.
+   */
+  enum class Mode(val topOffsetFactor: Float) {
+    HYPHENS(topOffsetFactor = 0.07f),
+    ASTERISKS(topOffsetFactor = -0.11f),
+    UNDERSCORES(topOffsetFactor = 0.42f)
   }
 
   override fun drawBackground(
