@@ -9,7 +9,7 @@ import me.saket.markdownrenderer.spans.pool.Recycler
 /**
  * @param syntax Used for calculating the left offset to avoid drawing under the text.
  */
-class HorizontalRuleSpan(
+class ThematicBreakSpan(
   @Px val ruleColor: Int,
   @Px val ruleThickness: Float,
   val syntax: CharSequence,

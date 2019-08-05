@@ -39,10 +39,10 @@ data class WysiwygTheme(
     val linkTextColor: Int = color(context, R.color.markdown_link_text),
 
     @ColorInt
-    val horizontalRuleColor: Int = color(context, R.color.markdown_horizontal_rule),
+    val thematicBreakColor: Int = color(context, R.color.markdown_thematic_break),
 
     @Px
-    val horizontalRuleStrokeWidth: Int = dimensPx(context, R.dimen.markdown_horizontal_rule_stroke_width),
+    val thematicBreakThickness: Int = dimensPx(context, R.dimen.markdown_thematic_break_thickness),
 
     @ColorInt
     val codeBackgroundColor: Int = color(context, R.color.markdown_code_background)

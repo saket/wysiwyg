@@ -53,8 +53,8 @@ class EditorActivity : AppCompatActivity(), OnLinkInsertListener {
         linkUrlColor = color(R.color.markdown_link_url),
         linkTextColor = color(R.color.markdown_link_text),
         listBlockIndentationMargin = dimensPx(R.dimen.markdown_text_block_indentation_margin),
-        horizontalRuleColor = color(R.color.markdown_horizontal_rule),
-        horizontalRuleStrokeWidth = dimensPx(R.dimen.markdown_horizontal_rule_stroke_width),
+        thematicBreakColor = color(R.color.markdown_horizontal_rule),
+        thematicBreakThickness = dimensPx(R.dimen.markdown_horizontal_rule_stroke_width),
         codeBackgroundColor = color(R.color.markdown_code_background))
   }
 
