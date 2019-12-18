@@ -1,6 +1,7 @@
 package me.saket.wysiwyg.sample
 
 import android.os.Bundle
+import android.transition.TransitionManager
 import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -21,8 +22,10 @@ class EditorActivity : AppCompatActivity(), OnLinkInsertListener {
     setContentView(R.layout.activity_editor)
 
     val markdownParser = FlexmarkMarkdownParser(markdownHintTheme())
-    val markdownHints = Wysiwyg(editorEditText, markdownParser)
-    editorEditText.addTextChangedListener(markdownHints.textWatcher())
+    val wysiwyg = Wysiwyg(editorEditText, markdownParser)
+    editorEditText.addTextChangedListener(wysiwyg.syntaxHighlighter())
+
+    TransitionManager.beginDelayedTransition
 
     formatToolbarView.onMarkdownSyntaxApplied = { syntax -> syntax.insert(editorEditText) }
     formatToolbarView.onInsertLinkClicked = {

@@ -10,7 +10,7 @@ import me.saket.markdownrenderer.spans.pool.Recycler
  * Copied from https://github.com/noties/Markwon.
  */
 class InlineCodeSpan(
-  val theme: WysiwygTheme,
+  theme: WysiwygTheme,
   val recycler: Recycler
 ) : MetricAffectingSpan(), WysiwygSpan {
 

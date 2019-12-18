@@ -21,7 +21,7 @@ class FlexmarkNodeTreeVisitor(
     while (node != null) {
       // A subclass of this visitor might modify the node, resulting in getNext returning a
       // different node or no node after visiting it. So get the next node before visiting.
-      val next = node.next
+      val next: Node? = node.next
 
       val visitor = highlighters.nodeVisitor(node)
       visitor.visitWithChildren(node, pool, writer, this)

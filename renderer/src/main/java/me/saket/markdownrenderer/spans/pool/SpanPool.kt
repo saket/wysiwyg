@@ -31,9 +31,9 @@ class SpanPool(val theme: WysiwygTheme) {
   }
 
   fun recycle(span: WysiwygSpan) {
-    val similarSpans = spans.getOrElse(span.javaClass) { Stack() }
+    val similarSpans = spans.getOrElse(span::class.java) { Stack() }
     similarSpans.add(span)
-    spans[span.javaClass] = similarSpans
+    spans[span::class.java] = similarSpans
   }
 
   /**

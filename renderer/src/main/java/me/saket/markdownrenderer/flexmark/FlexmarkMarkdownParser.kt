@@ -17,8 +17,8 @@ import me.saket.markdownrenderer.spans.pool.SpanPool
  */
 class FlexmarkMarkdownParser(theme: WysiwygTheme) : MarkdownParser {
 
-  private val pool: SpanPool = SpanPool(theme)
-  private val syntaxHighlighters: FlexmarkSyntaxHighlighters = FlexmarkSyntaxHighlighters()
+  private val pool = SpanPool(theme)
+  private val syntaxHighlighters = FlexmarkSyntaxHighlighters()
   private val markdownNodeTreeVisitor = FlexmarkNodeTreeVisitor(syntaxHighlighters, pool)
   private val parser: Parser = syntaxHighlighters.buildParser()
 

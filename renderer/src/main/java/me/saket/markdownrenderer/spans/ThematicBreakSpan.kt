@@ -3,7 +3,6 @@ package me.saket.markdownrenderer.spans
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.text.style.LineBackgroundSpan
-import androidx.annotation.Px
 import me.saket.markdownrenderer.WysiwygTheme
 import me.saket.markdownrenderer.spans.pool.Recycler
 
@@ -18,8 +17,6 @@ class ThematicBreakSpan(
 ) : LineBackgroundSpan, WysiwygSpan {
 
   private var offsetForSyntax = -1f
-//  @Px val ruleColor: Int
-//  @Px val ruleThickness: Float
 
   /**
    * @param topOffsetFactor Used for centering the rule with the text.

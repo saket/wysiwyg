@@ -13,7 +13,7 @@ import java.util.concurrent.Executors
  *
  * Usage:
  * val markdownHints = Wysiwyg(EditText, MarkdownParser))
- * editText.addTextChangedListener(markdownHints.textWatcher())
+ * editText.addTextChangedListener(markdownHints.syntaxHighlighter())
  */
 class Wysiwyg(
     private val editText: EditText,
@@ -33,7 +33,7 @@ class Wysiwyg(
     })
   }
 
-  fun textWatcher() = AfterTextChange { editable, textWatcher ->
+  fun syntaxHighlighter() = AfterTextChange { editable, textWatcher ->
     val textLengthToParse = editable.length
 
     bgExecutor.submit {

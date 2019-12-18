@@ -1,18 +1,57 @@
-apply plugin: 'java-library'
-apply plugin: 'kotlin'
-
-compileKotlin {
-  kotlinOptions {
-    jvmTarget = "1.8"
-  }
+plugins {
+  id 'kotlin-multiplatform'
 }
 
-compileTestKotlin {
-  kotlinOptions {
-    jvmTarget = "1.8"
-  }
-}
+kotlin {
+  targets {
+    jvm("android")
 
-dependencies {
-  implementation "org.jetbrains.kotlin:kotlin-stdlib:$versions.kotlin"
+    // iPhone simulator    : presets.iosX64
+    // real iDevice 32 bit : presets.iosArm32
+    // real iDevice 64 bit : presets.iosArm64
+    //    def iosPreset = presets.iosX64
+    //
+    //    fromPreset(iosPreset, 'ios') {
+    //      binaries {
+    //        framework {
+    //          // Disable bitcode embedding for the simulator build.
+    //          if (iosPreset == presets.iosX64) {
+    //            embedBitcode("disable")
+    //          }
+    //        }
+    //      }
+    //    }
+    //
+    //    fromPreset(presets.macosX64, "macos") {
+    //      binaries {
+    //        executable {
+    //          // Change to specify fully qualified name of your application's entry point:
+    //          entryPoint = 'sample.main'
+    //          // Specify command-line arguments, if necessary:
+    //          runTask?.args('')
+    //        }
+    //      }
+    //    }
+  }
+
+  sourceSets {
+    commonMain {
+      dependencies {
+        implementation 'org.jetbrains.kotlin:kotlin-stdlib-common'
+      }
+    }
+    androidMain {
+      dependencies {
+        implementation 'org.jetbrains.kotlin:kotlin-stdlib'
+      }
+    }
+    //    iosMain {
+    //      dependencies {
+    //      }
+    //    }
+    //    macosMain {
+    //      dependencies {
+    //      }
+    //    }
+  }
 }
