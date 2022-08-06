@@ -1,26 +1,3 @@
 <resources>
   <string name="app_name">Wysiwyg</string>
-
-  <string name="cd_textformat_bold">Bold</string>
-  <string name="cd_textformat_italic">Italic</string>
-  <string name="cd_textformat_insert_link">Insert link</string>
-  <string name="cd_textformat_insert_text_emoji">Insert text emoji</string>
-  <string name="cd_textformat_strikethrough">Strikethrough</string>
-  <string name="cd_textformat_quote">Quote</string>
-  <string name="cd_textformat_superscript">Superscript</string>
-  <string name="cd_textformat_code">Pre-formatted code</string>
-  <string name="cd_textformat_header">Header</string>
-  <string name="cd_textformat_thematic_header">Line break</string>
-  <string name="cd_textformat_spoiler">Spoiler</string>
-  <string name="composereply_redo">Redo</string>
-  <string name="composereply_undo">Undo</string>
-  <string name="cd_composereply_undo">Undo last change</string>
-  <string name="cd_composereply_redo">Redo last change</string>
-
-  <string name="composereply_addlink_error_empty_field">This can\'t be empty ಠ_ಠ</string>
-  <string name="composereply_addlink_title">Title</string>
-  <string name="composereply_addlink_url">URL</string>
-  <string name="composereply_addlink_cancel">Cancel</string>
-  <string name="composereply_addlink_insert">Insert</string>
-  <string name="composereply_paste_from_clipboard_hint">Tap to paste URL from clipboard\n%s</string>
 </resources>
