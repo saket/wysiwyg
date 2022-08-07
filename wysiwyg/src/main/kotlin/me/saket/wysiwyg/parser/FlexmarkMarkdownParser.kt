@@ -18,11 +18,10 @@ import com.vladsch.flexmark.util.ast.Node
 import me.saket.wysiwyg.internal.fastForEachReverseIndexed
 import me.saket.wysiwyg.parser.MarkdownParser.ParseResult
 import com.vladsch.flexmark.parser.Parser as FlexmarkParser
-import com.vladsch.flexmark.util.misc.Extension as FlexmarkExtension
 
 internal class FlexmarkMarkdownParser : MarkdownParser {
   private val parser = FlexmarkParser.builder()
-    .extensions(listOf<FlexmarkExtension>(StrikethroughExtension.create()))
+    .extensions(listOf(StrikethroughExtension.create(), RedditSuperscriptExtension()))
     .apply {
       // Disable parsers for unsupported syntaxes.
       set(FlexmarkParser.HTML_BLOCK_PARSER, false)
@@ -123,15 +122,15 @@ internal class FlexmarkMarkdownParser : MarkdownParser {
           buffer.add(
             MarkdownSpan(
               token = MarkdownSpanToken.SyntaxColor,
-              startIndex = startOffset,
+              startIndex = openingMarker.startOffset,
               endIndexExclusive = openingMarker.endOffset
             )
           )
           buffer.add(
             MarkdownSpan(
               token = MarkdownSpanToken.SyntaxColor,
-              startIndex = endOffset - (closingMarker.length),
-              endIndexExclusive = endOffset,
+              startIndex = closingMarker.startOffset,
+              endIndexExclusive = closingMarker.endOffset,
             )
           )
           buffer.add(
@@ -190,7 +189,7 @@ internal class FlexmarkMarkdownParser : MarkdownParser {
           buffer.add(
             MarkdownSpan(
               token = MarkdownSpanToken.SyntaxColor,
-              startIndex = startOffset,
+              startIndex = openingMarker.startOffset,
               endIndexExclusive = openingMarker.endOffset
             )
           )
@@ -212,6 +211,33 @@ internal class FlexmarkMarkdownParser : MarkdownParser {
           )
         )
       }
+      is RedditSuperscript -> {
+        buffer.add(
+          MarkdownSpan(
+            token = MarkdownSpanToken.SyntaxColor,
+            startIndex = openingMarker.startOffset,
+            endIndexExclusive = openingMarker.endOffset
+          )
+        )
+        closingMarker?.let {
+          buffer.add(
+            MarkdownSpan(
+              token = MarkdownSpanToken.SyntaxColor,
+              startIndex = closingMarker.startOffset,
+              endIndexExclusive = closingMarker.endOffset,
+            )
+          )
+        }
+
+
+        buffer.add(
+          MarkdownSpan(
+            token = MarkdownSpanToken.Superscript(hasClosingMarker = closingMarker != null),
+            startIndex = startOffset,
+            endIndexExclusive = endOffset
+          )
+        )
+      }
       else -> Unit
     }
   }
@@ -221,8 +247,8 @@ internal class FlexmarkMarkdownParser : MarkdownParser {
       add(
         MarkdownSpan(
           token = MarkdownSpanToken.SyntaxColor,
-          startIndex = node.startOffset,
-          endIndexExclusive = node.startOffset + node.openingMarker.length
+          startIndex = node.openingMarker.startOffset,
+          endIndexExclusive = node.openingMarker.endOffset
         )
       )
     }
@@ -231,8 +257,8 @@ internal class FlexmarkMarkdownParser : MarkdownParser {
       add(
         MarkdownSpan(
           token = MarkdownSpanToken.SyntaxColor,
-          startIndex = node.endOffset - (node.closingMarker.length),
-          endIndexExclusive = node.endOffset
+          startIndex = node.closingMarker.startOffset,
+          endIndexExclusive = node.closingMarker.endOffset
         )
       )
     }
@@ -246,6 +272,8 @@ internal class FlexmarkMarkdownParser : MarkdownParser {
     while (stack.isNotEmpty()) {
       next = stack.removeFirst()
 
+      // Wysiwyg keeps it simple and avoids nested markdown blocks.
+      // For example, nested block/italic styling inside headings feels overkill.
       val isNestedSyntax = (next is ListBlock && next.parent is ListItem)
         || next.parent is BlockQuote
         || next.parent is Heading
@@ -314,7 +342,7 @@ internal class FlexmarkMarkdownParser : MarkdownParser {
   }
 }
 
-private val MarkdownSpan.hasClosingMarker
+private val MarkdownSpan.hasClosingMarker: Boolean
   get() = when (token) {
     MarkdownSpanToken.SyntaxColor,
     MarkdownSpanToken.Bold,
@@ -327,4 +355,5 @@ private val MarkdownSpan.hasClosingMarker
     MarkdownSpanToken.BlockQuote,
     MarkdownSpanToken.ListBlock,
     is MarkdownSpanToken.Heading -> false
+    is MarkdownSpanToken.Superscript -> token.hasClosingMarker
   }

@@ -8,12 +8,15 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.BaselineShift
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextGeometricTransform
 import androidx.compose.ui.text.style.TextIndent
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import me.saket.wysiwyg.WysiwygTheme
 import me.saket.wysiwyg.parser.MarkdownSpan
+import me.saket.wysiwyg.parser.MarkdownSpanToken
 import me.saket.wysiwyg.parser.MarkdownSpanToken.BlockQuote
 import me.saket.wysiwyg.parser.MarkdownSpanToken.Bold
 import me.saket.wysiwyg.parser.MarkdownSpanToken.FencedCodeBlock
@@ -24,6 +27,7 @@ import me.saket.wysiwyg.parser.MarkdownSpanToken.LinkText
 import me.saket.wysiwyg.parser.MarkdownSpanToken.LinkUrl
 import me.saket.wysiwyg.parser.MarkdownSpanToken.ListBlock
 import me.saket.wysiwyg.parser.MarkdownSpanToken.StrikeThrough
+import me.saket.wysiwyg.parser.MarkdownSpanToken.Superscript
 import me.saket.wysiwyg.parser.MarkdownSpanToken.SyntaxColor
 
 @JvmInline
@@ -135,6 +139,13 @@ internal value class MarkdownRenderer(
           SpanStyle(
             fontSize = 1.em * theme.headingFontSizes.forLevel(span.token.level),
             fontWeight = FontWeight.Bold
+          )
+        )
+      }
+      is Superscript -> {
+        addSpanStyle(
+          SpanStyle(
+            baselineShift = BaselineShift.Superscript
           )
         )
       }

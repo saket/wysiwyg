@@ -15,8 +15,12 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.BaselineShift
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
@@ -30,13 +34,20 @@ import me.saket.wysiwyg.rememberWysiwyg
 fun WysiwygEditor() {
   val wysiwyg = rememberWysiwyg(wysiwygTheme()) {
     val text = """
-          |# Wysiwyg
           |
-          |Markdown is a **lightweight** and easy-to-use `syntax` for styling all forms of ~~web~~ writing. 
-          |> The overriding design goal for Markdown's formatting syntax is to make it as readable as possible.
+          |Using the caret sign ^will create exponentials.
           |
-          |Markdown was originally developed by [John Gruber](daringfireball.net/markdown).
+          |Another ^super text.
           """.trimMargin()
+
+    // |This is a ^superscript^. This is also a ^(superscript but with multiple words). This^looks^interesting^on^old^reddit.
+    /*
+    |
+    |Markdown is a **lightweight** and easy-to-use `syntax` for styling all forms of ~~web~~ writing.
+    |> The overriding design goal for Markdown's formatting syntax is to make it as readable as possible.
+    |
+    |Markdown was originally developed by [John Gruber](daringfireball.net/markdown).
+    * */
     TextFieldValue(text, selection = TextRange(text.length))
   }
   val extendedSpans = remember {
@@ -87,7 +98,7 @@ fun WysiwygEditor() {
 private fun wysiwygTheme(): WysiwygTheme {
   return WysiwygTheme(
     syntaxColor = MaterialTheme.colorScheme.primary,
-    linkTextColor = MaterialTheme.colorScheme.tertiary,
+    linkTextColor = MaterialTheme.colorScheme.primary,
     linkUrlColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
     struckThroughTextColor = LocalContentColor.current.copy(alpha = 0.5f),
     codeBackground = Color.Black.copy(alpha = 0.3f),

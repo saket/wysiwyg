@@ -47,6 +47,8 @@ sealed interface MarkdownSpanToken {
   object BlockQuote : MarkdownSpanToken
   object ListBlock : MarkdownSpanToken
 
+  data class Superscript(val hasClosingMarker: Boolean): MarkdownSpanToken
+
   data class Heading(val level: Int) : MarkdownSpanToken {
     init {
       check(level in 0..6)

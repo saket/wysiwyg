@@ -5,7 +5,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.getSelectedText
 import me.saket.wysiwyg.Wysiwyg
 
-interface MarkdownSyntaxInserter {
+fun interface MarkdownSyntaxInserter {
   fun insertInto(text: TextFieldValue): TextReplacement
 }
 
