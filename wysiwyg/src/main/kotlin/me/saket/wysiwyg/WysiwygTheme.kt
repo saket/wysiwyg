@@ -5,8 +5,9 @@ import androidx.compose.ui.unit.TextUnit
 
 data class WysiwygTheme(
   val syntaxColor: Color,
-  val linkTextColor: Color = syntaxColor,
+  val linkTextColor: Color,
   val linkUrlColor: Color,
+  val struckThroughTextColor: Color,
   val codeBackground: Color,
   val codeBlockLeadingPadding: TextUnit,
   val blockQuoteText: Color,

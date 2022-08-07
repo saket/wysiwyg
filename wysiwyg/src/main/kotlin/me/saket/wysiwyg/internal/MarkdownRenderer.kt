@@ -1,6 +1,7 @@
 package me.saket.wysiwyg.internal
 
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -38,6 +39,7 @@ internal value class MarkdownRenderer(
     }
   }
 
+  @OptIn(ExperimentalTextApi::class)
   private fun AnnotatedString.Builder.addSyntaxStyle(span: MarkdownSpan, text: AnnotatedString) {
     fun addSpanStyle(style: SpanStyle) {
       addStyle(
@@ -70,9 +72,16 @@ internal value class MarkdownRenderer(
       Bold -> addSpanStyle(SpanStyle(fontWeight = FontWeight.Bold))
       Italic -> addSpanStyle(SpanStyle(fontStyle = FontStyle.Italic))
       SyntaxColor -> addSpanStyle(SpanStyle(color = theme.syntaxColor))
-      StrikeThrough -> addSpanStyle(SpanStyle(textDecoration = TextDecoration.LineThrough))
       LinkText -> addSpanStyle(SpanStyle(color = theme.linkTextColor))
       LinkUrl -> addSpanStyle(SpanStyle(color = theme.linkUrlColor))
+      StrikeThrough -> {
+        addSpanStyle(
+          SpanStyle(
+            textDecoration = TextDecoration.LineThrough,
+            color = theme.struckThroughTextColor,
+          )
+        )
+      }
       InlineCode -> {
         addSpanStyle(
           SpanStyle(

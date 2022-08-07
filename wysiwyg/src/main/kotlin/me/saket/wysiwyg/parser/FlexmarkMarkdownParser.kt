@@ -70,7 +70,6 @@ internal class FlexmarkMarkdownParser : MarkdownParser {
         )
       }
       is Strikethrough -> {
-        buffer.addSyntaxSpans(this)
         buffer.add(
           MarkdownSpan(
             token = MarkdownSpanToken.StrikeThrough,
@@ -82,8 +81,22 @@ internal class FlexmarkMarkdownParser : MarkdownParser {
       is Link -> {
         buffer.add(
           MarkdownSpan(
-            token = MarkdownSpanToken.LinkText,
+            token = MarkdownSpanToken.SyntaxColor,
             startIndex = textOpeningMarker.startOffset,
+            endIndexExclusive = textOpeningMarker.endOffset
+          )
+        )
+        buffer.add(
+          MarkdownSpan(
+            token = MarkdownSpanToken.LinkText,
+            startIndex = textOpeningMarker.endOffset,
+            endIndexExclusive = textClosingMarker.endOffset
+          )
+        )
+        buffer.add(
+          MarkdownSpan(
+            token = MarkdownSpanToken.SyntaxColor,
+            startIndex = textClosingMarker.startOffset,
             endIndexExclusive = textClosingMarker.endOffset
           )
         )
@@ -96,6 +109,7 @@ internal class FlexmarkMarkdownParser : MarkdownParser {
         )
       }
       is Code -> {
+        buffer.addSyntaxSpans(this)
         buffer.add(
           MarkdownSpan(
             token = MarkdownSpanToken.InlineCode,
