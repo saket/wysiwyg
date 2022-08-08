@@ -10,14 +10,14 @@ import com.vladsch.flexmark.util.ast.Node
 import com.vladsch.flexmark.util.ast.NodeTracker
 import com.vladsch.flexmark.util.data.MutableDataHolder
 import com.vladsch.flexmark.util.sequence.BasedSequence
-import kotlin.time.ExperimentalTime
+import me.saket.wysiwyg.BuildConfig
 
 class RedditSuperscriptExtension : ParserExtension {
   override fun parserOptions(options: MutableDataHolder) = Unit
 
   override fun extend(parserBuilder: Parser.Builder) {
     parserBuilder.postProcessorFactory(
-      object : NodePostProcessorFactory(false) {
+      object : NodePostProcessorFactory(/* ignored = */ false) {
         init {
           addNodes(Text::class.java)
         }
@@ -30,66 +30,58 @@ class RedditSuperscriptExtension : ParserExtension {
   }
 }
 
-private class SuperscriptNodePostProcessor() : NodePostProcessor() {
-  @OptIn(ExperimentalTime::class)
+private class SuperscriptNodePostProcessor : NodePostProcessor() {
   override fun process(state: NodeTracker, node: Node) {
-    println("node = $node")
-    check(node is Text)
-
-    // Rules:
-    // - Search for "^"
-    //   - if it's followed by "(" then end it when ")^" is detected.
-    //   - otherwise, end when a space is detected
-    //   - if another "^" is detected then increase nesting.
-
-    node.chars.indexOfAll("^").forEach { index ->
-      val markerStartsAt = index
-
-      if (node.chars.getOrNull(markerStartsAt - 1) == ' ' && node.chars.getOrNull(markerStartsAt + 1) == '(') {
-        val endIndex = node.chars.indexOf(")", /* fromIndex = */ markerStartsAt)
-        if (endIndex != -1) {
-          val endOffset = node.startOffset + endIndex
-          val openingMarker = node.chars.subSequence(markerStartsAt, markerStartsAt + 2)
-          val closingMarker = node.chars.subSequence(endOffset, endOffset + 1)
-          val superscriptChars = node.baseSequence.subSequence(openingMarker.startOffset, closingMarker.endOffset)
-          val superscriptText = node.baseSequence.subSequence(openingMarker.endOffset, closingMarker.startOffset)
-
-          if (superscriptText.isNotEmpty) {
-            val superscript = RedditSuperscript(
-              chars = superscriptChars,
-              openingMarker = openingMarker,
-              closingMarker = closingMarker
+    runCatchingOnRelease {
+      node.chars.indexOfAll("^").forEach { startIndex ->
+        val isMultiWord = node.chars.getOrNull(startIndex - 1) == ' ' && node.chars.getOrNull(startIndex + 1) == '('
+        val superscript = if (isMultiWord) {
+          val endIndex = node.chars.indexOf(")", /* fromIndex = */ startIndex)
+          if (endIndex != -1) {
+            createSuperscriptNode(
+              openingMarker = node.chars.subSequence(startIndex, startIndex + 2),
+              closingMarker = node.chars.subSequence(endIndex, endIndex + 1)
             )
-            node.appendChild(superscript)
-            state.nodeAdded(superscript)
+          } else null
+
+        } else {
+          val endIndex = node.chars.indexOf(" ", /* fromIndex = */ startIndex).let {
+            if (it == -1) node.chars.lastIndex else it
           }
-        }
-
-      } else {
-        val endIndex = node.chars.indexOf(" ", /* fromIndex = */ markerStartsAt).let {
-          if (it == -1) node.chars.lastIndex else it
-        }
-
-        val endOffset = node.startOffset + endIndex
-        val openingMarker = node.chars.subSequence(markerStartsAt, markerStartsAt + 1)
-        val superscriptChars = node.baseSequence.subSequence(openingMarker.startOffset, endOffset + 1)
-        val superscriptText = node.baseSequence.subSequence(openingMarker.endOffset, endOffset + 1)
-
-        if (superscriptText.isNotEmpty) {
-          val superscript = RedditSuperscript(
-            chars = superscriptChars,
-            openingMarker = openingMarker,
-            closingMarker = null,
+          createSuperscriptNode(
+            openingMarker = node.chars.subSequence(startIndex, startIndex + 1),
+            closingMarker = node.chars.subSequence(endIndex, endIndex)
           )
+        }
+
+        if (superscript != null) {
           node.appendChild(superscript)
           state.nodeAdded(superscript)
         }
       }
     }
   }
+
+  private fun createSuperscriptNode(
+    openingMarker: BasedSequence,
+    closingMarker: BasedSequence
+  ): RedditSuperscriptNode? {
+    val baseSequence = openingMarker.baseSequence
+    val isNotEmpty = closingMarker.startOffset > openingMarker.endOffset
+
+    return if (isNotEmpty) {
+      RedditSuperscriptNode(
+        chars = baseSequence.subSequence(openingMarker.startOffset, closingMarker.endOffset),
+        openingMarker = openingMarker,
+        closingMarker = closingMarker
+      )
+    } else {
+      null
+    }
+  }
 }
 
-class RedditSuperscript(
+class RedditSuperscriptNode(
   chars: BasedSequence,
   val openingMarker: BasedSequence,
   val closingMarker: BasedSequence?,
@@ -98,6 +90,18 @@ class RedditSuperscript(
     return when (closingMarker) {
       null -> arrayOf(openingMarker)
       else -> arrayOf(openingMarker, closingMarker)
+    }
+  }
+}
+
+internal inline fun runCatchingOnRelease(block: () -> Unit) {
+  try {
+    block()
+  } catch (e: Throwable) {
+    if (BuildConfig.DEBUG) {
+      throw e
+    } else {
+      e.printStackTrace()
     }
   }
 }

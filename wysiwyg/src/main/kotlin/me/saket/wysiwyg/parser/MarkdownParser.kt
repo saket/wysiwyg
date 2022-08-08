@@ -46,8 +46,9 @@ sealed interface MarkdownSpanToken {
   object FencedCodeBlock : MarkdownSpanToken
   object BlockQuote : MarkdownSpanToken
   object ListBlock : MarkdownSpanToken
+  object Spoilers : MarkdownSpanToken
 
-  data class Superscript(val hasClosingMarker: Boolean): MarkdownSpanToken
+  data class Superscript(val hasClosingMarker: Boolean) : MarkdownSpanToken
 
   data class Heading(val level: Int) : MarkdownSpanToken {
     init {

@@ -13,15 +13,21 @@ import com.vladsch.flexmark.ast.StrongEmphasis
 import com.vladsch.flexmark.ast.ThematicBreak
 import com.vladsch.flexmark.ext.gfm.strikethrough.Strikethrough
 import com.vladsch.flexmark.ext.gfm.strikethrough.StrikethroughExtension
-import com.vladsch.flexmark.util.ast.DelimitedNode
 import com.vladsch.flexmark.util.ast.Node
+import com.vladsch.flexmark.util.sequence.BasedSequence
 import me.saket.wysiwyg.internal.fastForEachReverseIndexed
 import me.saket.wysiwyg.parser.MarkdownParser.ParseResult
 import com.vladsch.flexmark.parser.Parser as FlexmarkParser
 
 internal class FlexmarkMarkdownParser : MarkdownParser {
   private val parser = FlexmarkParser.builder()
-    .extensions(listOf(StrikethroughExtension.create(), RedditSuperscriptExtension()))
+    .extensions(
+      listOf(
+        StrikethroughExtension.create(),
+        RedditSuperscriptExtension(),
+        RedditSpoilersExtension()
+      )
+    )
     .apply {
       // Disable parsers for unsupported syntaxes.
       set(FlexmarkParser.HTML_BLOCK_PARSER, false)
@@ -49,7 +55,8 @@ internal class FlexmarkMarkdownParser : MarkdownParser {
   private fun Node.addSpansInto(buffer: MutableList<MarkdownSpan>) {
     when (this) {
       is Emphasis -> {
-        buffer.addSyntaxSpans(this)
+        buffer.addSyntaxSpanForMarker(openingMarker)
+        buffer.addSyntaxSpanForMarker(closingMarker)
         buffer.add(
           MarkdownSpan(
             token = MarkdownSpanToken.Italic,
@@ -59,7 +66,8 @@ internal class FlexmarkMarkdownParser : MarkdownParser {
         )
       }
       is StrongEmphasis -> {
-        buffer.addSyntaxSpans(this)
+        buffer.addSyntaxSpanForMarker(openingMarker)
+        buffer.addSyntaxSpanForMarker(closingMarker)
         buffer.add(
           MarkdownSpan(
             token = MarkdownSpanToken.Bold,
@@ -78,27 +86,8 @@ internal class FlexmarkMarkdownParser : MarkdownParser {
         )
       }
       is Link -> {
-        buffer.add(
-          MarkdownSpan(
-            token = MarkdownSpanToken.SyntaxColor,
-            startIndex = textOpeningMarker.startOffset,
-            endIndexExclusive = textOpeningMarker.endOffset
-          )
-        )
-        buffer.add(
-          MarkdownSpan(
-            token = MarkdownSpanToken.LinkText,
-            startIndex = textOpeningMarker.endOffset,
-            endIndexExclusive = textClosingMarker.endOffset
-          )
-        )
-        buffer.add(
-          MarkdownSpan(
-            token = MarkdownSpanToken.SyntaxColor,
-            startIndex = textClosingMarker.startOffset,
-            endIndexExclusive = textClosingMarker.endOffset
-          )
-        )
+        buffer.addSyntaxSpanForMarker(textOpeningMarker)
+        buffer.addSyntaxSpanForMarker(textClosingMarker)
         buffer.add(
           MarkdownSpan(
             token = MarkdownSpanToken.LinkUrl,
@@ -108,7 +97,8 @@ internal class FlexmarkMarkdownParser : MarkdownParser {
         )
       }
       is Code -> {
-        buffer.addSyntaxSpans(this)
+        buffer.addSyntaxSpanForMarker(openingMarker)
+        buffer.addSyntaxSpanForMarker(closingMarker)
         buffer.add(
           MarkdownSpan(
             token = MarkdownSpanToken.InlineCode,
@@ -119,20 +109,8 @@ internal class FlexmarkMarkdownParser : MarkdownParser {
       }
       is FencedCodeBlock -> {
         if (openingMarker.contains('`') && closingMarker.isNotEmpty) {
-          buffer.add(
-            MarkdownSpan(
-              token = MarkdownSpanToken.SyntaxColor,
-              startIndex = openingMarker.startOffset,
-              endIndexExclusive = openingMarker.endOffset
-            )
-          )
-          buffer.add(
-            MarkdownSpan(
-              token = MarkdownSpanToken.SyntaxColor,
-              startIndex = closingMarker.startOffset,
-              endIndexExclusive = closingMarker.endOffset,
-            )
-          )
+          buffer.addSyntaxSpanForMarker(openingMarker)
+          buffer.addSyntaxSpanForMarker(closingMarker)
           buffer.add(
             MarkdownSpan(
               token = MarkdownSpanToken.FencedCodeBlock,
@@ -169,13 +147,7 @@ internal class FlexmarkMarkdownParser : MarkdownParser {
         )
       }
       is ListItem -> {
-        buffer.add(
-          MarkdownSpan(
-            token = MarkdownSpanToken.SyntaxColor,
-            startIndex = startOffset,
-            endIndexExclusive = openingMarker.endOffset
-          )
-        )
+        buffer.addSyntaxSpanForMarker(openingMarker)
       }
       is Heading -> {
         // Setext headings aren't supported. They use underlines using "=" for H1 or "-" for H2.
@@ -186,13 +158,7 @@ internal class FlexmarkMarkdownParser : MarkdownParser {
         // This is an H2
         // -------------
         if (isAtxHeading) {
-          buffer.add(
-            MarkdownSpan(
-              token = MarkdownSpanToken.SyntaxColor,
-              startIndex = openingMarker.startOffset,
-              endIndexExclusive = openingMarker.endOffset
-            )
-          )
+          buffer.addSyntaxSpanForMarker(openingMarker)
           buffer.add(
             MarkdownSpan(
               token = MarkdownSpanToken.Heading(level),
@@ -211,25 +177,11 @@ internal class FlexmarkMarkdownParser : MarkdownParser {
           )
         )
       }
-      is RedditSuperscript -> {
-        buffer.add(
-          MarkdownSpan(
-            token = MarkdownSpanToken.SyntaxColor,
-            startIndex = openingMarker.startOffset,
-            endIndexExclusive = openingMarker.endOffset
-          )
-        )
+      is RedditSuperscriptNode -> {
+        buffer.addSyntaxSpanForMarker(openingMarker)
         closingMarker?.let {
-          buffer.add(
-            MarkdownSpan(
-              token = MarkdownSpanToken.SyntaxColor,
-              startIndex = closingMarker.startOffset,
-              endIndexExclusive = closingMarker.endOffset,
-            )
-          )
+          buffer.addSyntaxSpanForMarker(closingMarker)
         }
-
-
         buffer.add(
           MarkdownSpan(
             token = MarkdownSpanToken.Superscript(hasClosingMarker = closingMarker != null),
@@ -238,27 +190,28 @@ internal class FlexmarkMarkdownParser : MarkdownParser {
           )
         )
       }
+      is RedditSpoilersNode -> {
+        buffer.addSyntaxSpanForMarker(openingMarker)
+        buffer.addSyntaxSpanForMarker(closingMarker)
+        buffer.add(
+          MarkdownSpan(
+            token = MarkdownSpanToken.Spoilers,
+            startIndex = body.startOffset,
+            endIndexExclusive = body.endOffset
+          )
+        )
+      }
       else -> Unit
     }
   }
 
-  private fun <T> MutableList<MarkdownSpan>.addSyntaxSpans(node: T) where T : Node, T : DelimitedNode {
-    if (node.openingMarker.isNotEmpty) {
+  private fun MutableList<MarkdownSpan>.addSyntaxSpanForMarker(sequence: BasedSequence) {
+    if (sequence.isNotEmpty) {
       add(
         MarkdownSpan(
           token = MarkdownSpanToken.SyntaxColor,
-          startIndex = node.openingMarker.startOffset,
-          endIndexExclusive = node.openingMarker.endOffset
-        )
-      )
-    }
-
-    if (node.closingMarker.isNotEmpty) {
-      add(
-        MarkdownSpan(
-          token = MarkdownSpanToken.SyntaxColor,
-          startIndex = node.closingMarker.startOffset,
-          endIndexExclusive = node.closingMarker.endOffset
+          startIndex = sequence.startOffset,
+          endIndexExclusive = sequence.endOffset
         )
       )
     }
@@ -350,7 +303,8 @@ private val MarkdownSpan.hasClosingMarker: Boolean
     MarkdownSpanToken.StrikeThrough,
     MarkdownSpanToken.LinkText,
     MarkdownSpanToken.LinkUrl,
-    MarkdownSpanToken.InlineCode -> true
+    MarkdownSpanToken.InlineCode,
+    MarkdownSpanToken.Spoilers -> true
     MarkdownSpanToken.FencedCodeBlock,
     MarkdownSpanToken.BlockQuote,
     MarkdownSpanToken.ListBlock,

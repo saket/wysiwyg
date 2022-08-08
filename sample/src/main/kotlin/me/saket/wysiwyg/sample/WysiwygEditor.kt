@@ -15,12 +15,8 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextRange
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.style.BaselineShift
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
@@ -34,8 +30,9 @@ import me.saket.wysiwyg.rememberWysiwyg
 fun WysiwygEditor() {
   val wysiwyg = rememberWysiwyg(wysiwygTheme()) {
     val text = """
+          |The greatest thing you'll ever learn is just to >!reddit and be reddited in return!<.
           |
-          |Using the caret sign ^will create exponentials.
+          |Using the ^(caret sign will) create exponentials.
           |
           |Another ^super text.
           """.trimMargin()
@@ -101,6 +98,8 @@ private fun wysiwygTheme(): WysiwygTheme {
     linkTextColor = MaterialTheme.colorScheme.primary,
     linkUrlColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
     struckThroughTextColor = LocalContentColor.current.copy(alpha = 0.5f),
+    spoilersBackground = Color.Transparent,
+    spoilersTextColor = MaterialTheme.colorScheme.error,
     codeBackground = Color.Black.copy(alpha = 0.3f),
     codeBlockLeadingPadding = 16.sp,
     blockQuoteText = LocalContentColor.current.copy(alpha = 0.9f),

@@ -26,6 +26,7 @@ import me.saket.wysiwyg.parser.MarkdownSpanToken.Italic
 import me.saket.wysiwyg.parser.MarkdownSpanToken.LinkText
 import me.saket.wysiwyg.parser.MarkdownSpanToken.LinkUrl
 import me.saket.wysiwyg.parser.MarkdownSpanToken.ListBlock
+import me.saket.wysiwyg.parser.MarkdownSpanToken.Spoilers
 import me.saket.wysiwyg.parser.MarkdownSpanToken.StrikeThrough
 import me.saket.wysiwyg.parser.MarkdownSpanToken.Superscript
 import me.saket.wysiwyg.parser.MarkdownSpanToken.SyntaxColor
@@ -146,6 +147,14 @@ internal value class MarkdownRenderer(
         addSpanStyle(
           SpanStyle(
             baselineShift = BaselineShift.Superscript
+          )
+        )
+      }
+      Spoilers -> {
+        addSpanStyle(
+          SpanStyle(
+            color = theme.spoilersTextColor,
+            background = theme.spoilersBackground,
           )
         )
       }
