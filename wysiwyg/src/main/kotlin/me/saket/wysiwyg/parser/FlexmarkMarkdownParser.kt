@@ -19,15 +19,11 @@ import me.saket.wysiwyg.internal.fastForEachReverseIndexed
 import me.saket.wysiwyg.parser.MarkdownParser.ParseResult
 import com.vladsch.flexmark.parser.Parser as FlexmarkParser
 
-internal class FlexmarkMarkdownParser : MarkdownParser {
+class FlexmarkMarkdownParser(
+  vararg extensions: FlexmarkParser.ParserExtension,
+) : MarkdownParser {
+
   private val parser = FlexmarkParser.builder()
-    .extensions(
-      listOf(
-        StrikethroughExtension.create(),
-        RedditSuperscriptExtension(),
-        RedditSpoilersExtension()
-      )
-    )
     .apply {
       // Disable parsers for unsupported syntaxes.
       set(FlexmarkParser.HTML_BLOCK_PARSER, false)
@@ -40,6 +36,8 @@ internal class FlexmarkMarkdownParser : MarkdownParser {
       // "#" should always be followed by a character to be considered a heading.
       set(FlexmarkParser.HEADING_NO_EMPTY_HEADING_WITHOUT_SPACE, true)
     }
+    .extensions(listOf(StrikethroughExtension.create()))
+    .extensions(extensions.toList())
     .build()
 
   override fun parse(text: String): ParseResult {

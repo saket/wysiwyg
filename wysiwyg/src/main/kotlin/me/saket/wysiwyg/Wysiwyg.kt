@@ -4,54 +4,59 @@ package me.saket.wysiwyg
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.TextFieldValue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import me.saket.wysiwyg.format.MarkdownSyntaxInserter
-import me.saket.wysiwyg.format.OnEnterContinueList
-import me.saket.wysiwyg.format.OnEnterFormatter
 import me.saket.wysiwyg.format.OnEnterFormatters
-import me.saket.wysiwyg.format.OnEnterStartCodeBlock
-import me.saket.wysiwyg.format.insertBoldSyntax
 import me.saket.wysiwyg.internal.MarkdownRenderer
 import me.saket.wysiwyg.parser.FlexmarkMarkdownParser
 import me.saket.wysiwyg.parser.MarkdownParser
 import me.saket.wysiwyg.parser.MarkdownSpan
 import kotlin.coroutines.CoroutineContext
 
-@Composable fun rememberWysiwyg(
+@Composable
+fun rememberWysiwyg(
   theme: WysiwygTheme,
-  onEnterFormatters: List<OnEnterFormatter> = listOf(OnEnterStartCodeBlock, OnEnterContinueList()),
-  text: () -> TextFieldValue = { TextFieldValue() }
+  markdownParser: MarkdownParser = FlexmarkMarkdownParser(),
+  onEnterFormatters: OnEnterFormatters = OnEnterFormatters.Default,
+  initialText: () -> TextFieldValue = { TextFieldValue() }
 ): Wysiwyg {
-  return remember {
+  val textValue = rememberSaveable(stateSaver = TextFieldValue.Saver) {
+    mutableStateOf(initialText())
+  }
+  val wysiwyg = remember(theme, markdownParser) {
     Wysiwyg(
-      text = text(),
+      text = textValue,
       theme = theme,
-      onEnterFormatters = onEnterFormatters,
-      parser = FlexmarkMarkdownParser(),
+      parser = markdownParser,
       backgroundDispatcher = Dispatchers.IO
     )
   }
+  LaunchedEffect(wysiwyg, onEnterFormatters) {
+    wysiwyg.onEnterFormatters = onEnterFormatters
+  }
+  return wysiwyg
 }
 
 @Stable
 class Wysiwyg internal constructor(
-  text: TextFieldValue,
   theme: WysiwygTheme,
-  onEnterFormatters: List<OnEnterFormatter>,
+  text: MutableState<TextFieldValue>,
   private val parser: MarkdownParser,
   private val backgroundDispatcher: CoroutineContext,
 ) {
-  private var text: TextFieldValue by mutableStateOf(text)
+  private var text: TextFieldValue by text
   private val renderer = MarkdownRenderer(theme)
-  private val onEnterFormatters = OnEnterFormatters(onEnterFormatters)
+  internal var onEnterFormatters = OnEnterFormatters(emptyList())
 
   /** Text with syntax highlighting of markdown syntaxes. */
   @Composable

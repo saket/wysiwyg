@@ -1,4 +1,4 @@
-package me.saket.wysiwyg.parser
+package me.saket.wysiwyg.sample
 
 import com.vladsch.flexmark.ast.Text
 import com.vladsch.flexmark.parser.Parser

@@ -3,7 +3,7 @@ package me.saket.wysiwyg.format
 import org.junit.Test
 
 class OnEnterContinueListTest {
-  private val formatters = OnEnterFormatters(listOf(OnEnterContinueList()))
+  private val formatters = OnEnterFormatters(listOf(OnEnterContinueList(), OnEnterStartCodeBlock))
 
   @Test fun `enter key after a valid unordered list item`() {
     formatters.assertOnEnter(

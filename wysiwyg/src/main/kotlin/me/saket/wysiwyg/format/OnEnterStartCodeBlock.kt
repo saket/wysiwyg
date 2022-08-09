@@ -4,7 +4,7 @@ import kotlin.LazyThreadSafetyMode.NONE
 
 /** Starts a code block when enter key is pressed after 3 backticks. */
 object OnEnterStartCodeBlock : OnEnterFormatter {
-  val fencedCodeRegex by lazy(NONE) { Regex("(```)[a-z]*[\\s\\S]*?(```)") }
+  private val fencedCodeRegex by lazy(NONE) { Regex("(```)[a-z]*[\\s\\S]*?(```)") }
 
   override fun onEnterPressed(
     text: CharSequence,

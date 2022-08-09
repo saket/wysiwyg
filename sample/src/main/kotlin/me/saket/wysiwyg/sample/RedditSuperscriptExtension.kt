@@ -1,4 +1,4 @@
-package me.saket.wysiwyg.parser
+package me.saket.wysiwyg.sample
 
 import com.vladsch.flexmark.ast.Text
 import com.vladsch.flexmark.parser.Parser
@@ -10,7 +10,6 @@ import com.vladsch.flexmark.util.ast.Node
 import com.vladsch.flexmark.util.ast.NodeTracker
 import com.vladsch.flexmark.util.data.MutableDataHolder
 import com.vladsch.flexmark.util.sequence.BasedSequence
-import me.saket.wysiwyg.BuildConfig
 
 class RedditSuperscriptExtension : ParserExtension {
   override fun parserOptions(options: MutableDataHolder) = Unit

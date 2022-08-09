@@ -24,29 +24,38 @@ import me.saket.extendedspans.ExtendedSpans
 import me.saket.extendedspans.RoundedCornerSpanPainter
 import me.saket.extendedspans.drawBehind
 import me.saket.wysiwyg.WysiwygTheme
+import me.saket.wysiwyg.parser.FlexmarkMarkdownParser
 import me.saket.wysiwyg.rememberWysiwyg
 
 @Composable
 fun WysiwygEditor() {
-  val wysiwyg = rememberWysiwyg(wysiwygTheme()) {
-    val text = """
+  val wysiwyg = rememberWysiwyg(
+    theme = wysiwygTheme(),
+    markdownParser = remember {
+      FlexmarkMarkdownParser(
+        RedditSuperscriptExtension(),
+        RedditSpoilersExtension()
+      )
+    },
+    initialText = {
+      val text = """
           |The greatest thing you'll ever learn is just to >!reddit and be reddited in return!<.
           |
-          |Using the ^(caret sign will) create exponentials.
-          |
-          |Another ^super text.
+          |**Shopping list**
+          |1. Milk
           """.trimMargin()
 
-    // |This is a ^superscript^. This is also a ^(superscript but with multiple words). This^looks^interesting^on^old^reddit.
-    /*
-    |
-    |Markdown is a **lightweight** and easy-to-use `syntax` for styling all forms of ~~web~~ writing.
-    |> The overriding design goal for Markdown's formatting syntax is to make it as readable as possible.
-    |
-    |Markdown was originally developed by [John Gruber](daringfireball.net/markdown).
-    * */
-    TextFieldValue(text, selection = TextRange(text.length))
-  }
+      // |This is a ^superscript^. This is also a ^(superscript but with multiple words). This^looks^interesting^on^old^reddit.
+      /*
+        |
+        |Markdown is a **lightweight** and easy-to-use `syntax` for styling all forms of ~~web~~ writing.
+        |> The overriding design goal for Markdown's formatting syntax is to make it as readable as possible.
+        |
+        |Markdown was originally developed by [John Gruber](daringfireball.net/markdown).
+        * */
+      TextFieldValue(text, selection = TextRange(text.length))
+    },
+  )
   val extendedSpans = remember {
     ExtendedSpans(
       RoundedCornerSpanPainter(
