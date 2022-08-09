@@ -22,7 +22,7 @@ import kotlin.LazyThreadSafetyMode.NONE
  */
 class OnEnterContinueList(
   private val itemMarkers: String = "*+-"
-) : OnEnterFormatter {
+) : OnEnterMarkdownFormatter {
   private val orderedItemRegex by lazy(NONE) { Regex("(\\d+)\\.\\s") }
 
   override fun onEnterPressed(

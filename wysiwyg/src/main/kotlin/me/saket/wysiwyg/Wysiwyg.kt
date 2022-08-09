@@ -5,6 +5,7 @@ package me.saket.wysiwyg
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -16,7 +17,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import me.saket.wysiwyg.format.MarkdownSyntaxInserter
-import me.saket.wysiwyg.format.OnEnterFormatters
+import me.saket.wysiwyg.format.OnEnterMarkdownFormatters
 import me.saket.wysiwyg.internal.MarkdownRenderer
 import me.saket.wysiwyg.parser.FlexmarkMarkdownParser
 import me.saket.wysiwyg.parser.MarkdownParser
@@ -27,7 +28,7 @@ import kotlin.coroutines.CoroutineContext
 fun rememberWysiwyg(
   theme: WysiwygTheme,
   markdownParser: MarkdownParser = FlexmarkMarkdownParser(),
-  onEnterFormatters: OnEnterFormatters = OnEnterFormatters.Default,
+  onEnterMarkdownFormatters: OnEnterMarkdownFormatters = OnEnterMarkdownFormatters.Default,
   initialText: () -> TextFieldValue = { TextFieldValue() }
 ): Wysiwyg {
   val textValue = rememberSaveable(stateSaver = TextFieldValue.Saver) {
@@ -41,8 +42,8 @@ fun rememberWysiwyg(
       backgroundDispatcher = Dispatchers.IO
     )
   }
-  LaunchedEffect(wysiwyg, onEnterFormatters) {
-    wysiwyg.onEnterFormatters = onEnterFormatters
+  SideEffect {
+    wysiwyg.onEnterFormatters = onEnterMarkdownFormatters
   }
   return wysiwyg
 }
@@ -56,7 +57,7 @@ class Wysiwyg internal constructor(
 ) {
   private var text: TextFieldValue by text
   private val renderer = MarkdownRenderer(theme)
-  internal var onEnterFormatters = OnEnterFormatters(emptyList())
+  internal var onEnterFormatters = OnEnterMarkdownFormatters(emptyList())
 
   /** Text with syntax highlighting of markdown syntaxes. */
   @Composable

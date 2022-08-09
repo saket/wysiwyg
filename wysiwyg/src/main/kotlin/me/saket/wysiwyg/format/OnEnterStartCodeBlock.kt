@@ -3,7 +3,7 @@ package me.saket.wysiwyg.format
 import kotlin.LazyThreadSafetyMode.NONE
 
 /** Starts a code block when enter key is pressed after 3 backticks. */
-object OnEnterStartCodeBlock : OnEnterFormatter {
+object OnEnterStartCodeBlock : OnEnterMarkdownFormatter {
   private val fencedCodeRegex by lazy(NONE) { Regex("(```)[a-z]*[\\s\\S]*?(```)") }
 
   override fun onEnterPressed(

@@ -4,7 +4,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import me.saket.wysiwyg.decodeTextSelection
 import me.saket.wysiwyg.encodeTextSelection
 
-internal fun OnEnterFormatters.assertOnEnter(
+internal fun OnEnterMarkdownFormatters.assertOnEnter(
   input: String,
   expect: String?
 ) {

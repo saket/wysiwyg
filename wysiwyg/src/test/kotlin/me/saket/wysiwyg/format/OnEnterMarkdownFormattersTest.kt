@@ -4,16 +4,16 @@ import com.google.common.truth.Truth.assertThat
 import me.saket.wysiwyg.decodeTextSelection
 import org.junit.Test
 
-class OnEnterFormattersTest {
+class OnEnterMarkdownFormattersTest {
   @Test fun `detect enter key`() {
-    val formatter = object : OnEnterFormatter {
+    val formatter = object : OnEnterMarkdownFormatter {
       override fun onEnterPressed(
         text: CharSequence,
         paragraph: TextParagraph,
         cursorPositionBeforeEnter: Int
       ) = TextReplacement("enter detected", newCursorPosition = 0)
     }
-    val formatters = OnEnterFormatters(listOf(formatter))
+    val formatters = OnEnterMarkdownFormatters(listOf(formatter))
 
     assertThat(
       formatters.formatIfEnterWasPressed(
@@ -31,7 +31,7 @@ class OnEnterFormattersTest {
   }
 
   @Test fun `enter key on an empty paragraph shouldn't do anything`() {
-    val formatters = OnEnterFormatters(
+    val formatters = OnEnterMarkdownFormatters(
       listOf(OnEnterStartCodeBlock, OnEnterContinueList())
     )
 

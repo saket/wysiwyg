@@ -3,7 +3,7 @@ package me.saket.wysiwyg.format
 import org.junit.Test
 
 class OnEnterStartCodeBlockTest {
-  private val formatters = OnEnterFormatters(listOf(OnEnterContinueList(), OnEnterStartCodeBlock))
+  private val formatters = OnEnterMarkdownFormatters(listOf(OnEnterContinueList(), OnEnterStartCodeBlock))
 
   @Test fun `enter after fenced code syntax on the first line`() {
     formatters.assertOnEnter(
