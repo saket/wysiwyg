@@ -28,7 +28,7 @@ import kotlin.coroutines.CoroutineContext
 fun rememberWysiwyg(
   theme: WysiwygTheme,
   markdownParser: MarkdownParser = FlexmarkMarkdownParser(),
-  onEnterMarkdownFormatters: OnEnterMarkdownFormatters = OnEnterMarkdownFormatters.Default,
+  onEnterFormatters: OnEnterMarkdownFormatters = OnEnterMarkdownFormatters.Default,
   initialText: () -> TextFieldValue = { TextFieldValue() }
 ): Wysiwyg {
   val textValue = rememberSaveable(stateSaver = TextFieldValue.Saver) {
@@ -43,7 +43,7 @@ fun rememberWysiwyg(
     )
   }
   SideEffect {
-    wysiwyg.onEnterFormatters = onEnterMarkdownFormatters
+    wysiwyg.onEnterFormatters = onEnterFormatters
   }
   return wysiwyg
 }
