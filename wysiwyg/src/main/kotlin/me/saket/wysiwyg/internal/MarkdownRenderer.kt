@@ -10,13 +10,11 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.BaselineShift
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.style.TextGeometricTransform
 import androidx.compose.ui.text.style.TextIndent
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import me.saket.wysiwyg.WysiwygTheme
 import me.saket.wysiwyg.parser.MarkdownSpan
-import me.saket.wysiwyg.parser.MarkdownSpanToken
 import me.saket.wysiwyg.parser.MarkdownSpanToken.BlockQuote
 import me.saket.wysiwyg.parser.MarkdownSpanToken.Bold
 import me.saket.wysiwyg.parser.MarkdownSpanToken.FencedCodeBlock
@@ -54,7 +52,7 @@ internal value class MarkdownRenderer(
       )
     }
 
-    fun addParagraphStyle(style: ParagraphStyle, reduceVerticalPadding: Boolean) {
+    fun addParagraphStyle(style: ParagraphStyle) {
       addStyle(
         style = style,
         start = span.startIndex.coerceAtMost(length - 1),
@@ -63,13 +61,11 @@ internal value class MarkdownRenderer(
       // Compose UI adds a lot of vertical paddings around paragraphs.
       // Reduce the font size of line breaks to make them smaller.
       // https://issuetracker.google.com/u/1/issues/241426911
-      if (reduceVerticalPadding) {
-        if (text.getOrNull(span.startIndex - 1) == '\n') {
-          addStyle(SpanStyle(fontSize = 1.sp), start = span.startIndex - 1, end = span.startIndex)
-        }
-        if (text.getOrNull(span.endIndexExclusive) == '\n') {
-          addStyle(SpanStyle(fontSize = 1.sp), start = span.endIndexExclusive - 1, end = span.endIndexExclusive + 1)
-        }
+      if (text.getOrNull(span.startIndex - 1) == '\n') {
+        addStyle(SpanStyle(fontSize = 1.sp), start = span.startIndex - 1, end = span.startIndex)
+      }
+      if (text.getOrNull(span.endIndexExclusive) == '\n') {
+        addStyle(SpanStyle(fontSize = 1.sp), start = span.endIndexExclusive - 1, end = span.endIndexExclusive + 1)
       }
     }
 
@@ -108,8 +104,7 @@ internal value class MarkdownRenderer(
               firstLine = theme.codeBlockLeadingPadding,
               restLine = theme.codeBlockLeadingPadding
             )
-          ),
-          reduceVerticalPadding = false,
+          )
         )
       }
       BlockQuote -> {
@@ -120,8 +115,7 @@ internal value class MarkdownRenderer(
               firstLine = theme.blockQuoteLeadingPadding,
               restLine = theme.blockQuoteLeadingPadding
             )
-          ),
-          reduceVerticalPadding = true,
+          )
         )
       }
       ListBlock -> {
@@ -131,8 +125,7 @@ internal value class MarkdownRenderer(
               firstLine = theme.listBlockLeadingPadding,
               restLine = theme.listBlockLeadingPadding
             )
-          ),
-          reduceVerticalPadding = true,
+          )
         )
       }
       is Heading -> {
