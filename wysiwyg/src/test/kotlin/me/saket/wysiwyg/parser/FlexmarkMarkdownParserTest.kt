@@ -461,9 +461,9 @@ class FlexmarkMarkdownParserTest {
         else -> error("${it.token} is unsupported")
       }
       if (tag != null) {
-        val substring = text.substring(it.startIndex, it.endIndexExclusive.coerceAtMost(text.length))
+        val substring = text.substring(it.range.startIndex, it.range.endIndexExclusive.coerceAtMost(text.length))
         val replacement = "{$tag}$substring{/$tag}"
-        html.replace(offset + it.startIndex, offset + it.endIndexExclusive, replacement)
+        html.replace(offset + it.range.startIndex, offset + it.range.endIndexExclusive, replacement)
         offset += replacement.length - substring.length
       }
     }

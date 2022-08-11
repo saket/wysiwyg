@@ -47,25 +47,29 @@ internal value class MarkdownRenderer(
     fun addSpanStyle(style: SpanStyle) {
       addStyle(
         style = style,
-        start = span.startIndex.coerceAtMost(length - 1),
-        end = span.endIndexExclusive.coerceAtMost(length)
+        start = span.range.startIndex.coerceAtMost(length - 1),
+        end = span.range.endIndexExclusive.coerceAtMost(length)
       )
     }
 
     fun addParagraphStyle(style: ParagraphStyle) {
       addStyle(
         style = style,
-        start = span.startIndex.coerceAtMost(length - 1),
-        end = span.endIndexExclusive.coerceAtMost(length)
+        start = span.range.startIndex.coerceAtMost(length - 1),
+        end = span.range.endIndexExclusive.coerceAtMost(length)
       )
       // Compose UI adds a lot of vertical paddings around paragraphs.
       // Reduce the font size of line breaks to make them smaller.
       // https://issuetracker.google.com/u/1/issues/241426911
-      if (text.getOrNull(span.startIndex - 1) == '\n') {
-        addStyle(SpanStyle(fontSize = 1.sp), start = span.startIndex - 1, end = span.startIndex)
+      if (text.getOrNull(span.range.startIndex - 1) == '\n') {
+        addStyle(SpanStyle(fontSize = 1.sp), start = span.range.startIndex - 1, end = span.range.startIndex)
       }
-      if (text.getOrNull(span.endIndexExclusive) == '\n') {
-        addStyle(SpanStyle(fontSize = 1.sp), start = span.endIndexExclusive - 1, end = span.endIndexExclusive + 1)
+      if (text.getOrNull(span.range.endIndexExclusive) == '\n') {
+        addStyle(
+          SpanStyle(fontSize = 1.sp),
+          start = span.range.endIndexExclusive - 1,
+          end = span.range.endIndexExclusive + 1
+        )
       }
     }
 

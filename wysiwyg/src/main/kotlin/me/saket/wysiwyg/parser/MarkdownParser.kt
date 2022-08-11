@@ -1,6 +1,7 @@
 package me.saket.wysiwyg.parser
 
 import androidx.compose.ui.text.input.TextFieldValue
+import me.saket.wysiwyg.SpanTextRange
 
 interface MarkdownParser {
   fun parse(text: String): ParseResult
@@ -25,15 +26,8 @@ interface MarkdownParser {
 
 data class MarkdownSpan(
   val token: MarkdownSpanToken,
-  val startIndex: Int,
-  val endIndexExclusive: Int
-) {
-  val endIndexInclusive: Int get() = endIndexExclusive - 1
-
-  init {
-    check(endIndexExclusive > startIndex) { "Invalid offsets for $this" }
-  }
-}
+  val range: SpanTextRange,
+)
 
 sealed interface MarkdownSpanToken {
   object SyntaxColor : MarkdownSpanToken

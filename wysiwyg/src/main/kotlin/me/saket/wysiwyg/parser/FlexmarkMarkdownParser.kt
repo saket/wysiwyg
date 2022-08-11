@@ -15,6 +15,7 @@ import com.vladsch.flexmark.ext.gfm.strikethrough.Strikethrough
 import com.vladsch.flexmark.ext.gfm.strikethrough.StrikethroughExtension
 import com.vladsch.flexmark.util.ast.Node
 import com.vladsch.flexmark.util.sequence.BasedSequence
+import me.saket.wysiwyg.SpanTextRange
 import me.saket.wysiwyg.internal.fastForEachReverseIndexed
 import me.saket.wysiwyg.parser.MarkdownParser.ParseResult
 import com.vladsch.flexmark.parser.Parser as FlexmarkParser
@@ -58,8 +59,7 @@ class FlexmarkMarkdownParser(
         buffer.add(
           MarkdownSpan(
             token = MarkdownSpanToken.Italic,
-            startIndex = startOffset,
-            endIndexExclusive = endOffset
+            range = SpanTextRange(startOffset, endOffset)
           )
         )
       }
@@ -69,8 +69,7 @@ class FlexmarkMarkdownParser(
         buffer.add(
           MarkdownSpan(
             token = MarkdownSpanToken.Bold,
-            startIndex = startOffset,
-            endIndexExclusive = endOffset
+            range = SpanTextRange(startOffset, endOffset)
           )
         )
       }
@@ -78,8 +77,7 @@ class FlexmarkMarkdownParser(
         buffer.add(
           MarkdownSpan(
             token = MarkdownSpanToken.StrikeThrough,
-            startIndex = startOffset,
-            endIndexExclusive = endOffset
+            range = SpanTextRange(startOffset, endOffset)
           )
         )
       }
@@ -89,8 +87,7 @@ class FlexmarkMarkdownParser(
         buffer.add(
           MarkdownSpan(
             token = MarkdownSpanToken.LinkUrl,
-            startIndex = url.startOffset - 1,
-            endIndexExclusive = url.endOffset + 1
+            range = SpanTextRange(urlOpeningMarker.startOffset, urlClosingMarker.endOffset)
           )
         )
       }
@@ -100,8 +97,7 @@ class FlexmarkMarkdownParser(
         buffer.add(
           MarkdownSpan(
             token = MarkdownSpanToken.InlineCode,
-            startIndex = startOffset,
-            endIndexExclusive = endOffset
+            range = SpanTextRange(startOffset, endOffset)
           )
         )
       }
@@ -112,8 +108,7 @@ class FlexmarkMarkdownParser(
           buffer.add(
             MarkdownSpan(
               token = MarkdownSpanToken.FencedCodeBlock,
-              startIndex = startOffset,
-              endIndexExclusive = closingMarker.endOffset
+              range = SpanTextRange(startOffset, closingMarker.endOffset)
             )
           )
         }
@@ -122,8 +117,7 @@ class FlexmarkMarkdownParser(
         buffer.add(
           MarkdownSpan(
             token = MarkdownSpanToken.BlockQuote,
-            startIndex = startOffset,
-            endIndexExclusive = endOffset
+            range = SpanTextRange(startOffset, endOffset)
           )
         )
       }
@@ -139,8 +133,7 @@ class FlexmarkMarkdownParser(
         buffer.add(
           MarkdownSpan(
             token = MarkdownSpanToken.ListBlock,
-            startIndex = startOffset,
-            endIndexExclusive = correctEndOffset
+            range = SpanTextRange(startOffset, correctEndOffset)
           )
         )
       }
@@ -160,8 +153,7 @@ class FlexmarkMarkdownParser(
           buffer.add(
             MarkdownSpan(
               token = MarkdownSpanToken.Heading(level),
-              startIndex = startOffset,
-              endIndexExclusive = endOffset,
+              range = SpanTextRange(startOffset, endOffset)
             )
           )
         }
@@ -170,35 +162,32 @@ class FlexmarkMarkdownParser(
         buffer.add(
           MarkdownSpan(
             token = MarkdownSpanToken.SyntaxColor,
-            startIndex = startOffset,
-            endIndexExclusive = endOffset
+            range = SpanTextRange(startOffset, endOffset)
           )
         )
       }
-      is RedditSuperscriptNode -> {
-        buffer.addSyntaxSpanForMarker(openingMarker)
-        closingMarker?.let {
-          buffer.addSyntaxSpanForMarker(closingMarker)
-        }
-        buffer.add(
-          MarkdownSpan(
-            token = MarkdownSpanToken.Superscript(hasClosingMarker = closingMarker != null),
-            startIndex = startOffset,
-            endIndexExclusive = endOffset
-          )
-        )
-      }
-      is RedditSpoilersNode -> {
-        buffer.addSyntaxSpanForMarker(openingMarker)
-        buffer.addSyntaxSpanForMarker(closingMarker)
-        buffer.add(
-          MarkdownSpan(
-            token = MarkdownSpanToken.Spoilers,
-            startIndex = body.startOffset,
-            endIndexExclusive = body.endOffset
-          )
-        )
-      }
+      //      is RedditSuperscriptNode -> {
+      //        buffer.addSyntaxSpanForMarker(openingMarker)
+      //        closingMarker?.let {
+      //          buffer.addSyntaxSpanForMarker(closingMarker)
+      //        }
+      //        buffer.add(
+      //          MarkdownSpan(
+      //            token = MarkdownSpanToken.Superscript(hasClosingMarker = closingMarker != null),
+      //            range = SpanTextRange(startOffset, endOffset)
+      //          )
+      //        )
+      //      }
+      //      is RedditSpoilersNode -> {
+      //        buffer.addSyntaxSpanForMarker(openingMarker)
+      //        buffer.addSyntaxSpanForMarker(closingMarker)
+      //        buffer.add(
+      //          MarkdownSpan(
+      //            token = MarkdownSpanToken.Spoilers,
+      //            range = SpanTextRange(body.startOffset, body.endOffset)
+      //          )
+      //        )
+      //      }
       else -> Unit
     }
   }
@@ -208,8 +197,7 @@ class FlexmarkMarkdownParser(
       add(
         MarkdownSpan(
           token = MarkdownSpanToken.SyntaxColor,
-          startIndex = sequence.startOffset,
-          endIndexExclusive = sequence.endOffset
+          range = SpanTextRange(sequence.startOffset, sequence.endOffset)
         )
       )
     }
@@ -257,8 +245,8 @@ class FlexmarkMarkdownParser(
       // Some characters were deleted or replaced.
       // Remove spans within the affected text range.
       previousSpans.fastForEachReverseIndexed { index, span ->
-        if (span.startIndex in previousValue.selection
-          || (span.hasClosingMarker && span.endIndexInclusive in previousValue.selection)
+        if (span.range.startIndex in previousValue.selection
+          || (span.hasClosingMarker && span.range.endIndexInclusive in previousValue.selection)
         ) {
           previousSpans.removeAt(index)
         }
@@ -269,20 +257,30 @@ class FlexmarkMarkdownParser(
       // Back-press detected! Remove any span whose opening/closing marker was deleted.
       previousSpans.fastForEachReverseIndexed { index, span ->
         val newCursorAt = newValue.selection.min
-        if (span.startIndex == newCursorAt || (span.hasClosingMarker && span.endIndexInclusive == newCursorAt)) {
+        if (span.range.startIndex == newCursorAt
+          || (span.hasClosingMarker && span.range.endIndexInclusive == newCursorAt)
+        ) {
           previousSpans.removeAt(index)
         }
       }
     }
 
     previousSpans.fastForEachReverseIndexed { index, span ->
-      val isStartAffected = span.startIndex >= offsetShiftStartsFrom
-      val isEndAffected = span.endIndexExclusive >= offsetShiftStartsFrom
+      val isStartAffected = span.range.startIndex >= offsetShiftStartsFrom
+      val isEndAffected = span.range.endIndexExclusive >= offsetShiftStartsFrom
 
       if (isStartAffected || isEndAffected) {
         val adjusted = span.copy(
-          startIndex = if (isStartAffected) span.startIndex + offsetShift else span.startIndex,
-          endIndexExclusive = if (isEndAffected) span.endIndexExclusive + offsetShift else span.endIndexExclusive
+          range = SpanTextRange(
+            startIndex = when {
+              isStartAffected -> span.range.startIndex + offsetShift
+              else -> span.range.startIndex
+            },
+            endIndexExclusive = when {
+              isEndAffected -> span.range.endIndexExclusive + offsetShift
+              else -> span.range.endIndexExclusive
+            }
+          )
         )
         previousSpans.removeAt(index)
         previousSpans.add(index, adjusted)
