@@ -68,7 +68,7 @@ class Wysiwyg internal constructor(
     var styledText: AnnotatedString by remember(text.text) {
       // Retain any previously applied spans immediately so that there's no delay in
       // highlighting markdown. The downside of doing this is that it's happening on
-      // the main thread so it's not great for large amounts of text.
+      // the main thread so it's probably not great for large amounts of text.
       previousValue?.let { previousValue ->
         previousSpans = parser.offsetSpansOnTextChange(
           newValue = text,

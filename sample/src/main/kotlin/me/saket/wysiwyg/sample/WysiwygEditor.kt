@@ -26,6 +26,8 @@ import me.saket.extendedspans.drawBehind
 import me.saket.wysiwyg.WysiwygTheme
 import me.saket.wysiwyg.parser.FlexmarkMarkdownParser
 import me.saket.wysiwyg.rememberWysiwyg
+import me.saket.wysiwyg.sample.extensions.RedditSpoilersExtension
+import me.saket.wysiwyg.sample.extensions.RedditSuperscriptExtension
 
 @Composable
 fun WysiwygEditor() {

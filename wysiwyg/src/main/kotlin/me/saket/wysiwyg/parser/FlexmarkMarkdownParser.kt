@@ -16,13 +16,29 @@ import com.vladsch.flexmark.ext.gfm.strikethrough.StrikethroughExtension
 import com.vladsch.flexmark.util.ast.Node
 import com.vladsch.flexmark.util.sequence.BasedSequence
 import me.saket.wysiwyg.SpanTextRange
+import me.saket.wysiwyg.internal.fastForEach
 import me.saket.wysiwyg.internal.fastForEachReverseIndexed
 import me.saket.wysiwyg.parser.MarkdownParser.ParseResult
 import com.vladsch.flexmark.parser.Parser as FlexmarkParser
 
+interface FlexmarkMarkdownParserExtension {
+  /**
+   * Flexmark extensions or post-processor factories can be registered
+   * here for parsing text and inserting custom nodes to the AST.
+   */
+  fun buildParser(builder: FlexmarkParser.Builder)
+
+  /**
+   * Once an AST is generated, this function is called for each markdown
+   * node in the tree to create markdown spans for them.
+   */
+  fun Node.addSpansInto(spans: MutableList<MarkdownSpan>)
+}
+
 class FlexmarkMarkdownParser(
-  vararg extensions: FlexmarkParser.ParserExtension,
+  vararg extensions: FlexmarkMarkdownParserExtension,
 ) : MarkdownParser {
+  private val extensions = extensions.toList()
 
   private val parser = FlexmarkParser.builder()
     .apply {
@@ -38,7 +54,7 @@ class FlexmarkMarkdownParser(
       set(FlexmarkParser.HEADING_NO_EMPTY_HEADING_WITHOUT_SPACE, true)
     }
     .extensions(listOf(StrikethroughExtension.create()))
-    .extensions(extensions.toList())
+    .apply { extensions.forEach { it.buildParser(this) } }
     .build()
 
   override fun parse(text: String): ParseResult {
@@ -46,6 +62,9 @@ class FlexmarkMarkdownParser(
       spans = mutableListOf<MarkdownSpan>().apply {
         parser.parse(text).traverse { node ->
           node.addSpansInto(this)
+          extensions.fastForEach {
+            it.run { node.addSpansInto(this@apply) }
+          }
         }
       }
     )
@@ -58,7 +77,7 @@ class FlexmarkMarkdownParser(
         buffer.addSyntaxSpanForMarker(closingMarker)
         buffer.add(
           MarkdownSpan(
-            token = MarkdownSpanToken.Italic,
+            style = ItalicSpanStyle,
             range = SpanTextRange(startOffset, endOffset)
           )
         )
@@ -68,7 +87,7 @@ class FlexmarkMarkdownParser(
         buffer.addSyntaxSpanForMarker(closingMarker)
         buffer.add(
           MarkdownSpan(
-            token = MarkdownSpanToken.Bold,
+            style = BoldSpanStyle,
             range = SpanTextRange(startOffset, endOffset)
           )
         )
@@ -76,7 +95,7 @@ class FlexmarkMarkdownParser(
       is Strikethrough -> {
         buffer.add(
           MarkdownSpan(
-            token = MarkdownSpanToken.StrikeThrough,
+            style = StrikeThroughSpanStyle,
             range = SpanTextRange(startOffset, endOffset)
           )
         )
@@ -86,7 +105,13 @@ class FlexmarkMarkdownParser(
         buffer.addSyntaxSpanForMarker(textClosingMarker)
         buffer.add(
           MarkdownSpan(
-            token = MarkdownSpanToken.LinkUrl,
+            style = LinkTextSpanStyle,
+            range = SpanTextRange(textOpeningMarker.endOffset, textClosingMarker.startOffset)
+          )
+        )
+        buffer.add(
+          MarkdownSpan(
+            style = LinkUrlSpanStyle,
             range = SpanTextRange(urlOpeningMarker.startOffset, urlClosingMarker.endOffset)
           )
         )
@@ -96,7 +121,7 @@ class FlexmarkMarkdownParser(
         buffer.addSyntaxSpanForMarker(closingMarker)
         buffer.add(
           MarkdownSpan(
-            token = MarkdownSpanToken.InlineCode,
+            style = InlineCodeSpanStyle,
             range = SpanTextRange(startOffset, endOffset)
           )
         )
@@ -107,7 +132,7 @@ class FlexmarkMarkdownParser(
           buffer.addSyntaxSpanForMarker(closingMarker)
           buffer.add(
             MarkdownSpan(
-              token = MarkdownSpanToken.FencedCodeBlock,
+              style = FencedCodeBlockSpanStyle,
               range = SpanTextRange(startOffset, closingMarker.endOffset)
             )
           )
@@ -116,7 +141,7 @@ class FlexmarkMarkdownParser(
       is BlockQuote -> {
         buffer.add(
           MarkdownSpan(
-            token = MarkdownSpanToken.BlockQuote,
+            style = BlockQuoteSpanStyle,
             range = SpanTextRange(startOffset, endOffset)
           )
         )
@@ -132,7 +157,7 @@ class FlexmarkMarkdownParser(
         }
         buffer.add(
           MarkdownSpan(
-            token = MarkdownSpanToken.ListBlock,
+            style = ListBlockSpanStyle,
             range = SpanTextRange(startOffset, correctEndOffset)
           )
         )
@@ -152,7 +177,7 @@ class FlexmarkMarkdownParser(
           buffer.addSyntaxSpanForMarker(openingMarker)
           buffer.add(
             MarkdownSpan(
-              token = MarkdownSpanToken.Heading(level),
+              style = HeadingSpanStyle(level),
               range = SpanTextRange(startOffset, endOffset)
             )
           )
@@ -161,33 +186,11 @@ class FlexmarkMarkdownParser(
       is ThematicBreak -> {
         buffer.add(
           MarkdownSpan(
-            token = MarkdownSpanToken.SyntaxColor,
+            style = SyntaxColorSpanStyle,
             range = SpanTextRange(startOffset, endOffset)
           )
         )
       }
-      //      is RedditSuperscriptNode -> {
-      //        buffer.addSyntaxSpanForMarker(openingMarker)
-      //        closingMarker?.let {
-      //          buffer.addSyntaxSpanForMarker(closingMarker)
-      //        }
-      //        buffer.add(
-      //          MarkdownSpan(
-      //            token = MarkdownSpanToken.Superscript(hasClosingMarker = closingMarker != null),
-      //            range = SpanTextRange(startOffset, endOffset)
-      //          )
-      //        )
-      //      }
-      //      is RedditSpoilersNode -> {
-      //        buffer.addSyntaxSpanForMarker(openingMarker)
-      //        buffer.addSyntaxSpanForMarker(closingMarker)
-      //        buffer.add(
-      //          MarkdownSpan(
-      //            token = MarkdownSpanToken.Spoilers,
-      //            range = SpanTextRange(body.startOffset, body.endOffset)
-      //          )
-      //        )
-      //      }
       else -> Unit
     }
   }
@@ -196,7 +199,7 @@ class FlexmarkMarkdownParser(
     if (sequence.isNotEmpty) {
       add(
         MarkdownSpan(
-          token = MarkdownSpanToken.SyntaxColor,
+          style = SyntaxColorSpanStyle,
           range = SpanTextRange(sequence.startOffset, sequence.endOffset)
         )
       )
@@ -246,7 +249,7 @@ class FlexmarkMarkdownParser(
       // Remove spans within the affected text range.
       previousSpans.fastForEachReverseIndexed { index, span ->
         if (span.range.startIndex in previousValue.selection
-          || (span.hasClosingMarker && span.range.endIndexInclusive in previousValue.selection)
+          || (span.style.hasClosingMarker && span.range.endIndexInclusive in previousValue.selection)
         ) {
           previousSpans.removeAt(index)
         }
@@ -258,13 +261,14 @@ class FlexmarkMarkdownParser(
       previousSpans.fastForEachReverseIndexed { index, span ->
         val newCursorAt = newValue.selection.min
         if (span.range.startIndex == newCursorAt
-          || (span.hasClosingMarker && span.range.endIndexInclusive == newCursorAt)
+          || (span.style.hasClosingMarker && span.range.endIndexInclusive == newCursorAt)
         ) {
           previousSpans.removeAt(index)
         }
       }
     }
 
+    // Expand spans to include text that was inserted within their range.
     previousSpans.fastForEachReverseIndexed { index, span ->
       val isStartAffected = span.range.startIndex >= offsetShiftStartsFrom
       val isEndAffected = span.range.endIndexExclusive >= offsetShiftStartsFrom
@@ -290,20 +294,3 @@ class FlexmarkMarkdownParser(
     return previousSpans
   }
 }
-
-private val MarkdownSpan.hasClosingMarker: Boolean
-  get() = when (token) {
-    MarkdownSpanToken.SyntaxColor,
-    MarkdownSpanToken.Bold,
-    MarkdownSpanToken.Italic,
-    MarkdownSpanToken.StrikeThrough,
-    MarkdownSpanToken.LinkText,
-    MarkdownSpanToken.LinkUrl,
-    MarkdownSpanToken.InlineCode,
-    MarkdownSpanToken.Spoilers -> true
-    MarkdownSpanToken.FencedCodeBlock,
-    MarkdownSpanToken.BlockQuote,
-    MarkdownSpanToken.ListBlock,
-    is MarkdownSpanToken.Heading -> false
-    is MarkdownSpanToken.Superscript -> token.hasClosingMarker
-  }

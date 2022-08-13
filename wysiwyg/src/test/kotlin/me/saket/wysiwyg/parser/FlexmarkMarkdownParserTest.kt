@@ -1,12 +1,8 @@
 package me.saket.wysiwyg.parser
 
 import com.google.common.truth.Truth.assertThat
+import me.saket.wysiwyg.SpanTextRange
 import me.saket.wysiwyg.decodeTextSelection
-import me.saket.wysiwyg.parser.MarkdownSpanToken.BlockQuote
-import me.saket.wysiwyg.parser.MarkdownSpanToken.Bold
-import me.saket.wysiwyg.parser.MarkdownSpanToken.Italic
-import me.saket.wysiwyg.parser.MarkdownSpanToken.ListBlock
-import me.saket.wysiwyg.parser.MarkdownSpanToken.SyntaxColor
 import org.junit.Test
 
 class FlexmarkMarkdownParserTest {
@@ -35,14 +31,12 @@ class FlexmarkMarkdownParserTest {
         """.trimMargin(),
       expect = listOf(
         MarkdownSpan(
-          token = SyntaxColor,
-          startIndex = 0,
-          endIndexExclusive = 2
+          style = SyntaxColorSpanStyle,
+          range = SpanTextRange(startIndex = 0, endIndexExclusive = 2),
         ),
         MarkdownSpan(
-          token = ListBlock,
-          startIndex = 0,
-          endIndexExclusive = 7
+          style = ListBlockSpanStyle,
+          range = SpanTextRange(startIndex = 0, endIndexExclusive = 7)
         )
       )
     )
@@ -56,14 +50,12 @@ class FlexmarkMarkdownParserTest {
         """.trimMargin(),
       expect = listOf(
         MarkdownSpan(
-          token = SyntaxColor,
-          startIndex = 0,
-          endIndexExclusive = 2
+          style = SyntaxColorSpanStyle,
+          range = SpanTextRange(startIndex = 0, endIndexExclusive = 2)
         ),
         MarkdownSpan(
-          token = ListBlock,
-          startIndex = 0,
-          endIndexExclusive = 11
+          style = ListBlockSpanStyle,
+          range = SpanTextRange(startIndex = 0, endIndexExclusive = 11)
         )
       )
     )
@@ -83,14 +75,12 @@ class FlexmarkMarkdownParserTest {
         """.trimMargin(),
       expect = listOf(
         MarkdownSpan(
-          token = SyntaxColor,
-          startIndex = 0,
-          endIndexExclusive = 1
+          style = SyntaxColorSpanStyle,
+          range = SpanTextRange(startIndex = 0, endIndexExclusive = 1)
         ),
         MarkdownSpan(
-          token = MarkdownSpanToken.Heading(level = 1),
-          startIndex = 0,
-          endIndexExclusive = 8
+          style = HeadingSpanStyle(level = 1),
+          range = SpanTextRange(startIndex = 0, endIndexExclusive = 8)
         ),
       )
     )
@@ -101,14 +91,12 @@ class FlexmarkMarkdownParserTest {
         """.trimMargin(),
       expect = listOf(
         MarkdownSpan(
-          token = SyntaxColor,
-          startIndex = 0,
-          endIndexExclusive = 2
+          style = SyntaxColorSpanStyle,
+          range = SpanTextRange(startIndex = 0, endIndexExclusive = 2)
         ),
         MarkdownSpan(
-          token = MarkdownSpanToken.Heading(level = 2),
-          startIndex = 0,
-          endIndexExclusive = 10
+          style = HeadingSpanStyle(level = 2),
+          range = SpanTextRange(startIndex = 0, endIndexExclusive = 10)
         ),
       )
     )
@@ -453,12 +441,12 @@ class FlexmarkMarkdownParserTest {
 
     var offset = 0
     spans.forEach {
-      val tag = when (it.token) {
-        SyntaxColor -> null
-        Bold -> "b"
-        Italic -> "i"
-        BlockQuote -> "quote"
-        else -> error("${it.token} is unsupported")
+      val tag = when (it.style) {
+        SyntaxColorSpanStyle -> null
+        BoldSpanStyle -> "b"
+        ItalicSpanStyle -> "i"
+        BlockQuoteSpanStyle -> "quote"
+        else -> error("${it.style} is unsupported")
       }
       if (tag != null) {
         val substring = text.substring(it.range.startIndex, it.range.endIndexExclusive.coerceAtMost(text.length))

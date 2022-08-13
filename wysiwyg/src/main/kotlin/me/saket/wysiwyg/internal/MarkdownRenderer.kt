@@ -1,172 +1,62 @@
 package me.saket.wysiwyg.internal
 
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.BaselineShift
-import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.style.TextIndent
-import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
+import me.saket.wysiwyg.SpanTextRange
 import me.saket.wysiwyg.WysiwygTheme
 import me.saket.wysiwyg.parser.MarkdownSpan
-import me.saket.wysiwyg.parser.MarkdownSpanToken.BlockQuote
-import me.saket.wysiwyg.parser.MarkdownSpanToken.Bold
-import me.saket.wysiwyg.parser.MarkdownSpanToken.FencedCodeBlock
-import me.saket.wysiwyg.parser.MarkdownSpanToken.Heading
-import me.saket.wysiwyg.parser.MarkdownSpanToken.InlineCode
-import me.saket.wysiwyg.parser.MarkdownSpanToken.Italic
-import me.saket.wysiwyg.parser.MarkdownSpanToken.LinkText
-import me.saket.wysiwyg.parser.MarkdownSpanToken.LinkUrl
-import me.saket.wysiwyg.parser.MarkdownSpanToken.ListBlock
-import me.saket.wysiwyg.parser.MarkdownSpanToken.Spoilers
-import me.saket.wysiwyg.parser.MarkdownSpanToken.StrikeThrough
-import me.saket.wysiwyg.parser.MarkdownSpanToken.Superscript
-import me.saket.wysiwyg.parser.MarkdownSpanToken.SyntaxColor
 
 @JvmInline
 internal value class MarkdownRenderer(
   private val theme: WysiwygTheme
 ) {
   fun buildAnnotatedString(text: AnnotatedString, spans: List<MarkdownSpan>): AnnotatedString {
+    val scope = object : MarkdownRendererScope {
+      override val theme: WysiwygTheme get() = this@MarkdownRenderer.theme
+      override val unstyledText: AnnotatedString get() = text
+    }
+
     return buildAnnotatedString {
       append(text)
+      val textBuilder: AnnotatedString.Builder = this
       spans.fastForEach { span ->
-        addSyntaxStyle(span, text)
-      }
-    }
-  }
-
-  @OptIn(ExperimentalTextApi::class)
-  private fun AnnotatedString.Builder.addSyntaxStyle(span: MarkdownSpan, text: AnnotatedString) {
-    fun addSpanStyle(style: SpanStyle) {
-      addStyle(
-        style = style,
-        start = span.range.startIndex.coerceAtMost(length - 1),
-        end = span.range.endIndexExclusive.coerceAtMost(length)
-      )
-    }
-
-    fun addParagraphStyle(style: ParagraphStyle) {
-      addStyle(
-        style = style,
-        start = span.range.startIndex.coerceAtMost(length - 1),
-        end = span.range.endIndexExclusive.coerceAtMost(length)
-      )
-      // Compose UI adds a lot of vertical paddings around paragraphs.
-      // Reduce the font size of line breaks to make them smaller.
-      // https://issuetracker.google.com/u/1/issues/241426911
-      if (text.getOrNull(span.range.startIndex - 1) == '\n') {
-        addStyle(SpanStyle(fontSize = 1.sp), start = span.range.startIndex - 1, end = span.range.startIndex)
-      }
-      if (text.getOrNull(span.range.endIndexExclusive) == '\n') {
-        addStyle(
-          SpanStyle(fontSize = 1.sp),
-          start = span.range.endIndexExclusive - 1,
-          end = span.range.endIndexExclusive + 1
-        )
-      }
-    }
-
-    when (span.token) {
-      Bold -> addSpanStyle(SpanStyle(fontWeight = FontWeight.Bold))
-      Italic -> addSpanStyle(SpanStyle(fontStyle = FontStyle.Italic))
-      SyntaxColor -> addSpanStyle(SpanStyle(color = theme.syntaxColor))
-      LinkText -> addSpanStyle(SpanStyle(color = theme.linkTextColor))
-      LinkUrl -> addSpanStyle(SpanStyle(color = theme.linkUrlColor))
-      StrikeThrough -> {
-        addSpanStyle(
-          SpanStyle(
-            textDecoration = TextDecoration.LineThrough,
-            color = theme.struckThroughTextColor,
-          )
-        )
-      }
-      InlineCode -> {
-        addSpanStyle(
-          SpanStyle(
-            background = theme.codeBackground,
-            fontFamily = FontFamily.Monospace,
-          )
-        )
-      }
-      FencedCodeBlock -> {
-        addSpanStyle(
-          SpanStyle(
-            background = theme.codeBackground,
-            fontFamily = FontFamily.Monospace,
-          )
-        )
-        addParagraphStyle(
-          style = ParagraphStyle(
-            textIndent = TextIndent(
-              firstLine = theme.codeBlockLeadingPadding,
-              restLine = theme.codeBlockLeadingPadding
-            )
-          )
-        )
-      }
-      BlockQuote -> {
-        addSpanStyle(SpanStyle(color = theme.blockQuoteText))
-        addParagraphStyle(
-          style = ParagraphStyle(
-            textIndent = TextIndent(
-              firstLine = theme.blockQuoteLeadingPadding,
-              restLine = theme.blockQuoteLeadingPadding
-            )
-          )
-        )
-      }
-      ListBlock -> {
-        addParagraphStyle(
-          style = ParagraphStyle(
-            textIndent = TextIndent(
-              firstLine = theme.listBlockLeadingPadding,
-              restLine = theme.listBlockLeadingPadding
-            )
-          )
-        )
-      }
-      is Heading -> {
-        addSpanStyle(
-          SpanStyle(
-            fontSize = 1.em * theme.headingFontSizes.forLevel(span.token.level),
-            fontWeight = FontWeight.Bold
-          )
-        )
-      }
-      is Superscript -> {
-        addSpanStyle(
-          SpanStyle(
-            baselineShift = BaselineShift.Superscript
-          )
-        )
-      }
-      Spoilers -> {
-        addSpanStyle(
-          SpanStyle(
-            color = theme.spoilersTextColor,
-            background = theme.spoilersBackground,
-          )
-        )
+        with(span.style) {
+          scope.render(text = textBuilder, span.range)
+        }
       }
     }
   }
 }
 
-private fun WysiwygTheme.HeadingFontSizeMultipliers.forLevel(level: Int): Float {
-  return when (level) {
-    1 -> h1
-    2 -> h2
-    3 -> h3
-    4 -> h4
-    5 -> h5
-    6 -> h6
-    else -> error("nope")
+interface MarkdownRendererScope {
+  val theme: WysiwygTheme
+  val unstyledText: AnnotatedString
+
+  fun AnnotatedString.Builder.addStyle(style: SpanStyle, range: SpanTextRange) {
+    addStyle(
+      style = style,
+      start = range.startIndex.coerceAtMost(unstyledText.lastIndex),
+      end = range.endIndexExclusive.coerceAtMost(length)
+    )
+  }
+
+  fun AnnotatedString.Builder.addStyle(style: ParagraphStyle, range: SpanTextRange) {
+    addStyle(
+      style = style,
+      start = range.startIndex.coerceAtMost(unstyledText.lastIndex),
+      end = range.endIndexExclusive.coerceAtMost(length)
+    )
+    // Compose UI adds a lot of vertical paddings around paragraphs.
+    // Reduce the font size of line breaks to make them smaller.
+    // https://issuetracker.google.com/u/1/issues/241426911
+    if (unstyledText.getOrNull(range.startIndex - 1) == '\n') {
+      addStyle(SpanStyle(fontSize = 1.sp), start = range.startIndex - 1, end = range.startIndex)
+    }
+    if (unstyledText.getOrNull(range.endIndexExclusive) == '\n') {
+      addStyle(SpanStyle(fontSize = 1.sp), start = range.endIndexExclusive - 1, end = range.endIndexExclusive + 1)
+    }
   }
 }
