@@ -112,7 +112,7 @@ class FlexmarkMarkdownParser(
         buffer.add(
           MarkdownSpan(
             style = LinkUrlSpanStyle,
-            range = SpanTextRange(urlOpeningMarker.startOffset, urlClosingMarker.endOffset)
+            range = SpanTextRange(linkOpeningMarker.startOffset, linkClosingMarker.endOffset)
           )
         )
       }
