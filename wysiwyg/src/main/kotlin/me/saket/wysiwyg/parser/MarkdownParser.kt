@@ -208,7 +208,8 @@ data class HeadingSpanStyle(private val level: Int) : MarkdownSpanStyle(hasClosi
     text.addStyle(
       style = SpanStyle(
         fontSize = 1.em * fontSizeMultiplier,
-        fontWeight = FontWeight.Bold
+        fontWeight = FontWeight.Bold,
+        color = theme.headingColor,
       ),
       range = range,
     )

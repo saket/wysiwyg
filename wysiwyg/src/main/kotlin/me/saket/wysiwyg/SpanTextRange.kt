@@ -11,6 +11,10 @@ value class SpanTextRange private constructor(private val range: TextRange) {
   constructor(startIndex: Int, endIndexExclusive: Int) : this(TextRange(startIndex, endIndexExclusive))
 
   init {
-    check(endIndexExclusive > startIndex) { "Invalid offsets for $this" }
+    check(endIndexExclusive >= startIndex) { "Invalid offsets for $this" }
+  }
+
+  override fun toString(): String {
+    return "SpanTextRange(start=$startIndex, endExclusive=$endIndexExclusive)"
   }
 }

@@ -174,13 +174,13 @@ class FlexmarkMarkdownParser(
         // This is an H2
         // -------------
         if (isAtxHeading) {
-          buffer.addSyntaxSpanForMarker(openingMarker)
           buffer.add(
             MarkdownSpan(
               style = HeadingSpanStyle(level),
               range = SpanTextRange(startOffset, endOffset)
             )
           )
+          buffer.addSyntaxSpanForMarker(openingMarker)
         }
       }
       is ThematicBreak -> {

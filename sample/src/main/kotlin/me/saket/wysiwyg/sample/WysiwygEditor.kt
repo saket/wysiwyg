@@ -41,20 +41,13 @@ fun WysiwygEditor() {
     },
     initialText = {
       val text = """
-          |The greatest thing you'll ever learn is just to >!reddit and be reddited in return!<.
-          |
-          |**Shopping list**
-          |1. Milk
-          """.trimMargin()
-
-      // |This is a ^superscript^. This is also a ^(superscript but with multiple words). This^looks^interesting^on^old^reddit.
-      /*
+        |# Wysiwyg
         |
         |Markdown is a **lightweight** and easy-to-use `syntax` for styling all forms of ~~web~~ writing.
         |> The overriding design goal for Markdown's formatting syntax is to make it as readable as possible.
         |
         |Markdown was originally developed by [John Gruber](daringfireball.net/markdown).
-        * */
+        """.trimMargin()
       TextFieldValue(text, selection = TextRange(text.length))
     },
   )
@@ -105,7 +98,8 @@ fun WysiwygEditor() {
 @Composable
 private fun wysiwygTheme(): WysiwygTheme {
   return WysiwygTheme(
-    syntaxColor = MaterialTheme.colorScheme.primary,
+    syntaxColor = MaterialTheme.colorScheme.tertiary,
+    headingColor = MaterialTheme.colorScheme.primary,
     linkTextColor = MaterialTheme.colorScheme.primary,
     linkUrlColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
     struckThroughTextColor = LocalContentColor.current.copy(alpha = 0.5f),
