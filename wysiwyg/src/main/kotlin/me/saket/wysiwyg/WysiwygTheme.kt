@@ -5,7 +5,6 @@ import androidx.compose.ui.unit.TextUnit
 
 data class WysiwygTheme(
   val syntaxColor: Color,
-  val headingColor: Color,
   val linkTextColor: Color,
   val linkUrlColor: Color,
   val struckThroughTextColor: Color,
@@ -16,6 +15,7 @@ data class WysiwygTheme(
   val blockQuoteText: Color,
   val blockQuoteLeadingPadding: TextUnit,
   val listBlockLeadingPadding: TextUnit,
+  val headingColor: Color,
   val headingFontSizes: HeadingFontSizeMultipliers = HeadingFontSizeMultipliers(),
 ) {
 

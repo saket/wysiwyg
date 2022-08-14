@@ -233,7 +233,6 @@ class FlexmarkMarkdownParser(
       // For example, nested block/italic styling inside headings feels overkill.
       val isNestedSyntax = (next is ListBlock && next.parent is ListItem)
         || next.parent is BlockQuote
-        || next.parent is Heading
         || next.parent is FencedCodeBlock
 
       if (!isNestedSyntax) {
