@@ -50,8 +50,8 @@ fun rememberWysiwyg(
 
 @Stable
 class Wysiwyg internal constructor(
-  theme: WysiwygTheme,
   text: MutableState<TextFieldValue>,
+  val theme: WysiwygTheme,
   private val parser: MarkdownParser,
   private val backgroundDispatcher: CoroutineContext,
 ) {

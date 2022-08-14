@@ -14,6 +14,7 @@ import com.vladsch.flexmark.ast.ThematicBreak
 import com.vladsch.flexmark.ext.gfm.strikethrough.Strikethrough
 import com.vladsch.flexmark.ext.gfm.strikethrough.StrikethroughExtension
 import com.vladsch.flexmark.util.ast.Node
+import com.vladsch.flexmark.util.misc.CharPredicate
 import com.vladsch.flexmark.util.sequence.BasedSequence
 import me.saket.wysiwyg.SpanTextRange
 import me.saket.wysiwyg.internal.fastForEach
@@ -141,10 +142,18 @@ class FlexmarkMarkdownParser(
       is BlockQuote -> {
         buffer.add(
           MarkdownSpan(
-            style = BlockQuoteSpanStyle,
+            style = BlockQuoteBodySpanStyle,
             range = SpanTextRange(startOffset, endOffset)
           )
         )
+        val withEndingLineBreaksTrimmed = chars.countTrailing(CharPredicate.anyOf('\n'))
+        buffer.add(
+          MarkdownSpan(
+            style = BlockQuoteParagraphLineSpanStyle,
+            range = SpanTextRange(startOffset, endOffset - withEndingLineBreaksTrimmed)
+          )
+        )
+        buffer.addSyntaxSpanForMarker(openingMarker)
       }
       is ListBlock -> {
         // Workaround for https://github.com/vsch/flexmark-java/issues/519.
@@ -184,6 +193,12 @@ class FlexmarkMarkdownParser(
         }
       }
       is ThematicBreak -> {
+        buffer.add(
+          MarkdownSpan(
+            style = ThematicBreakSpanStyle,
+            range = SpanTextRange(startOffset, endOffset)
+          )
+        )
         buffer.add(
           MarkdownSpan(
             style = SyntaxColorSpanStyle,

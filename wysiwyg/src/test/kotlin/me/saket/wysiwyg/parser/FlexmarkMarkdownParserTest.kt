@@ -445,7 +445,7 @@ class FlexmarkMarkdownParserTest {
         SyntaxColorSpanStyle -> null
         BoldSpanStyle -> "b"
         ItalicSpanStyle -> "i"
-        BlockQuoteSpanStyle -> "quote"
+        BlockQuoteBodySpanStyle -> "quote"
         else -> error("${it.style} is unsupported")
       }
       if (tag != null) {

@@ -160,7 +160,7 @@ object FencedCodeBlockSpanStyle : MarkdownSpanStyle(hasClosingMarker = true) {
   }
 }
 
-object BlockQuoteSpanStyle : MarkdownSpanStyle(hasClosingMarker = false) {
+object BlockQuoteBodySpanStyle : MarkdownSpanStyle(hasClosingMarker = false) {
   override fun MarkdownRendererScope.render(text: AnnotatedString.Builder, range: SpanTextRange) {
     text.addStyle(
       style = SpanStyle(color = theme.blockQuoteText),
@@ -174,6 +174,17 @@ object BlockQuoteSpanStyle : MarkdownSpanStyle(hasClosingMarker = false) {
         )
       ),
       range = range,
+    )
+  }
+}
+
+object BlockQuoteParagraphLineSpanStyle : MarkdownSpanStyle(hasClosingMarker = false) {
+  override fun MarkdownRendererScope.render(text: AnnotatedString.Builder, range: SpanTextRange) {
+    text.addStringAnnotation(
+      tag = "blockquote",
+      annotation = "ignored",
+      start = range.startIndex,
+      end = range.endIndexExclusive
     )
   }
 }
@@ -212,6 +223,17 @@ data class HeadingSpanStyle(private val level: Int) : MarkdownSpanStyle(hasClosi
         color = theme.headingColor,
       ),
       range = range,
+    )
+  }
+}
+
+object ThematicBreakSpanStyle : MarkdownSpanStyle(hasClosingMarker = true) {
+  override fun MarkdownRendererScope.render(text: AnnotatedString.Builder, range: SpanTextRange) {
+    text.addStringAnnotation(
+      tag = "thematic_break",
+      annotation = "ignored",
+      start = range.startIndex,
+      end = range.endIndexExclusive
     )
   }
 }

@@ -1,9 +1,12 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package me.saket.wysiwyg.sample
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
@@ -44,13 +47,21 @@ fun WysiwygEditor() {
         |# Wysiwyg
         |
         |Markdown is a **lightweight** and easy-to-use `syntax` for styling all forms of ~~web~~ writing.
-        |> The overriding design goal for Markdown's formatting syntax is to make it as readable as possible.
         |
+        |> The overriding design goal for Markdown's formatting syntax is to make it as readable as possible.
+        |---
         |Markdown was originally developed by [John Gruber](daringfireball.net/markdown).
         """.trimMargin()
       TextFieldValue(text, selection = TextRange(text.length))
-    },
+    }
   )
+
+  val focusRequester = remember { FocusRequester() }
+  LaunchedEffect(focusRequester) {
+    delay(50) // Workaround for https://issuetracker.google.com/issues/199631318.
+    focusRequester.requestFocus()
+  }
+
   val extendedSpans = remember {
     ExtendedSpans(
       RoundedCornerSpanPainter(
@@ -59,14 +70,10 @@ fun WysiwygEditor() {
         topMargin = 2.sp,
         bottomMargin = 2.sp,
         stroke = null,
-      )
+      ),
+      BlockQuoteSpanPainter(wysiwyg.theme.syntaxColor),
+      ThematicBreakSpanPainter(wysiwyg.theme.syntaxColor),
     )
-  }
-
-  val focusRequester = remember { FocusRequester() }
-  LaunchedEffect(focusRequester) {
-    delay(50) // Workaround for https://issuetracker.google.com/issues/199631318.
-    focusRequester.requestFocus()
   }
 
   Column {
