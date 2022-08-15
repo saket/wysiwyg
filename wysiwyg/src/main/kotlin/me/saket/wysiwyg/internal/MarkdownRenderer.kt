@@ -14,13 +14,20 @@ internal value class MarkdownRenderer(
   private val theme: WysiwygTheme
 ) {
   fun buildAnnotatedString(text: AnnotatedString, spans: List<MarkdownSpan>): AnnotatedString {
+    // TODO: remove once this is available in a stable release:
+    //  https://android-review.googlesource.com/c/platform/frameworks/support/+/2171623/
+    val spans = spans.sortedBy { it.range.startIndex }
+
     val scope = object : MarkdownRendererScope {
       override val theme: WysiwygTheme get() = this@MarkdownRenderer.theme
       override val unstyledText: AnnotatedString get() = text
     }
 
     return buildAnnotatedString {
-      append(text)
+      // Discard any previous styles that may have gotten restored after a config change.
+      // This is slightly unfortunate because any spans added by user will also be discarded.
+      append(text.text)
+
       val textBuilder: AnnotatedString.Builder = this
       spans.fastForEach { span ->
         with(span.style) {
@@ -39,7 +46,7 @@ interface MarkdownRendererScope {
     addStyle(
       style = style,
       start = range.startIndex.coerceAtMost(unstyledText.lastIndex),
-      end = range.endIndexExclusive.coerceAtMost(length)
+      end = range.endIndexExclusive.coerceAtMost(length)  // todo: remove these coerces. coerce in offsetSpansOnTextChange() instead.
     )
   }
 
