@@ -4,7 +4,7 @@ buildscript {
     kotlin: '1.7.10',
     flexmark: '0.64.0',
     compose: '1.3.0-rc01',
-    composeUi: '1.3.0-alpha02',
+    composeUi: '1.2.0',
   ]
 
   repositories {
@@ -14,7 +14,7 @@ buildscript {
   }
 
   dependencies {
-    classpath "com.android.tools.build:gradle:7.1.1"
+    classpath "com.android.tools.build:gradle:7.1.3"
     classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$versions.kotlin"
     classpath "com.vanniktech:gradle-maven-publish-plugin:0.21.0"
     classpath "org.jetbrains.dokka:dokka-gradle-plugin:1.6.10"

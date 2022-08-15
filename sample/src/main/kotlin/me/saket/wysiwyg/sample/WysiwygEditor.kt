@@ -2,10 +2,14 @@
 
 package me.saket.wysiwyg.sample
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
@@ -13,6 +17,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -27,6 +32,8 @@ import me.saket.extendedspans.ExtendedSpans
 import me.saket.extendedspans.RoundedCornerSpanPainter
 import me.saket.extendedspans.drawBehind
 import me.saket.wysiwyg.WysiwygTheme
+import me.saket.wysiwyg.extendedspans.BlockQuoteSpanPainter
+import me.saket.wysiwyg.extendedspans.ThematicBreakSpanPainter
 import me.saket.wysiwyg.parser.FlexmarkMarkdownParser
 import me.saket.wysiwyg.rememberWysiwyg
 import me.saket.wysiwyg.sample.extensions.RedditSpoilersExtension
@@ -47,10 +54,27 @@ fun WysiwygEditor() {
         |# Wysiwyg
         |
         |Markdown is a **lightweight** and easy-to-use `syntax` for styling all forms of ~~web~~ writing.
-        |
         |> The overriding design goal for Markdown's formatting syntax is to make it as readable as possible.
         |---
         |Markdown was originally developed by [John Gruber](daringfireball.net/markdown).
+        |
+        |Markdown is a **lightweight** and easy-to-use `syntax` for styling all forms of ~~web~~ writing.
+        |> The overriding design goal for Markdown's formatting syntax is to make it as readable as possible.
+        |
+        |Markdown is a **lightweight** and easy-to-use `syntax` for styling all forms of ~~web~~ writing.
+        |> The overriding design goal for Markdown's formatting syntax is to make it as readable as possible.
+        |
+        |Markdown is a **lightweight** and easy-to-use `syntax` for styling all forms of ~~web~~ writing.
+        |> The overriding design goal for Markdown's formatting syntax is to make it as readable as possible.
+        |
+        |Markdown is a **lightweight** and easy-to-use `syntax` for styling all forms of ~~web~~ writing.
+        |> The overriding design goal for Markdown's formatting syntax is to make it as readable as possible.
+        |
+        |Markdown is a **lightweight** and easy-to-use `syntax` for styling all forms of ~~web~~ writing.
+        |> The overriding design goal for Markdown's formatting syntax is to make it as readable as possible.
+        |
+        |Markdown is a **lightweight** and easy-to-use `syntax` for styling all forms of ~~web~~ writing.
+        |> The overriding design goal for Markdown's formatting syntax is to make it as readable as possible.
         """.trimMargin()
       TextFieldValue(text, selection = TextRange(text.length))
     }
@@ -77,23 +101,34 @@ fun WysiwygEditor() {
   }
 
   Column {
-    BasicTextField(
-      modifier = Modifier
-        .focusRequester(focusRequester)
-        .fillMaxWidth()
+    // TextField's internal scrolling mechanism does not participate in nested scrolling for
+    // bringing view into focus. As a workaround, I'm using my own scrollable box.
+    // TODO: this doesn't work very well right now. It:
+    //  - loses restoration of scroll position across config changes
+    //  - portion of text obscured by IME isn't brought into focus when any key is pressed
+    Box(
+      Modifier
         .weight(1f)
-        .padding(24.dp)
-        .drawBehind(extendedSpans),
-      value = wysiwyg.text().let {
-        it.copy(annotatedString = extendedSpans.extend(it.annotatedString))
-      },
-      onValueChange = wysiwyg::onTextChange,
-      onTextLayout = { result ->
-        extendedSpans.onTextLayout(result)
-      },
-      cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-      textStyle = LocalTextStyle.current.copy(color = LocalContentColor.current),
-    )
+        .verticalScroll(rememberScrollState())
+    ) {
+      BasicTextField(
+        modifier = Modifier
+          .focusRequester(focusRequester)
+          .fillMaxWidth()
+          .wrapContentHeight(align = Alignment.Top, unbounded = true)
+          .padding(24.dp)
+          .drawBehind(extendedSpans),
+        value = wysiwyg.text().let {
+          it.copy(annotatedString = extendedSpans.extend(it.annotatedString))
+        },
+        onValueChange = wysiwyg::onTextChange,
+        onTextLayout = { result ->
+          extendedSpans.onTextLayout(result)
+        },
+        cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+        textStyle = LocalTextStyle.current.copy(color = LocalContentColor.current),
+      )
+    }
 
     MarkdownFormattingBar(
       modifier = Modifier.fillMaxWidth(),

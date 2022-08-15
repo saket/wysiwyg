@@ -1,4 +1,4 @@
-package me.saket.wysiwyg.sample
+package me.saket.wysiwyg.extendedspans
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString

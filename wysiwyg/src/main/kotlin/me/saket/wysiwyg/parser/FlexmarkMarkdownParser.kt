@@ -282,6 +282,8 @@ class FlexmarkMarkdownParser(
       }
     }
 
+    // todo: when enter is pressed at the end of a paragraph span, do not extend the span maybe? or maybe only do this for thematic break.
+
     // Expand spans to include text that was inserted within their range.
     previousSpans.fastForEachReverseIndexed { index, span ->
       val isStartAffected = span.range.startIndex >= offsetShiftStartsFrom

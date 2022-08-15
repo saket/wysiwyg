@@ -1,4 +1,4 @@
-package me.saket.wysiwyg.sample
+package me.saket.wysiwyg.extendedspans
 
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Rect

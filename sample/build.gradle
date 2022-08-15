@@ -40,5 +40,4 @@ dependencies {
   implementation "androidx.compose.foundation:foundation:$versions.composeUi"
   implementation "androidx.compose.material3:material3:1.0.0-alpha15"
   implementation "androidx.compose.material:material-icons-extended:$versions.composeUi"
-  implementation "me.saket.extendedspans:extendedspans:1.3.0"
 }
