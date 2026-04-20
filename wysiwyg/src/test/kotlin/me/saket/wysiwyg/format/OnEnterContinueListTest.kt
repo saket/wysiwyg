@@ -17,7 +17,7 @@ class OnEnterContinueListTest {
               |- Milk
               |- Bread
               |- ▮
-              """.trimMargin()
+              """.trimMargin(),
     )
 
     formatters.assertOnEnter(
@@ -31,7 +31,7 @@ class OnEnterContinueListTest {
               |+ Milk
               |+ Bread
               |+ ▮
-              """.trimMargin()
+              """.trimMargin(),
     )
 
     formatters.assertOnEnter(
@@ -45,7 +45,7 @@ class OnEnterContinueListTest {
               |* Milk
               |* Bread
               |* ▮
-              """.trimMargin()
+              """.trimMargin(),
     )
   }
 
@@ -63,7 +63,7 @@ class OnEnterContinueListTest {
               |- Drinks
               |  - Coke
               |  - ▮
-              """.trimMargin()
+              """.trimMargin(),
     )
   }
 
@@ -81,7 +81,7 @@ class OnEnterContinueListTest {
               |2. Drinks
               |  3. Coke
               |  4. ▮
-              """.trimMargin()
+              """.trimMargin(),
     )
 
     formatters.assertOnEnter(
@@ -97,7 +97,7 @@ class OnEnterContinueListTest {
               |2. Drinks
               |  1. Coke
               |  2. ▮
-              """.trimMargin()
+              """.trimMargin(),
     )
   }
 
@@ -108,7 +108,7 @@ class OnEnterContinueListTest {
               |- Milk
               |Bread▮
               """.trimMargin(),
-      expect = null
+      expect = null,
     )
 
     formatters.assertOnEnter(
@@ -117,7 +117,7 @@ class OnEnterContinueListTest {
               |+ Milk
               |+Bread▮
               """.trimMargin(),
-      expect = null
+      expect = null,
     )
   }
 
@@ -133,7 +133,7 @@ class OnEnterContinueListTest {
               |1. Milk
               |2. Bread
               |3. ▮
-              """.trimMargin()
+              """.trimMargin(),
     )
 
     formatters.assertOnEnter(
@@ -147,7 +147,7 @@ class OnEnterContinueListTest {
               |199. Milk
               |200. Bread
               |201. ▮
-              """.trimMargin()
+              """.trimMargin(),
     )
   }
 
@@ -158,7 +158,7 @@ class OnEnterContinueListTest {
               |1. Milk
               |2.Bread▮
               """.trimMargin(),
-      expect = null
+      expect = null,
     )
 
     formatters.assertOnEnter(
@@ -167,7 +167,7 @@ class OnEnterContinueListTest {
               |1. Milk
               |2Bread▮
               """.trimMargin(),
-      expect = null
+      expect = null,
     )
 
     formatters.assertOnEnter(
@@ -176,7 +176,7 @@ class OnEnterContinueListTest {
               |180 Tomatoes
               |200 Onions▮
               """.trimMargin(),
-      expect = null
+      expect = null,
     )
   }
 
@@ -198,7 +198,7 @@ class OnEnterContinueListTest {
               |▮
               |
               |Some other text
-              """.trimMargin()
+              """.trimMargin(),
     )
 
     formatters.assertOnEnter(
@@ -218,7 +218,7 @@ class OnEnterContinueListTest {
               |▮
               |
               |Some other text
-              """.trimMargin()
+              """.trimMargin(),
     )
 
     formatters.assertOnEnter(
@@ -238,7 +238,7 @@ class OnEnterContinueListTest {
               |▮
               |
               |Some other text
-              """.trimMargin()
+              """.trimMargin(),
     )
   }
 
@@ -260,7 +260,7 @@ class OnEnterContinueListTest {
               |▮
               |
               |Some other text
-              """.trimMargin()
+              """.trimMargin(),
     )
   }
 
@@ -274,7 +274,7 @@ class OnEnterContinueListTest {
               |
               |Some other text
               """.trimMargin(),
-      expect = null
+      expect = null,
     )
 
     formatters.assertOnEnter(
@@ -286,7 +286,7 @@ class OnEnterContinueListTest {
               |
               |Some other text
               """.trimMargin(),
-      expect = null
+      expect = null,
     )
 
     formatters.assertOnEnter(
@@ -298,7 +298,7 @@ class OnEnterContinueListTest {
               |
               |Some other text
               """.trimMargin(),
-      expect = null
+      expect = null,
     )
     formatters.assertOnEnter(
       input = """
@@ -309,7 +309,7 @@ class OnEnterContinueListTest {
               |
               |Some other text
               """.trimMargin(),
-      expect = null
+      expect = null,
     )
   }
 
@@ -318,7 +318,7 @@ class OnEnterContinueListTest {
       input = """
               |-▮
               """.trimMargin(),
-      expect = null
+      expect = null,
     )
   }
 }

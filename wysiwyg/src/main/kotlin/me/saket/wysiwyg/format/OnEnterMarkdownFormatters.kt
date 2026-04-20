@@ -1,49 +1,54 @@
 package me.saket.wysiwyg.format
 
+import androidx.compose.foundation.text.input.InputTransformation
+import androidx.compose.foundation.text.input.TextFieldBuffer
 import androidx.compose.runtime.Stable
-import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.TextRange
+import kotlin.coroutines.cancellation.CancellationException
 
 @Stable
 class OnEnterMarkdownFormatters(
-  private val formatters: List<OnEnterMarkdownFormatter>
+  private val formatters: List<OnEnterMarkdownFormatter>,
 ) {
-  fun formatIfEnterWasPressed(previousText: TextFieldValue, newText: TextFieldValue): TextFieldValue {
-    runCatching {
-      val wasEnterPressed = previousText.selection.collapsed
-        && newText.text.length - previousText.text.length == 1
-        && newText.text.getOrNull(newText.selection.start - 1) == '\n'
-
-      if (wasEnterPressed) {
-        val replacement = onEnterPressed(textBeforeEnter = previousText)
-        if (replacement != null) {
-          return newText.copy(
-            text = replacement.text.toString(),
-            selection = replacement.newSelection
-          )
-        }
-      }
-    }
-
-    return newText
-  }
-
-  fun onEnterPressed(textBeforeEnter: TextFieldValue): TextReplacement? {
-    if (!textBeforeEnter.selection.collapsed) {
-      // Some text was selected.
+  fun onEnterPressed(text: CharSequence, selection: TextRange): TextReplacement? {
+    if (!selection.collapsed) {
       return null
     }
 
-    val editedParagraph = TextParagraph.findUnderCursor(textBeforeEnter)
+    val editedParagraph = TextParagraph.findUnderCursor(text, selection)
     if (editedParagraph.text.isBlank()) {
       return null
     }
 
     return formatters.firstNotNullOfOrNull {
       it.onEnterPressed(
-        text = textBeforeEnter.text,
+        text = text,
         paragraph = editedParagraph,
-        cursorPositionBeforeEnter = textBeforeEnter.selection.start
+        cursorPositionBeforeEnter = selection.start,
       )
+    }
+  }
+
+  fun asInputTransformation(): InputTransformation {
+    return InputTransformation { applyIfEnterWasPressed() }
+  }
+
+  private fun TextFieldBuffer.applyIfEnterWasPressed() {
+    try {
+      val wasEnterPressed = originalSelection.collapsed
+        && length - originalText.length == 1
+        && asCharSequence().getOrNull(selection.start - 1) == '\n'
+
+      if (!wasEnterPressed) return
+
+      val replacement = onEnterPressed(originalText, originalSelection) ?: return
+      replace(0, length, replacement.text)
+      selection = replacement.newSelection
+    } catch (e: CancellationException) {
+      throw e
+    } catch (_: Throwable) {
+      // Formatter bugs (bad indices, regex edge cases) should not crash
+      // text input. Next keystroke gets another chance at formatting.
     }
   }
 
@@ -51,40 +56,29 @@ class OnEnterMarkdownFormatters(
     val Default = OnEnterMarkdownFormatters(
       listOf(
         OnEnterStartCodeBlock,
-        OnEnterContinueList()
-      )
+        OnEnterContinueList(),
+      ),
     )
   }
 }
 
 /**
  * Note for self: unlike functions in [String], this does not return
- * -1 for empty paragraphs. See [FindTextParagraphTest].
+ * -1 for empty paragraphs. See FindTextParagraphTest.
  */
-internal fun TextParagraph.Companion.findUnderCursor(value: TextFieldValue): TextParagraph {
-  val text = value.text
+internal fun TextParagraph.Companion.findUnderCursor(
+  text: CharSequence,
+  selection: TextRange,
+): TextParagraph {
+  val lastNewline = text.lastIndexOf('\n', startIndex = selection.min - 1)
+  val startOffset = if (lastNewline == -1) 0 else lastNewline + 1
 
-  // Begin with the assumption that this is the first paragraph
-  var startOffset = 0
-  for (i in value.selection.min downTo 0) {
-    if (i > 0 && text[i - 1] == '\n') {
-      startOffset = i
-      break
-    }
-  }
-
-  // Begin with the assumption that this is the last paragraph.
-  var endOffsetExclusive = text.length
-  for (i in value.selection.max until text.length) {
-    if (text[i] == '\n') {
-      endOffsetExclusive = i
-      break
-    }
-  }
+  val nextNewline = text.indexOf('\n', startIndex = selection.max)
+  val endOffsetExclusive = if (nextNewline == -1) text.length else nextNewline
 
   return TextParagraph(
     text = text.substring(startOffset, endOffsetExclusive),
     startIndex = startOffset,
-    endIndexExclusive = endOffsetExclusive
+    endIndexExclusive = endOffsetExclusive,
   )
 }

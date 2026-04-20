@@ -18,7 +18,7 @@ class FencedCodeBlockSyntaxInserterTest {
               |```
               |John Blake: Blake sir.
               |Gordon: You have something you wanna ask me Officer Blake?
-              """.trimMargin()
+              """.trimMargin(),
     )
   }
 
@@ -35,7 +35,7 @@ class FencedCodeBlockSyntaxInserterTest {
               |John Blake: Blake sir.▮
               |```
               |Gordon: You have something you wanna ask me Officer Blake?
-              """.trimMargin()
+              """.trimMargin(),
     )
   }
 
@@ -52,7 +52,7 @@ class FencedCodeBlockSyntaxInserterTest {
               |```
               |Gordon: You have something you wanna ask me Officer Blake?▮
               |```
-              """.trimMargin()
+              """.trimMargin(),
     )
   }
 
@@ -65,7 +65,7 @@ class FencedCodeBlockSyntaxInserterTest {
               |```
               |▮
               |```
-              """.trimMargin()
+              """.trimMargin(),
     )
   }
 
@@ -80,7 +80,7 @@ class FencedCodeBlockSyntaxInserterTest {
               |```
               |▮
               |```
-              """.trimMargin()
+              """.trimMargin(),
     )
   }
 
@@ -93,7 +93,7 @@ class FencedCodeBlockSyntaxInserterTest {
               |```
               |You have something you ▮ wanna ask me Officer Blake?
               |```
-              """.trimMargin()
+              """.trimMargin(),
     )
   }
 
@@ -106,7 +106,7 @@ class FencedCodeBlockSyntaxInserterTest {
               |```
               |You have something you wanna ▮ask me▮ Officer Blake?
               |```
-              """.trimMargin()
+              """.trimMargin(),
     )
   }
 
@@ -119,7 +119,7 @@ class FencedCodeBlockSyntaxInserterTest {
               |```
               |▮You have something you wanna ask me Officer Blake?▮
               |```
-              """.trimMargin()
+              """.trimMargin(),
     )
   }
 
@@ -134,7 +134,7 @@ class FencedCodeBlockSyntaxInserterTest {
               |```
               |▮
               |```
-              """.trimMargin()
+              """.trimMargin(),
     )
   }
 
@@ -149,7 +149,7 @@ class FencedCodeBlockSyntaxInserterTest {
               |```
               |  ▮
               |```
-              """.trimMargin()
+              """.trimMargin(),
     )
   }
 }

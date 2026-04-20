@@ -17,7 +17,7 @@ class BlockQuoteSyntaxInserterTest {
               |
               |Batman/Bruce Wayne: In the middle of the day Alfred?
               |Alfred: The Lamborghini then? Much more subtle.
-              """.trimMargin()
+              """.trimMargin(),
     )
   }
 
@@ -34,7 +34,7 @@ class BlockQuoteSyntaxInserterTest {
               |> Batman/Bruce Wayne: In the middle of the day Alfred?▮
               |
               |Alfred: The Lamborghini then? Much more subtle.
-              """.trimMargin()
+              """.trimMargin(),
     )
   }
 
@@ -50,7 +50,7 @@ class BlockQuoteSyntaxInserterTest {
               |Batman/Bruce Wayne: In the middle of the day Alfred?
               |
               |> Alfred: The Lamborghini then? Much more subtle.▮
-              """.trimMargin()
+              """.trimMargin(),
     )
   }
 
@@ -68,7 +68,7 @@ class BlockQuoteSyntaxInserterTest {
               |> Batman/Bruce Wayne: In the middle of the day Alfred?▮
               |
               |Alfred: The Lamborghini then? Much more subtle.
-              """.trimMargin()
+              """.trimMargin(),
     )
     syntaxInserter.assertOnInsert(
       input = """
@@ -85,7 +85,7 @@ class BlockQuoteSyntaxInserterTest {
               |> Alfred: The Lamborghini then? Much more subtle.▮
               |
               |Another line.
-              """.trimMargin()
+              """.trimMargin(),
     )
   }
 
@@ -96,7 +96,7 @@ class BlockQuoteSyntaxInserterTest {
               """.trimMargin(),
       expect = """
               |> ▮
-              """.trimMargin()
+              """.trimMargin(),
     )
   }
 
@@ -109,7 +109,7 @@ class BlockQuoteSyntaxInserterTest {
       expect = """
               |
               |> ▮
-              """.trimMargin()
+              """.trimMargin(),
     )
   }
 
@@ -120,7 +120,7 @@ class BlockQuoteSyntaxInserterTest {
               """.trimMargin(),
       expect = """
               |> Tell your men they work ▮ for me now. This is my city.
-              """.trimMargin()
+              """.trimMargin(),
     )
   }
 
@@ -131,7 +131,7 @@ class BlockQuoteSyntaxInserterTest {
               """.trimMargin(),
       expect = """
               |> Tell your men they work for ▮me▮ now. This is my city.
-              """.trimMargin()
+              """.trimMargin(),
     )
   }
 
@@ -142,7 +142,7 @@ class BlockQuoteSyntaxInserterTest {
               """.trimMargin(),
       expect = """
               |> ▮Tell your men they work for me now. This is my city.▮
-              """.trimMargin()
+              """.trimMargin(),
     )
   }
 
@@ -166,7 +166,7 @@ class BlockQuoteSyntaxInserterTest {
               |Gordon: Because he's the hero Gotham deserves, but not the one it needs right now.
               |So we'll hunt him. Because he can take it. Because he's not a hero. He's a silent
               |guardian. A watchful protector. The Dark Knight.
-              """.trimMargin()
+              """.trimMargin(),
     )
   }
 
@@ -180,7 +180,7 @@ class BlockQuoteSyntaxInserterTest {
               |Tell your men they work for me now. This is my city.
               |
               |> ▮
-              """.trimMargin()
+              """.trimMargin(),
     )
   }
 
@@ -194,7 +194,7 @@ class BlockQuoteSyntaxInserterTest {
               |Tell your men they work for me now. This is my city.
               |
               |>  ▮
-              """.trimMargin()
+              """.trimMargin(),
     )
   }
 
@@ -205,7 +205,7 @@ class BlockQuoteSyntaxInserterTest {
               """.trimMargin(),
       expect = """
               |>> Tell your men they work for me now. This is my city.▮
-              """.trimMargin()
+              """.trimMargin(),
     )
     syntaxInserter.assertOnInsert(
       input = """
@@ -213,7 +213,7 @@ class BlockQuoteSyntaxInserterTest {
               """.trimMargin(),
       expect = """
               |>>> Tell your men they work for me now. This is my city.▮
-              """.trimMargin()
+              """.trimMargin(),
     )
   }
 }

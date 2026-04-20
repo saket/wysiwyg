@@ -1,56 +1,42 @@
 package me.saket.wysiwyg.format
 
+import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.ui.text.TextRange
-import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.input.getSelectedText
-import me.saket.wysiwyg.Wysiwyg
 
-fun interface MarkdownSyntaxInserter {
-  fun insertInto(text: TextFieldValue): TextReplacement
+internal fun interface MarkdownSyntaxInserter {
+  fun insertInto(text: CharSequence, selection: TextRange): TextReplacement
+}
+
+internal fun TextFieldState.insertSyntax(inserter: MarkdownSyntaxInserter) {
+  val replacement = inserter.insertInto(text = text, selection = selection)
+  edit {
+    replace(0, length, replacement.text)
+    selection = replacement.newSelection
+  }
 }
 
 /** Insert "*" around any text under selection or at the current cursor position. */
-fun Wysiwyg.insertItalicSyntax() {
-  insertSyntax(
-    SymmetricMarkdownSyntaxInserter(
-      syntax = "*",
-      placeholder = "Italic"
-    )
-  )
+fun TextFieldState.insertItalic() {
+  insertSyntax(SymmetricMarkdownSyntaxInserter(syntax = "*", placeholder = "Italic"))
 }
 
 /** Insert "**" around any text under selection or at the current cursor position. */
-fun Wysiwyg.insertBoldSyntax() {
-  insertSyntax(
-    SymmetricMarkdownSyntaxInserter(
-      syntax = "**",
-      placeholder = "Bold"
-    )
-  )
+fun TextFieldState.insertBold() {
+  insertSyntax(SymmetricMarkdownSyntaxInserter(syntax = "**", placeholder = "Bold"))
 }
 
 /** Insert "~~" around any text under selection or at the current cursor position. */
-fun Wysiwyg.insertStrikethroughSyntax() {
-  insertSyntax(
-    SymmetricMarkdownSyntaxInserter(
-      syntax = "~~",
-      placeholder = "Strikethrough"
-    )
-  )
+fun TextFieldState.insertStrikethrough() {
+  insertSyntax(SymmetricMarkdownSyntaxInserter(syntax = "~~", placeholder = "Strikethrough"))
 }
 
-/** Insert "[`]" around any text under selection or at the current cursor position. */
-fun Wysiwyg.insertInlineCodeSyntax() {
-  insertSyntax(
-    SymmetricMarkdownSyntaxInserter(
-      syntax = "`",
-      placeholder = "Code"
-    )
-  )
+/** Insert "`" around any text under selection or at the current cursor position. */
+fun TextFieldState.insertInlineCode() {
+  insertSyntax(SymmetricMarkdownSyntaxInserter(syntax = "`", placeholder = "Code"))
 }
 
-/** Insert "[```]" around the paragraph currently being edited. */
-fun Wysiwyg.insertCodeBlockSyntax() {
+/** Insert "```" around the paragraph currently being edited. */
+fun TextFieldState.insertCodeBlock() {
   insertSyntax(FencedCodeBlockSyntaxInserter)
 }
 
@@ -58,20 +44,16 @@ fun Wysiwyg.insertCodeBlockSyntax() {
  * Insert ">" at the beginning of the paragraph currently being edited.
  * Can be used multiple times on the same paragraph to insert nested blockquotes.
  */
-fun Wysiwyg.insertBlockQuoteSyntax() {
-  insertSyntax(
-    CompoundableParagraphSyntaxInserter.BlockQuote
-  )
+fun TextFieldState.insertBlockQuote() {
+  insertSyntax(CompoundableParagraphSyntaxInserter.BlockQuote)
 }
 
 /**
  * Insert "#" at the beginning of the paragraph currently being edited.
- * Can be used multiple times on the same paragraph to insert nested blockquotes.
+ * Can be used multiple times on the same paragraph to insert nested headings.
  */
-fun Wysiwyg.insertHeadingSyntax() {
-  insertSyntax(
-    CompoundableParagraphSyntaxInserter.Heading
-  )
+fun TextFieldState.insertHeading() {
+  insertSyntax(CompoundableParagraphSyntaxInserter.Heading)
 }
 
 /**
@@ -82,27 +64,27 @@ internal class SymmetricMarkdownSyntaxInserter(
   private val syntax: String,
   private val placeholder: String,
 ) : MarkdownSyntaxInserter {
-  override fun insertInto(text: TextFieldValue): TextReplacement {
-    val textUnderSelection = if (text.selection.collapsed) null else text.getSelectedText()
+  override fun insertInto(text: CharSequence, selection: TextRange): TextReplacement {
+    val textUnderSelection = if (selection.collapsed) null else text.substring(selection.min, selection.max)
 
     val newSelection = if (textUnderSelection == null) {
       TextRange(
-        start = text.selection.min + syntax.length,
-        end = text.selection.min + syntax.length + placeholder.length,
+        start = selection.min + syntax.length,
+        end = selection.min + syntax.length + placeholder.length,
       )
     } else {
       TextRange(
-        index = text.selection.min + (syntax.length * 2) + textUnderSelection.length
+        index = selection.min + (syntax.length * 2) + textUnderSelection.length,
       )
     }
 
     return TextReplacement(
-      text = text.text.replaceRange(
-        startIndex = text.selection.min,
-        endIndex = text.selection.max,
-        replacement = "$syntax${textUnderSelection ?: placeholder}$syntax"
+      text = text.replaceRange(
+        startIndex = selection.min,
+        endIndex = selection.max,
+        replacement = "$syntax${textUnderSelection ?: placeholder}$syntax",
       ),
-      newSelection = newSelection
+      newSelection = newSelection,
     )
   }
 }
@@ -111,29 +93,26 @@ internal object FencedCodeBlockSyntaxInserter : MarkdownSyntaxInserter {
   private const val leftSyntax = "```\n"
   private const val rightSyntax = "\n```"
 
-  override fun insertInto(text: TextFieldValue): TextReplacement {
-    val currentParagraph = TextParagraph.findUnderCursor(text)
+  override fun insertInto(text: CharSequence, selection: TextRange): TextReplacement {
+    val currentParagraph = TextParagraph.findUnderCursor(text, selection)
     return TextReplacement(
-      text = text.text.replaceRange(
+      text = text.replaceRange(
         startIndex = currentParagraph.startIndex,
         endIndex = currentParagraph.endIndexExclusive,
-        replacement = "$leftSyntax${currentParagraph.text}$rightSyntax"
+        replacement = "$leftSyntax${currentParagraph.text}$rightSyntax",
       ),
-      newSelection = TextRange(
-        start = text.selection.min + leftSyntax.length,
-        end = text.selection.max + leftSyntax.length,
-      )
+      newSelection = selection.offsetBy(leftSyntax.length),
     )
   }
 }
 
 internal class CompoundableParagraphSyntaxInserter(
   private val leftSyntax: Char,
-  private val addSurroundingLineBreaks: Boolean
+  private val addSurroundingLineBreaks: Boolean,
 ) : MarkdownSyntaxInserter {
 
-  override fun insertInto(text: TextFieldValue): TextReplacement {
-    val currentParagraph = TextParagraph.findUnderCursor(text)
+  override fun insertInto(text: CharSequence, selection: TextRange): TextReplacement {
+    val currentParagraph = TextParagraph.findUnderCursor(text, selection)
 
     val willCompound = currentParagraph.text.getOrNull(0) == leftSyntax
     val hasLeadingSpace = currentParagraph.text.getOrNull(0)?.isWhitespace() ?: false
@@ -144,16 +123,16 @@ internal class CompoundableParagraphSyntaxInserter(
 
     val needsLeadingNewLine = addSurroundingLineBreaks
       && currentParagraph.startIndex >= 2
-      && text.text[currentParagraph.startIndex - 2] != '\n'
+      && text[currentParagraph.startIndex - 2] != '\n'
 
-    val hasFollowingNewLine = text.text.getOrNull(currentParagraph.endIndexExclusive + 1) == '\n'
+    val hasFollowingNewLine = text.getOrNull(currentParagraph.endIndexExclusive + 1) == '\n'
     val needsFollowingNewLine = !hasFollowingNewLine
       && addSurroundingLineBreaks
-      && currentParagraph.endIndexExclusive != text.text.length
+      && currentParagraph.endIndexExclusive != text.length
 
     val leadingNewLine = if (needsLeadingNewLine) "\n" else ""
     return TextReplacement(
-      text = text.text.replaceRange(
+      text = text.replaceRange(
         startIndex = currentParagraph.startIndex,
         endIndex = currentParagraph.endIndexExclusive,
         replacement = buildString {
@@ -163,23 +142,23 @@ internal class CompoundableParagraphSyntaxInserter(
           if (needsFollowingNewLine) {
             append("\n")
           }
-        }
+        },
       ),
-      newSelection = text.selection.offsetBy(
-        leadingNewLine.length + leftSyntaxWithSpace.length
-      )
+      newSelection = selection.offsetBy(
+        leadingNewLine.length + leftSyntaxWithSpace.length,
+      ),
     )
   }
 
   companion object {
     val BlockQuote = CompoundableParagraphSyntaxInserter(
       leftSyntax = '>',
-      addSurroundingLineBreaks = true
+      addSurroundingLineBreaks = true,
     )
 
     val Heading = CompoundableParagraphSyntaxInserter(
       leftSyntax = '#',
-      addSurroundingLineBreaks = false
+      addSurroundingLineBreaks = false,
     )
   }
 }

@@ -14,7 +14,7 @@ class OnEnterStartCodeBlockTest {
               |```
               |▮
               |```
-              """.trimMargin()
+              """.trimMargin(),
     )
   }
 
@@ -31,7 +31,7 @@ class OnEnterStartCodeBlockTest {
               |▮
               |```
               |Batman/Bruce Wayne: In the middle of the day Alfred?
-              """.trimMargin()
+              """.trimMargin(),
     )
   }
 
@@ -48,7 +48,7 @@ class OnEnterStartCodeBlockTest {
               |▮
               |```
               |Batman/Bruce Wayne: In the middle of the day Alfred?
-              """.trimMargin()
+              """.trimMargin(),
     )
   }
 
@@ -70,7 +70,7 @@ class OnEnterStartCodeBlockTest {
               |fun anotherCodeBlock() {}
               |```
               """.trimMargin(),
-      expect = null
+      expect = null,
     )
   }
 
@@ -91,7 +91,7 @@ class OnEnterStartCodeBlockTest {
               |fun anotherCodeBlock() {}
               |```
               """.trimMargin(),
-      expect = null
+      expect = null,
     )
   }
 
@@ -112,7 +112,7 @@ class OnEnterStartCodeBlockTest {
               |```
               |▮
               |```
-              """.trimMargin()
+              """.trimMargin(),
     )
   }
 }

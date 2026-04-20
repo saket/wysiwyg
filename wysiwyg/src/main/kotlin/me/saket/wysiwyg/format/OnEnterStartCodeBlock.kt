@@ -4,12 +4,12 @@ import kotlin.LazyThreadSafetyMode.NONE
 
 /** Starts a code block when enter key is pressed after 3 backticks. */
 object OnEnterStartCodeBlock : OnEnterMarkdownFormatter {
-  private val fencedCodeRegex by lazy(NONE) { Regex("(```)[a-z]*[\\s\\S]*?(```)") }
+  private val fencedCodeRegex by lazy(NONE) { Regex("```[a-z]*[\\s\\S]*?```") }
 
   override fun onEnterPressed(
     text: CharSequence,
     paragraph: TextParagraph,
-    cursorPositionBeforeEnter: Int
+    cursorPositionBeforeEnter: Int,
   ): TextReplacement? {
     if (!paragraph.text.startsWith("```")) {
       return null
@@ -17,18 +17,14 @@ object OnEnterStartCodeBlock : OnEnterMarkdownFormatter {
 
     val allCodeBlocks = fencedCodeRegex.findAll(text)
     for (block in allCodeBlocks) {
-      // Check if the cursor is already inside a code block.
       if (block.range.contains(cursorPositionBeforeEnter)) {
         return null
       }
 
-      // Check if the cursor is placed after the closing syntax.
       val enterPressedOnClosingLine = paragraph.startIndex < block.range.last
         && cursorPositionBeforeEnter <= paragraph.endIndexExclusive
 
       if (enterPressedOnClosingLine) {
-        // Cursor is on the same line as the closing
-        // marker. This isn't a new code block.
         return null
       }
     }
@@ -37,9 +33,9 @@ object OnEnterStartCodeBlock : OnEnterMarkdownFormatter {
       text = text.replaceRange(
         startIndex = cursorPositionBeforeEnter,
         endIndex = cursorPositionBeforeEnter,
-        replacement = "\n\n```"
+        replacement = "\n\n```",
       ),
-      newCursorPosition = cursorPositionBeforeEnter + 1
+      newCursorPosition = cursorPositionBeforeEnter + 1,
     )
   }
 }

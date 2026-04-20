@@ -16,7 +16,7 @@ class HeadingSyntaxInserterTest {
               |# Alfred: Shall you be taking the Batpod sir?▮
               |Batman/Bruce Wayne: In the middle of the day Alfred?
               |Alfred: The Lamborghini then? Much more subtle.
-              """.trimMargin()
+              """.trimMargin(),
     )
   }
 
@@ -31,7 +31,7 @@ class HeadingSyntaxInserterTest {
               |Alfred: Shall you be taking the Batpod sir?
               |# Batman/Bruce Wayne: In the middle of the day Alfred?▮
               |Alfred: The Lamborghini then? Much more subtle.
-              """.trimMargin()
+              """.trimMargin(),
     )
   }
 
@@ -46,7 +46,7 @@ class HeadingSyntaxInserterTest {
               |Alfred: Shall you be taking the Batpod sir?
               |Batman/Bruce Wayne: In the middle of the day Alfred?
               |# Alfred: The Lamborghini then? Much more subtle.▮
-              """.trimMargin()
+              """.trimMargin(),
     )
   }
 
@@ -57,7 +57,7 @@ class HeadingSyntaxInserterTest {
               """.trimMargin(),
       expect = """
               |# ▮
-              """.trimMargin()
+              """.trimMargin(),
     )
   }
 
@@ -70,7 +70,7 @@ class HeadingSyntaxInserterTest {
       expect = """
               |
               |# ▮
-              """.trimMargin()
+              """.trimMargin(),
     )
   }
 
@@ -81,7 +81,7 @@ class HeadingSyntaxInserterTest {
               """.trimMargin(),
       expect = """
               |# Tell your men they work ▮ for me now. This is my city.
-              """.trimMargin()
+              """.trimMargin(),
     )
   }
 
@@ -92,7 +92,7 @@ class HeadingSyntaxInserterTest {
               """.trimMargin(),
       expect = """
               |# Tell your men they work for ▮me▮ now. This is my city.
-              """.trimMargin()
+              """.trimMargin(),
     )
   }
 
@@ -103,7 +103,7 @@ class HeadingSyntaxInserterTest {
               """.trimMargin(),
       expect = """
               |# ▮Tell your men they work for me now. This is my city.▮
-              """.trimMargin()
+              """.trimMargin(),
     )
   }
 
@@ -116,7 +116,7 @@ class HeadingSyntaxInserterTest {
       expect = """
               |Tell your men they work for me now. This is my city.
               |# ▮
-              """.trimMargin()
+              """.trimMargin(),
     )
   }
 
@@ -129,7 +129,7 @@ class HeadingSyntaxInserterTest {
       expect = """
               |Tell your men they work for me now. This is my city.
               |#  ▮
-              """.trimMargin()
+              """.trimMargin(),
     )
   }
 
@@ -140,7 +140,7 @@ class HeadingSyntaxInserterTest {
               """.trimMargin(),
       expect = """
               |## Tell your men they work for me now. This is my city.▮
-              """.trimMargin()
+              """.trimMargin(),
     )
     syntaxInserter.assertOnInsert(
       input = """
@@ -148,7 +148,7 @@ class HeadingSyntaxInserterTest {
               """.trimMargin(),
       expect = """
               |### Tell your men they work for me now. This is my city.▮
-              """.trimMargin()
+              """.trimMargin(),
     )
   }
 }

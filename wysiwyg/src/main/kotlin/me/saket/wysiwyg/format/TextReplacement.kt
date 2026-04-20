@@ -4,14 +4,13 @@ import androidx.compose.ui.text.TextRange
 
 data class TextReplacement(
   val text: CharSequence,
-  val newSelection: TextRange
+  val newSelection: TextRange,
 ) {
-
   constructor(
     text: CharSequence,
-    newCursorPosition: Int
-  ): this(
+    newCursorPosition: Int,
+  ) : this(
     text = text,
-    newSelection = TextRange(newCursorPosition)
+    newSelection = TextRange(newCursorPosition),
   )
 }

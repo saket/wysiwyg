@@ -1,28 +1,26 @@
 package me.saket.wysiwyg.format
 
-import androidx.compose.ui.text.input.TextFieldValue
-import me.saket.wysiwyg.decodeTextSelection
-import me.saket.wysiwyg.encodeTextSelection
-
 internal fun OnEnterMarkdownFormatters.assertOnEnter(
   input: String,
-  expect: String?
+  expect: String?,
 ) {
-  val output = onEnterPressed(decodeTextSelection(input))
-  val expectedValue = expect?.let(::decodeTextSelection)
-  assertTextsAreEquals(output, expectedValue)
+  val snapshot = decodeTextSelection(input)
+  val output = onEnterPressed(snapshot.text, snapshot.selection)
+  val expected = expect?.let(::decodeTextSelection)
+  assertTextsAreEqual(output, expected)
 }
 
 internal fun MarkdownSyntaxInserter.assertOnInsert(
   input: String,
-  expect: String?
+  expect: String?,
 ) {
-  val output = insertInto(decodeTextSelection(input))
-  val expectedValue = expect?.let(::decodeTextSelection)
-  assertTextsAreEquals(output, expectedValue)
+  val snapshot = decodeTextSelection(input)
+  val output = insertInto(snapshot.text, snapshot.selection)
+  val expected = expect?.let(::decodeTextSelection)
+  assertTextsAreEqual(output, expected)
 }
 
-private fun assertTextsAreEquals(output: TextReplacement?, expected: TextFieldValue?) {
+private fun assertTextsAreEqual(output: TextReplacement?, expected: TextSnapshot?) {
   if (output?.text?.toString() != expected?.text || output?.newSelection != expected?.selection) {
     error(
       buildString {
@@ -38,7 +36,7 @@ private fun assertTextsAreEquals(output: TextReplacement?, expected: TextFieldVa
         } else {
           appendLine("\nActual: \nnull")
         }
-      }
+      },
     )
   }
 }

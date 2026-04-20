@@ -1,52 +1,63 @@
 package me.saket.wysiwyg.format
 
-import com.google.common.truth.Truth.assertThat
-import me.saket.wysiwyg.decodeTextSelection
+import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.ui.text.TextRange
+import assertk.assertThat
+import assertk.assertions.isEqualTo
 import org.junit.Test
 
 class OnEnterMarkdownFormattersTest {
-  @Test fun `detect enter key`() {
+  @Test fun `detect enter key via input transformation`() {
     val formatter = object : OnEnterMarkdownFormatter {
       override fun onEnterPressed(
         text: CharSequence,
         paragraph: TextParagraph,
-        cursorPositionBeforeEnter: Int
+        cursorPositionBeforeEnter: Int,
       ) = TextReplacement("enter detected", newCursorPosition = 0)
     }
     val formatters = OnEnterMarkdownFormatters(listOf(formatter))
+    val transformation = formatters.asInputTransformation()
 
-    assertThat(
-      formatters.formatIfEnterWasPressed(
-        previousText = decodeTextSelection("Alfred: Shall you be taking the Batpo▮"),
-        newText = decodeTextSelection("Alfred: Shall you be taking the Batpod▮")
-      ).text
-    ).isEqualTo("Alfred: Shall you be taking the Batpod")
+    // Typing a non-newline character should leave the text untouched.
+    val beforeDState = TextFieldState(
+      initialText = "Alfred: Shall you be taking the Batpo",
+      initialSelection = TextRange(37),
+    )
+    beforeDState.edit {
+      replace(37, 37, "d")
+      with(transformation) { transformInput() }
+    }
+    assertThat(beforeDState.text.toString()).isEqualTo("Alfred: Shall you be taking the Batpod")
 
-    assertThat(
-      formatters.formatIfEnterWasPressed(
-        previousText = decodeTextSelection("Alfred: Shall you be taking the Batpod▮"),
-        newText = decodeTextSelection("Alfred: Shall you be taking the Batpod\n▮")
-      ).text
-    ).isEqualTo("enter detected")
+    // Typing a newline at the cursor should trigger the formatter.
+    val beforeEnterState = TextFieldState(
+      initialText = "Alfred: Shall you be taking the Batpod",
+      initialSelection = TextRange(38),
+    )
+    beforeEnterState.edit {
+      replace(38, 38, "\n")
+      with(transformation) { transformInput() }
+    }
+    assertThat(beforeEnterState.text.toString()).isEqualTo("enter detected")
   }
 
   @Test fun `enter key on an empty paragraph shouldn't do anything`() {
     val formatters = OnEnterMarkdownFormatters(
-      listOf(OnEnterStartCodeBlock, OnEnterContinueList())
+      listOf(OnEnterStartCodeBlock, OnEnterContinueList()),
     )
 
     formatters.assertOnEnter(
       input = """
               |▮
               """.trimMargin(),
-      expect = null
+      expect = null,
     )
     formatters.assertOnEnter(
       input = """
               |
               |▮
               """.trimMargin(),
-      expect = null
+      expect = null,
     )
   }
 }
