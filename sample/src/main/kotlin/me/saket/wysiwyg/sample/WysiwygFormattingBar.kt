@@ -7,8 +7,11 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.material.icons.Icons
@@ -40,9 +43,10 @@ fun MarkdownFormattingBar(
 ) {
   Row(
     modifier
-      .clipToBounds()
+      .imePadding()
       .background(MaterialTheme.colorScheme.surfaceColorAtElevation(10.dp))
       .horizontalScroll(rememberScrollState())
+      .navigationBarsPadding()
   ) {
     FormatButton(
       icon = Icons.TwoTone.FormatBold,

@@ -6,12 +6,12 @@ plugins {
 
 android {
   namespace "me.saket.wysiwyg.sample"
-  compileSdk 34
+  compileSdk 36
 
   defaultConfig {
     applicationId "me.saket.wysiwyg.sample"
-    minSdk 26
-    targetSdk 34
+    minSdk 31
+    targetSdk 36
     versionCode 1
     versionName "1.0"
   }

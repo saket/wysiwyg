@@ -5,7 +5,9 @@ package me.saket.wysiwyg.sample
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicTextField
@@ -33,13 +35,15 @@ import me.saket.wysiwyg.sample.extensions.RedditSpoilersExtension
 import me.saket.wysiwyg.sample.extensions.RedditSuperscriptExtension
 
 @Composable
-fun WysiwygEditor() {
+fun WysiwygEditor(
+  modifier: Modifier = Modifier,
+) {
   val wysiwyg = rememberWysiwyg(
     theme = wysiwygTheme(),
     markdownParser = remember {
       FlexmarkMarkdownParser(
         RedditSuperscriptExtension(),
-        RedditSpoilersExtension()
+        RedditSpoilersExtension(),
       )
     },
     initialText = {
@@ -53,23 +57,8 @@ fun WysiwygEditor() {
         |
         |Markdown is a **lightweight** and easy-to-use `syntax` for styling all forms of ~~web~~ writing.
         |> The overriding design goal for Markdown's formatting syntax is to make it as readable as possible.
-        |
-        |Markdown is a **lightweight** and easy-to-use `syntax` for styling all forms of ~~web~~ writing.
-        |> The overriding design goal for Markdown's formatting syntax is to make it as readable as possible.
-        |
-        |Markdown is a **lightweight** and easy-to-use `syntax` for styling all forms of ~~web~~ writing.
-        |> The overriding design goal for Markdown's formatting syntax is to make it as readable as possible.
-        |
-        |Markdown is a **lightweight** and easy-to-use `syntax` for styling all forms of ~~web~~ writing.
-        |> The overriding design goal for Markdown's formatting syntax is to make it as readable as possible.
-        |
-        |Markdown is a **lightweight** and easy-to-use `syntax` for styling all forms of ~~web~~ writing.
-        |> The overriding design goal for Markdown's formatting syntax is to make it as readable as possible.
-        |
-        |Markdown is a **lightweight** and easy-to-use `syntax` for styling all forms of ~~web~~ writing.
-        |> The overriding design goal for Markdown's formatting syntax is to make it as readable as possible.
         """.trimMargin()
-    }
+    },
   )
 
   val focusRequester = remember { FocusRequester() }
@@ -78,11 +67,13 @@ fun WysiwygEditor() {
     focusRequester.requestFocus()
   }
 
-  Column {
+  Column(modifier) {
     Box(
       Modifier
         .weight(1f)
         .verticalScroll(rememberScrollState())
+        .systemBarsPadding()
+        .imePadding(),
     ) {
       BasicTextField(
         state = wysiwyg.state,
@@ -91,7 +82,7 @@ fun WysiwygEditor() {
           .focusRequester(focusRequester)
           .fillMaxWidth()
           .wrapContentHeight(align = Alignment.Top, unbounded = true)
-          .padding(24.dp),
+          .padding(16.dp),
         cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
         textStyle = LocalTextStyle.current.copy(color = LocalContentColor.current),
       )
