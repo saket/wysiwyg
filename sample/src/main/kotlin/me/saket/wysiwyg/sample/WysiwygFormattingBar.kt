@@ -15,7 +15,7 @@ import androidx.compose.material.icons.twotone.FormatBold
 import androidx.compose.material.icons.twotone.FormatItalic
 import androidx.compose.material.icons.twotone.FormatQuote
 import androidx.compose.material.icons.twotone.Tag
-import androidx.compose.material.ripple.rememberRipple
+import androidx.compose.material3.ripple
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.surfaceColorAtElevation
@@ -77,7 +77,7 @@ fun FormatButton(
     Modifier
       .clickable(
         interactionSource = remember { MutableInteractionSource() },
-        indication = rememberRipple(bounded = false),
+        indication = ripple(bounded = false),
         onClick = onClick
       )
       .padding(12.dp)
