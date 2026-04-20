@@ -3,7 +3,11 @@ package me.saket.wysiwyg.parser
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.test.runTest
-import me.saket.wysiwyg.SpanTextRange
+import me.saket.wysiwyg.HeadingSpanStyle
+import me.saket.wysiwyg.ListBlockSpanStyle
+import me.saket.wysiwyg.MarkdownSpan
+import me.saket.wysiwyg.MarkerColorSpanStyle
+import me.saket.wysiwyg.MarkdownSpanTextRange
 import org.junit.Test
 
 class FlexmarkMarkdownParserTest {
@@ -33,11 +37,11 @@ class FlexmarkMarkdownParserTest {
       expect = listOf(
         MarkdownSpan(
           style = MarkerColorSpanStyle,
-          range = SpanTextRange(startIndex = 0, endIndexExclusive = 2),
+          range = MarkdownSpanTextRange(startIndex = 0, endIndexExclusive = 2),
         ),
         MarkdownSpan(
           style = ListBlockSpanStyle,
-          range = SpanTextRange(startIndex = 0, endIndexExclusive = 7)
+          range = MarkdownSpanTextRange(startIndex = 0, endIndexExclusive = 7)
         )
       )
     )
@@ -52,11 +56,11 @@ class FlexmarkMarkdownParserTest {
       expect = listOf(
         MarkdownSpan(
           style = MarkerColorSpanStyle,
-          range = SpanTextRange(startIndex = 0, endIndexExclusive = 2)
+          range = MarkdownSpanTextRange(startIndex = 0, endIndexExclusive = 2)
         ),
         MarkdownSpan(
           style = ListBlockSpanStyle,
-          range = SpanTextRange(startIndex = 0, endIndexExclusive = 11)
+          range = MarkdownSpanTextRange(startIndex = 0, endIndexExclusive = 11)
         )
       )
     )
@@ -77,11 +81,11 @@ class FlexmarkMarkdownParserTest {
       expect = listOf(
         MarkdownSpan(
           style = MarkerColorSpanStyle,
-          range = SpanTextRange(startIndex = 0, endIndexExclusive = 1)
+          range = MarkdownSpanTextRange(startIndex = 0, endIndexExclusive = 1)
         ),
         MarkdownSpan(
           style = HeadingSpanStyle(level = 1),
-          range = SpanTextRange(startIndex = 0, endIndexExclusive = 8)
+          range = MarkdownSpanTextRange(startIndex = 0, endIndexExclusive = 8)
         ),
       )
     )
@@ -93,11 +97,11 @@ class FlexmarkMarkdownParserTest {
       expect = listOf(
         MarkdownSpan(
           style = MarkerColorSpanStyle,
-          range = SpanTextRange(startIndex = 0, endIndexExclusive = 2)
+          range = MarkdownSpanTextRange(startIndex = 0, endIndexExclusive = 2)
         ),
         MarkdownSpan(
           style = HeadingSpanStyle(level = 2),
-          range = SpanTextRange(startIndex = 0, endIndexExclusive = 10)
+          range = MarkdownSpanTextRange(startIndex = 0, endIndexExclusive = 10)
         ),
       )
     )

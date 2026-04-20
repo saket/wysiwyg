@@ -19,7 +19,21 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
-import me.saket.wysiwyg.SpanTextRange
+import me.saket.wysiwyg.BlockQuoteBodySpanStyle
+import me.saket.wysiwyg.BlockQuoteParagraphLineSpanStyle
+import me.saket.wysiwyg.BoldSpanStyle
+import me.saket.wysiwyg.FencedCodeBlockSpanStyle
+import me.saket.wysiwyg.HeadingSpanStyle
+import me.saket.wysiwyg.InlineCodeSpanStyle
+import me.saket.wysiwyg.ItalicSpanStyle
+import me.saket.wysiwyg.LinkTextSpanStyle
+import me.saket.wysiwyg.LinkUrlSpanStyle
+import me.saket.wysiwyg.ListBlockSpanStyle
+import me.saket.wysiwyg.MarkdownSpan
+import me.saket.wysiwyg.MarkerColorSpanStyle
+import me.saket.wysiwyg.MarkdownSpanTextRange
+import me.saket.wysiwyg.StrikeThroughSpanStyle
+import me.saket.wysiwyg.ThematicBreakSpanStyle
 import me.saket.wysiwyg.internal.fastForEach
 import me.saket.wysiwyg.parser.MarkdownParser.ParseResult
 import com.vladsch.flexmark.parser.Parser as FlexmarkParser
@@ -86,7 +100,7 @@ class FlexmarkMarkdownParser(
         buffer.add(
           MarkdownSpan(
             style = ItalicSpanStyle,
-            range = SpanTextRange(startOffset, endOffset)
+            range = MarkdownSpanTextRange(startOffset, endOffset)
           )
         )
       }
@@ -96,7 +110,7 @@ class FlexmarkMarkdownParser(
         buffer.add(
           MarkdownSpan(
             style = BoldSpanStyle,
-            range = SpanTextRange(startOffset, endOffset)
+            range = MarkdownSpanTextRange(startOffset, endOffset)
           )
         )
       }
@@ -104,7 +118,7 @@ class FlexmarkMarkdownParser(
         buffer.add(
           MarkdownSpan(
             style = StrikeThroughSpanStyle,
-            range = SpanTextRange(startOffset, endOffset)
+            range = MarkdownSpanTextRange(startOffset, endOffset)
           )
         )
       }
@@ -114,13 +128,13 @@ class FlexmarkMarkdownParser(
         buffer.add(
           MarkdownSpan(
             style = LinkTextSpanStyle,
-            range = SpanTextRange(textOpeningMarker.endOffset, textClosingMarker.startOffset)
+            range = MarkdownSpanTextRange(textOpeningMarker.endOffset, textClosingMarker.startOffset)
           )
         )
         buffer.add(
           MarkdownSpan(
             style = LinkUrlSpanStyle,
-            range = SpanTextRange(linkOpeningMarker.startOffset, linkClosingMarker.endOffset)
+            range = MarkdownSpanTextRange(linkOpeningMarker.startOffset, linkClosingMarker.endOffset)
           )
         )
       }
@@ -130,7 +144,7 @@ class FlexmarkMarkdownParser(
         buffer.add(
           MarkdownSpan(
             style = InlineCodeSpanStyle,
-            range = SpanTextRange(startOffset, endOffset)
+            range = MarkdownSpanTextRange(startOffset, endOffset)
           )
         )
       }
@@ -141,7 +155,7 @@ class FlexmarkMarkdownParser(
           buffer.add(
             MarkdownSpan(
               style = FencedCodeBlockSpanStyle,
-              range = SpanTextRange(startOffset, closingMarker.endOffset)
+              range = MarkdownSpanTextRange(startOffset, closingMarker.endOffset)
             )
           )
         }
@@ -150,14 +164,14 @@ class FlexmarkMarkdownParser(
         buffer.add(
           MarkdownSpan(
             style = BlockQuoteBodySpanStyle,
-            range = SpanTextRange(startOffset, endOffset)
+            range = MarkdownSpanTextRange(startOffset, endOffset)
           )
         )
         val withEndingLineBreaksTrimmed = chars.countTrailing(CharPredicate.anyOf('\n'))
         buffer.add(
           MarkdownSpan(
             style = BlockQuoteParagraphLineSpanStyle,
-            range = SpanTextRange(startOffset, endOffset - withEndingLineBreaksTrimmed)
+            range = MarkdownSpanTextRange(startOffset, endOffset - withEndingLineBreaksTrimmed)
           )
         )
         buffer.addMarkerSpan(openingMarker)
@@ -174,7 +188,7 @@ class FlexmarkMarkdownParser(
         buffer.add(
           MarkdownSpan(
             style = ListBlockSpanStyle,
-            range = SpanTextRange(startOffset, correctEndOffset)
+            range = MarkdownSpanTextRange(startOffset, correctEndOffset)
           )
         )
       }
@@ -193,7 +207,7 @@ class FlexmarkMarkdownParser(
           buffer.add(
             MarkdownSpan(
               style = HeadingSpanStyle(level),
-              range = SpanTextRange(startOffset, endOffset)
+              range = MarkdownSpanTextRange(startOffset, endOffset)
             )
           )
           buffer.addMarkerSpan(openingMarker)
@@ -203,13 +217,13 @@ class FlexmarkMarkdownParser(
         buffer.add(
           MarkdownSpan(
             style = ThematicBreakSpanStyle,
-            range = SpanTextRange(startOffset, endOffset)
+            range = MarkdownSpanTextRange(startOffset, endOffset)
           )
         )
         buffer.add(
           MarkdownSpan(
             style = MarkerColorSpanStyle,
-            range = SpanTextRange(startOffset, endOffset)
+            range = MarkdownSpanTextRange(startOffset, endOffset)
           )
         )
       }
@@ -222,7 +236,7 @@ class FlexmarkMarkdownParser(
       add(
         MarkdownSpan(
           style = MarkerColorSpanStyle,
-          range = SpanTextRange(sequence.startOffset, sequence.endOffset)
+          range = MarkdownSpanTextRange(sequence.startOffset, sequence.endOffset)
         )
       )
     }

@@ -5,9 +5,9 @@ import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.sp
-import me.saket.wysiwyg.SpanTextRange
+import me.saket.wysiwyg.MarkdownSpanTextRange
 import me.saket.wysiwyg.WysiwygTheme
-import me.saket.wysiwyg.parser.MarkdownSpan
+import me.saket.wysiwyg.MarkdownSpan
 
 @JvmInline
 internal value class MarkdownRenderer(
@@ -42,7 +42,7 @@ interface MarkdownRendererScope {
   val theme: WysiwygTheme
   val unstyledText: AnnotatedString
 
-  fun AnnotatedString.Builder.addStyle(style: SpanStyle, range: SpanTextRange) {
+  fun AnnotatedString.Builder.addStyle(style: SpanStyle, range: MarkdownSpanTextRange) {
     addStyle(
       style = style,
       start = range.startIndex.coerceAtMost(unstyledText.lastIndex),
@@ -50,7 +50,7 @@ interface MarkdownRendererScope {
     )
   }
 
-  fun AnnotatedString.Builder.addStyle(style: ParagraphStyle, range: SpanTextRange) {
+  fun AnnotatedString.Builder.addStyle(style: ParagraphStyle, range: MarkdownSpanTextRange) {
     addStyle(
       style = style,
       start = range.startIndex.coerceAtMost(unstyledText.lastIndex),

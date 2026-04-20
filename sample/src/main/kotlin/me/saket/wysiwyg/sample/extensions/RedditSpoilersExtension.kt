@@ -10,12 +10,12 @@ import com.vladsch.flexmark.util.ast.Document
 import com.vladsch.flexmark.util.ast.Node
 import com.vladsch.flexmark.util.ast.NodeTracker
 import com.vladsch.flexmark.util.sequence.BasedSequence
-import me.saket.wysiwyg.SpanTextRange
+import me.saket.wysiwyg.MarkdownSpanTextRange
 import me.saket.wysiwyg.internal.MarkdownRendererScope
 import me.saket.wysiwyg.parser.FlexmarkMarkdownParserExtension
-import me.saket.wysiwyg.parser.MarkdownSpan
-import me.saket.wysiwyg.parser.MarkdownSpanStyle
-import me.saket.wysiwyg.parser.MarkerColorSpanStyle
+import me.saket.wysiwyg.MarkdownSpan
+import me.saket.wysiwyg.MarkdownSpanStyle
+import me.saket.wysiwyg.MarkerColorSpanStyle
 
 class RedditSpoilersExtension : FlexmarkMarkdownParserExtension {
   override fun buildParser(builder: Parser.Builder) {
@@ -37,19 +37,19 @@ class RedditSpoilersExtension : FlexmarkMarkdownParserExtension {
       buffer.add(
         MarkdownSpan(
           style = MarkerColorSpanStyle,
-          range = SpanTextRange(openingMarker.startOffset, openingMarker.endOffset)
+          range = MarkdownSpanTextRange(openingMarker.startOffset, openingMarker.endOffset)
         )
       )
       buffer.add(
         MarkdownSpan(
           style = MarkerColorSpanStyle,
-          range = SpanTextRange(closingMarker.startOffset, closingMarker.endOffset)
+          range = MarkdownSpanTextRange(closingMarker.startOffset, closingMarker.endOffset)
         )
       )
       buffer.add(
         MarkdownSpan(
           style = SpoilersSpanStyle,
-          range = SpanTextRange(body.startOffset, body.endOffset)
+          range = MarkdownSpanTextRange(body.startOffset, body.endOffset)
         )
       )
     }
@@ -94,7 +94,7 @@ class RedditSpoilersNode(
 }
 
 object SpoilersSpanStyle : MarkdownSpanStyle() {
-  override fun MarkdownRendererScope.render(text: AnnotatedString.Builder, range: SpanTextRange) {
+  override fun MarkdownRendererScope.render(text: AnnotatedString.Builder, range: MarkdownSpanTextRange) {
     text.addStyle(
       style = SpanStyle(
         color = theme.spoilersTextColor,

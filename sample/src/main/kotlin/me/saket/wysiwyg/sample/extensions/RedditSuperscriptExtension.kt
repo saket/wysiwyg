@@ -11,12 +11,12 @@ import com.vladsch.flexmark.util.ast.Document
 import com.vladsch.flexmark.util.ast.Node
 import com.vladsch.flexmark.util.ast.NodeTracker
 import com.vladsch.flexmark.util.sequence.BasedSequence
-import me.saket.wysiwyg.SpanTextRange
+import me.saket.wysiwyg.MarkdownSpanTextRange
 import me.saket.wysiwyg.internal.MarkdownRendererScope
 import me.saket.wysiwyg.parser.FlexmarkMarkdownParserExtension
-import me.saket.wysiwyg.parser.MarkdownSpan
-import me.saket.wysiwyg.parser.MarkdownSpanStyle
-import me.saket.wysiwyg.parser.MarkerColorSpanStyle
+import me.saket.wysiwyg.MarkdownSpan
+import me.saket.wysiwyg.MarkdownSpanStyle
+import me.saket.wysiwyg.MarkerColorSpanStyle
 
 class RedditSuperscriptExtension : FlexmarkMarkdownParserExtension {
   override fun buildParser(builder: Parser.Builder) {
@@ -38,21 +38,21 @@ class RedditSuperscriptExtension : FlexmarkMarkdownParserExtension {
       buffer.add(
         MarkdownSpan(
           style = MarkerColorSpanStyle,
-          range = SpanTextRange(openingMarker.startOffset, openingMarker.endOffset)
+          range = MarkdownSpanTextRange(openingMarker.startOffset, openingMarker.endOffset)
         )
       )
       if (closingMarker != null) {
         buffer.add(
           MarkdownSpan(
             style = MarkerColorSpanStyle,
-            range = SpanTextRange(closingMarker.startOffset, closingMarker.endOffset)
+            range = MarkdownSpanTextRange(closingMarker.startOffset, closingMarker.endOffset)
           )
         )
       }
       buffer.add(
         MarkdownSpan(
           style = SuperscriptSpanStyle(isMultiWord = closingMarker != null),
-          range = SpanTextRange(startOffset, endOffset)
+          range = MarkdownSpanTextRange(startOffset, endOffset)
         )
       )
     }
@@ -124,7 +124,7 @@ class RedditSuperscriptNode(
 }
 
 data class SuperscriptSpanStyle(val isMultiWord: Boolean) : MarkdownSpanStyle() {
-  override fun MarkdownRendererScope.render(text: AnnotatedString.Builder, range: SpanTextRange) {
+  override fun MarkdownRendererScope.render(text: AnnotatedString.Builder, range: MarkdownSpanTextRange) {
     text.addStyle(
       style = SpanStyle(baselineShift = BaselineShift.Superscript),
       range = range
