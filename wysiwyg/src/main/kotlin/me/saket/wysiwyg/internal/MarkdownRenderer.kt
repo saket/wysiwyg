@@ -46,7 +46,7 @@ interface MarkdownRendererScope {
     addStyle(
       style = style,
       start = range.startIndex.coerceAtMost(unstyledText.lastIndex),
-      end = range.endIndexExclusive.coerceAtMost(length),  // todo: remove these coerces. coerce in offsetSpansOnTextChange() instead.
+      end = range.endIndexExclusive.coerceAtMost(length),
     )
   }
 

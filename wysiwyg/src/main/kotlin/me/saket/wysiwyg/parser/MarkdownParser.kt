@@ -27,9 +27,6 @@ interface MarkdownParser {
  * Spans are designed to be as granular as possible. For example, when a link markdown is
  * detected, instead of generating one span for representing the entire link, two spans
  * are generated -- one for coloring the link text and one for coloring the link url.
- *
- * Granularity of spans allows parser implementations to individually adjust their bounds
- * when re-applying stale spans across text changes for zero-flicker UX.
  */
 data class MarkdownSpan(
   val style: MarkdownSpanStyle,
