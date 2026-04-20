@@ -31,7 +31,7 @@ interface FlexmarkMarkdownParserExtension {
    * Once an AST is generated, this function is called for each markdown
    * node in the tree to create markdown spans for them.
    */
-  fun Node.addSpansInto(spans: MutableList<MarkdownSpan>)
+  fun Node.addSpansInto(buffer: MutableList<MarkdownSpan>)
 }
 
 class FlexmarkMarkdownParser(

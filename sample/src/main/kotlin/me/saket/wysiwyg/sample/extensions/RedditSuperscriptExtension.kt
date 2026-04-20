@@ -33,23 +33,23 @@ class RedditSuperscriptExtension : FlexmarkMarkdownParserExtension {
     )
   }
 
-  override fun Node.addSpansInto(spans: MutableList<MarkdownSpan>) {
+  override fun Node.addSpansInto(buffer: MutableList<MarkdownSpan>) {
     if (this is RedditSuperscriptNode) {
-      spans.add(
+      buffer.add(
         MarkdownSpan(
           style = MarkerColorSpanStyle,
           range = SpanTextRange(openingMarker.startOffset, openingMarker.endOffset)
         )
       )
       if (closingMarker != null) {
-        spans.add(
+        buffer.add(
           MarkdownSpan(
             style = MarkerColorSpanStyle,
             range = SpanTextRange(closingMarker.startOffset, closingMarker.endOffset)
           )
         )
       }
-      spans.add(
+      buffer.add(
         MarkdownSpan(
           style = SuperscriptSpanStyle(isMultiWord = closingMarker != null),
           range = SpanTextRange(startOffset, endOffset)
