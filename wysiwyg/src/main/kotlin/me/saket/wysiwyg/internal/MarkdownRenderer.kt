@@ -11,7 +11,7 @@ import me.saket.wysiwyg.parser.MarkdownSpan
 
 @JvmInline
 internal value class MarkdownRenderer(
-  private val theme: WysiwygTheme
+  private val theme: WysiwygTheme,
 ) {
   fun buildAnnotatedString(text: AnnotatedString, spans: List<MarkdownSpan>): AnnotatedString {
     // TODO: remove once this is available in a stable release:
@@ -46,7 +46,7 @@ interface MarkdownRendererScope {
     addStyle(
       style = style,
       start = range.startIndex.coerceAtMost(unstyledText.lastIndex),
-      end = range.endIndexExclusive.coerceAtMost(length)  // todo: remove these coerces. coerce in offsetSpansOnTextChange() instead.
+      end = range.endIndexExclusive.coerceAtMost(length),  // todo: remove these coerces. coerce in offsetSpansOnTextChange() instead.
     )
   }
 
@@ -54,7 +54,7 @@ interface MarkdownRendererScope {
     addStyle(
       style = style,
       start = range.startIndex.coerceAtMost(unstyledText.lastIndex),
-      end = range.endIndexExclusive.coerceAtMost(length)
+      end = range.endIndexExclusive.coerceAtMost(length),
     )
     // Compose UI adds a lot of vertical paddings around paragraphs.
     // Reduce the font size of line breaks to make them smaller.
@@ -63,7 +63,11 @@ interface MarkdownRendererScope {
       addStyle(SpanStyle(fontSize = 1.sp), start = range.startIndex - 1, end = range.startIndex)
     }
     if (unstyledText.getOrNull(range.endIndexExclusive) == '\n') {
-      addStyle(SpanStyle(fontSize = 1.sp), start = range.endIndexExclusive - 1, end = range.endIndexExclusive + 1)
+      addStyle(
+        SpanStyle(fontSize = 1.sp),
+        start = range.endIndexExclusive - 1,
+        end = range.endIndexExclusive + 1,
+      )
     }
   }
 }
