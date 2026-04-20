@@ -1,9 +1,5 @@
 package me.saket.wysiwyg.format
 
-import androidx.compose.foundation.text.input.TextFieldState
-import androidx.compose.ui.text.TextRange
-import assertk.assertThat
-import assertk.assertions.isEqualTo
 import org.junit.Test
 
 class OnEnterMarkdownFormattersTest {
@@ -15,30 +11,21 @@ class OnEnterMarkdownFormattersTest {
         cursorPositionBeforeEnter: Int,
       ) = TextReplacement("enter detected", newCursorPosition = 0)
     }
-    val formatters = OnEnterMarkdownFormatters(listOf(formatter))
-    val transformation = formatters.asInputTransformation()
+    val transformation = OnEnterMarkdownFormatters(listOf(formatter)).asInputTransformation()
 
     // Typing a non-newline character should leave the text untouched.
-    val beforeDState = TextFieldState(
-      initialText = "Alfred: Shall you be taking the Batpo",
-      initialSelection = TextRange(37),
+    transformation.assertOnChange(
+      before = "Alfred: Shall you be taking the Batpo▮",
+      after = "Alfred: Shall you be taking the Batpod▮",
+      expect = "Alfred: Shall you be taking the Batpod▮",
     )
-    beforeDState.edit {
-      replace(37, 37, "d")
-      with(transformation) { transformInput() }
-    }
-    assertThat(beforeDState.text.toString()).isEqualTo("Alfred: Shall you be taking the Batpod")
 
     // Typing a newline at the cursor should trigger the formatter.
-    val beforeEnterState = TextFieldState(
-      initialText = "Alfred: Shall you be taking the Batpod",
-      initialSelection = TextRange(38),
+    transformation.assertOnChange(
+      before = "Alfred: Shall you be taking the Batpod▮",
+      after = "Alfred: Shall you be taking the Batpod\n▮",
+      expect = "▮enter detected",
     )
-    beforeEnterState.edit {
-      replace(38, 38, "\n")
-      with(transformation) { transformInput() }
-    }
-    assertThat(beforeEnterState.text.toString()).isEqualTo("enter detected")
   }
 
   @Test fun `enter key on an empty paragraph shouldn't do anything`() {
