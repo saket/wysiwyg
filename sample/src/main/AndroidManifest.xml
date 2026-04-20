@@ -14,7 +14,7 @@
     <activity
       android:name="me.saket.wysiwyg.sample.SampleActivity"
       android:exported="true"
-      android:windowSoftInputMode="adjustResize">
+      android:windowSoftInputMode="adjustNothing">
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />
         <category android:name="android.intent.category.LAUNCHER" />

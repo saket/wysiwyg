@@ -70,19 +70,18 @@ fun WysiwygEditor(
   Column(modifier) {
     Box(
       Modifier
+        .fillMaxWidth()
         .weight(1f)
+        .fitInside(WindowInsetsRulers.SystemBars.current)
+        .fitInside(WindowInsetsRulers.Ime.current)
         .verticalScroll(rememberScrollState())
-        .systemBarsPadding()
-        .imePadding(),
+        .padding(16.dp),
     ) {
       BasicTextField(
         state = wysiwyg.state,
         inputTransformation = wysiwyg.inputTransformation,
         modifier = Modifier
-          .focusRequester(focusRequester)
-          .fillMaxWidth()
-          .wrapContentHeight(align = Alignment.Top, unbounded = true)
-          .padding(16.dp),
+          .focusRequester(focusRequester),
         cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
         textStyle = LocalTextStyle.current.copy(color = LocalContentColor.current),
       )
