@@ -8,6 +8,7 @@ androidx-activity = "1.13.0"  # https://developer.android.com/jetpack/androidx/r
 androidx-appcompat = "1.7.1"
 flexmark = "0.64.8"
 extendedspans = "1.4.0"
+kotlinx-coroutines = "1.9.0"
 junit = "4.13.2"
 truth = "1.4.5"
 assertk = "0.28.1"
@@ -25,6 +26,7 @@ androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "a
 flexmark-java = { module = "com.vladsch.flexmark:flexmark-java", version.ref = "flexmark" }
 flexmark-ext-gfm-strikethrough = { module = "com.vladsch.flexmark:flexmark-ext-gfm-strikethrough", version.ref = "flexmark" }
 extendedspans = { module = "me.saket.extendedspans:extendedspans", version.ref = "extendedspans" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
 junit = { module = "junit:junit", version.ref = "junit" }
 truth = { module = "com.google.truth:truth", version.ref = "truth" }
 assertk = { module = "com.willowtreeapps.assertk:assertk", version.ref = "assertk" }

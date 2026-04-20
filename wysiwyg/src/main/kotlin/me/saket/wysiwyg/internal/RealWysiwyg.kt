@@ -9,13 +9,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.text.AnnotatedString
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.withContext
 import me.saket.wysiwyg.BuildConfig
 import me.saket.wysiwyg.Wysiwyg
 import me.saket.wysiwyg.WysiwygTheme
 import me.saket.wysiwyg.format.OnEnterMarkdownFormatters
+import me.saket.wysiwyg.parser.ChangeListSnapshot
 import me.saket.wysiwyg.parser.MarkdownParser
 
 @Stable
@@ -31,13 +30,12 @@ internal class RealWysiwyg internal constructor(
   suspend fun syncOutputTransformationWithText() {
     snapshotFlow { textState.text }.collectLatest { text ->
       try {
-        val parsed = withContext(Dispatchers.Default) {
-          parser.parse(text.toString())
+        parser.parse(text.toString(), ChangeListSnapshot.Empty).collect { parsed ->
+          outputTransformation = StyledOutputTransformation(
+            parseResult = parsed,
+            renderer = MarkdownRenderer(theme),
+          )
         }
-        outputTransformation = StyledOutputTransformation(
-          parseResult = parsed,
-          renderer = MarkdownRenderer(theme),
-        )
       } catch (e: Throwable) {
         if (BuildConfig.DEBUG) {
           throw e

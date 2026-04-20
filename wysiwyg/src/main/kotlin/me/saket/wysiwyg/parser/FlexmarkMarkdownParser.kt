@@ -15,6 +15,10 @@ import com.vladsch.flexmark.ext.gfm.strikethrough.StrikethroughExtension
 import com.vladsch.flexmark.util.ast.Node
 import com.vladsch.flexmark.util.misc.CharPredicate
 import com.vladsch.flexmark.util.sequence.BasedSequence
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.withContext
 import me.saket.wysiwyg.SpanTextRange
 import me.saket.wysiwyg.internal.fastForEach
 import me.saket.wysiwyg.parser.MarkdownParser.ParseResult
@@ -56,17 +60,22 @@ class FlexmarkMarkdownParser(
     .apply { extensions.forEach { it.buildParser(this) } }
     .build()
 
-  override fun parse(text: String): ParseResult {
-    return ParseResult(
-      spans = mutableListOf<MarkdownSpan>().apply {
+  override fun parse(text: String, changes: ChangeListSnapshot): Flow<ParseResult> {
+    return flow {
+      // Flexmark is not incremental, so [changes] is ignored and the flow emits exactly once.
+      val buffer = mutableListOf<MarkdownSpan>()
+      withContext(Dispatchers.Default) {
         parser.parse(text).traverse { node ->
-          node.addSpansInto(this)
-          extensions.fastForEach {
-            it.run { node.addSpansInto(this@apply) }
+          node.addSpansInto(buffer)
+          extensions.fastForEach { extension ->
+            with(extension) {
+              node.addSpansInto(buffer)
+            }
           }
         }
       }
-    )
+      emit(ParseResult(spans = buffer))
+    }
   }
 
   private fun Node.addSpansInto(buffer: MutableList<MarkdownSpan>) {
@@ -230,8 +239,8 @@ class FlexmarkMarkdownParser(
       // Wysiwyg keeps it simple and avoids nested markdown blocks.
       // For example, nested block/italic styling inside headings feels overkill.
       val isNestedSyntax = (next is ListBlock && next.parent is ListItem)
-        || next.parent is BlockQuote
-        || next.parent is FencedCodeBlock
+          || next.parent is BlockQuote
+          || next.parent is FencedCodeBlock
 
       if (!isNestedSyntax) {
         action(next)

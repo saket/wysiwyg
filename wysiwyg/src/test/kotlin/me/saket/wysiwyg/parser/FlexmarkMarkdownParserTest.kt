@@ -1,6 +1,8 @@
 package me.saket.wysiwyg.parser
 
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.flow.last
+import kotlinx.coroutines.test.runTest
 import me.saket.wysiwyg.SpanTextRange
 import org.junit.Test
 
@@ -104,8 +106,8 @@ class FlexmarkMarkdownParserTest {
   private fun assertSpansFor(
     input: String,
     expect: List<MarkdownSpan>
-  ) {
-    val result = parser.parse(input)
+  ) = runTest {
+    val result = parser.parse(input, ChangeListSnapshot.Empty).last()
     assertThat(result.spans).containsExactlyElementsIn(expect)
   }
 }
