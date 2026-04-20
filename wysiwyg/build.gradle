@@ -36,6 +36,8 @@ dependencies {
   implementation libs.androidx.compose.ui
   implementation libs.androidx.compose.foundation
 
+  lintChecks libs.composeLintChecks
+
   testImplementation libs.junit
   testImplementation libs.truth
   testImplementation libs.assertk
