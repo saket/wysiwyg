@@ -2,32 +2,34 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 
 android {
-  compileSdkVersion versions.compileSdk
+  namespace "me.saket.wysiwyg.sample"
+  compileSdk versions.compileSdk
 
   defaultConfig {
     applicationId "me.saket.wysiwyg.sample"
-    minSdkVersion 26
-    targetSdkVersion versions.compileSdk
+    minSdk 26
+    targetSdk versions.compileSdk
     versionCode 1
     versionName "1.0"
   }
 
   buildFeatures {
     compose = true
+    buildConfig = true
   }
   composeOptions {
     kotlinCompilerExtensionVersion = versions.compose
   }
 
   kotlinOptions {
-    jvmTarget = "11"
+    jvmTarget = "17"
   }
 
   java {
-    toolchain.languageVersion.set(JavaLanguageVersion.of(11))
+    toolchain.languageVersion.set(JavaLanguageVersion.of(17))
   }
 
-  lintOptions {
+  lint {
     abortOnError true
   }
 }
@@ -35,7 +37,7 @@ android {
 dependencies {
   implementation project(':wysiwyg')
   implementation "androidx.appcompat:appcompat:1.4.2"
-  implementation "androidx.activity:activity-compose:1.6.0-alpha03"
+  implementation "androidx.activity:activity-compose:1.8.2"
   implementation "androidx.compose.ui:ui:$versions.composeUi"
   implementation "androidx.compose.foundation:foundation:$versions.composeUi"
   implementation "androidx.compose.material3:material3:1.0.0-alpha15"

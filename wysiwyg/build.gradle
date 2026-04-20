@@ -4,24 +4,26 @@ apply plugin: 'com.vanniktech.maven.publish'
 apply plugin: 'app.cash.paparazzi'
 
 android {
+  namespace "me.saket.wysiwyg"
   resourcePrefix "wysiwyg_"
 
-  compileSdkVersion versions.compileSdk
-  defaultConfig.minSdkVersion 21
+  compileSdk versions.compileSdk
+  defaultConfig.minSdk 21
 
   buildFeatures {
     compose = true
+    buildConfig = true
   }
   composeOptions {
     kotlinCompilerExtensionVersion = versions.compose
   }
   kotlinOptions {
-    jvmTarget = "11"
+    jvmTarget = "17"
   }
   java {
-    toolchain.languageVersion.set(JavaLanguageVersion.of(11))
+    toolchain.languageVersion.set(JavaLanguageVersion.of(17))
   }
-  lintOptions {
+  lint {
     abortOnError true
   }
 }
