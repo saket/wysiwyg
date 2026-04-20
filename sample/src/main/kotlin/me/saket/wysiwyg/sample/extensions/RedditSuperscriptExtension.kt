@@ -33,6 +33,10 @@ class RedditSuperscriptExtension : FlexmarkMarkdownParserExtension {
     )
   }
 
+  override fun hasClosingMarker(style: MarkdownSpanStyle): Boolean {
+    return style is SuperscriptSpanStyle && style.isMultiWord
+  }
+
   override fun Node.addSpansInto(spans: MutableList<MarkdownSpan>) {
     if (this is RedditSuperscriptNode) {
       spans.add(
@@ -123,7 +127,7 @@ class RedditSuperscriptNode(
   }
 }
 
-data class SuperscriptSpanStyle(val isMultiWord: Boolean) : MarkdownSpanStyle(hasClosingMarker = isMultiWord) {
+data class SuperscriptSpanStyle(val isMultiWord: Boolean) : MarkdownSpanStyle() {
   override fun MarkdownRendererScope.render(text: AnnotatedString.Builder, range: SpanTextRange) {
     text.addStyle(
       style = SpanStyle(baselineShift = BaselineShift.Superscript),

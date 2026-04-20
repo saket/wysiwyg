@@ -32,6 +32,10 @@ class RedditSpoilersExtension : FlexmarkMarkdownParserExtension {
     )
   }
 
+  override fun hasClosingMarker(style: MarkdownSpanStyle): Boolean {
+    return style is SpoilersSpanStyle
+  }
+
   override fun Node.addSpansInto(spans: MutableList<MarkdownSpan>) {
     if (this is RedditSpoilersNode) {
       spans.add(
@@ -93,7 +97,7 @@ class RedditSpoilersNode(
   }
 }
 
-object SpoilersSpanStyle : MarkdownSpanStyle(hasClosingMarker = true) {
+object SpoilersSpanStyle : MarkdownSpanStyle() {
   override fun MarkdownRendererScope.render(text: AnnotatedString.Builder, range: SpanTextRange) {
     text.addStyle(
       style = SpanStyle(

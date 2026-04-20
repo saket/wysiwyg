@@ -1,6 +1,7 @@
 package me.saket.wysiwyg.parser
 
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.util.fastAny
 import com.vladsch.flexmark.ast.BlockQuote
 import com.vladsch.flexmark.ast.Code
 import com.vladsch.flexmark.ast.Emphasis
@@ -34,6 +35,17 @@ interface FlexmarkMarkdownParserExtension {
    * node in the tree to create markdown spans for them.
    */
   fun Node.addSpansInto(spans: MutableList<MarkdownSpan>)
+
+  /**
+   * Return `true` if [style] is one this extension emits and carries an explicit closing marker
+   * (e.g. the trailing `!<` of a Reddit spoiler).
+   *
+   * Used by the flicker-avoidance heuristic inside [FlexmarkMarkdownParser]: when text is deleted at
+   * a span's last index, spans with a closing marker are discarded (the marker was likely what got
+   * deleted), while spans without one are kept and shrunk. Extensions only need to override this if
+   * they want correct behavior in the brief window before the real parser re-parses.
+   */
+  fun hasClosingMarker(style: MarkdownSpanStyle): Boolean = false
 }
 
 class FlexmarkMarkdownParser(
@@ -244,7 +256,20 @@ class FlexmarkMarkdownParser(
     }
   }
 
-  override fun offsetSpansOnTextChange(
+  /**
+   * When text is changed, Compose emits a new text value and discards any previously generated span styles.
+   * Parsing this new text value takes at least a few milliseconds, enough for the user to see markdown styling
+   * flicker on every keystroke.
+   *
+   * To prevent this, Wysiwyg retains the span styles generated for the previous text value and immediately
+   * re-applies them. This function manually adjusts their spans to account for text that may have changed
+   * between their bounds. For example, if a letter was inserted within a bold span, this function shifts all
+   * spans after the inserted index by one position.
+   *
+   * The implementation does not need to be perfect because the new text will be re-parsed in a few milliseconds.
+   * It just needs to be good enough to give an illusion that parsing is happening instantly on every keystroke.
+   */
+  internal fun offsetSpansOnTextChange(
     newValue: TextFieldValue,
     previousValue: TextFieldValue,
     previousSpans: List<MarkdownSpan>
@@ -263,7 +288,7 @@ class FlexmarkMarkdownParser(
       // Remove spans within the affected text range.
       previousSpans.fastForEachReverseIndexed { index, span ->
         if (span.range.startIndex in previousValue.selection
-          || (span.style.hasClosingMarker && span.range.endIndexInclusive in previousValue.selection)
+          || (span.style.hasClosingMarker() && span.range.endIndexInclusive in previousValue.selection)
         ) {
           previousSpans.removeAt(index)
         }
@@ -275,7 +300,7 @@ class FlexmarkMarkdownParser(
       previousSpans.fastForEachReverseIndexed { index, span ->
         val newCursorAt = newValue.selection.min
         if (span.range.startIndex == newCursorAt
-          || (span.style.hasClosingMarker && span.range.endIndexInclusive == newCursorAt)
+          || (span.style.hasClosingMarker() && span.range.endIndexInclusive == newCursorAt)
         ) {
           previousSpans.removeAt(index)
         }
@@ -308,5 +333,32 @@ class FlexmarkMarkdownParser(
     }
 
     return previousSpans
+  }
+
+  /**
+   * Knowledge about which built-in styles carry a closing marker stays local to this parser rather
+   * than leaking into the shared [MarkdownSpanStyle] type. Extensions opt in via
+   * [FlexmarkMarkdownParserExtension.hasClosingMarker].
+   */
+  private fun MarkdownSpanStyle.hasClosingMarker(): Boolean {
+    return when (this) {
+      MarkerColorSpanStyle,
+      BoldSpanStyle,
+      ItalicSpanStyle,
+      StrikeThroughSpanStyle,
+      LinkTextSpanStyle,
+      LinkUrlSpanStyle,
+      InlineCodeSpanStyle,
+      FencedCodeBlockSpanStyle,
+      ThematicBreakSpanStyle -> true
+
+      BlockQuoteBodySpanStyle,
+      BlockQuoteParagraphLineSpanStyle,
+      ListBlockSpanStyle -> false
+
+      is HeadingSpanStyle -> false
+
+      else -> extensions.fastAny { it.hasClosingMarker(this@hasClosingMarker) }
+    }
   }
 }

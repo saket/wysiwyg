@@ -6,7 +6,6 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextIndent
 import androidx.compose.ui.unit.em
@@ -20,25 +19,6 @@ interface MarkdownParser {
   value class ParseResult(
     val spans: List<MarkdownSpan>
   )
-
-  /**
-   * When text is changed, Compose emits a new text value and discards any previously generated span styles.
-   * Parsing this new text value will take at least a few milliseconds, enough for the user to see markdown
-   * styling flicker on every key stroke.
-   *
-   * To prevent this, Wysiwyg retains the span styles generated for the previous text value and immediately
-   * re-applies them. Ths function manually adjusts their spans to account for text that may have changed
-   * between their bounds. For example, if a letter was inserted within a bold span, this function will move
-   * all spans after the inserted index by one position.
-   *
-   * The implementation does not need to be perfect because the new text will be re-parsed in a few milliseconds.
-   * It just needs to good enough to give an illusion that the parsing is happening instantly on every key stroke.
-   */
-  fun offsetSpansOnTextChange(
-    newValue: TextFieldValue,
-    previousValue: TextFieldValue,
-    previousSpans: List<MarkdownSpan>
-  ): List<MarkdownSpan>
 }
 
 /**
@@ -48,29 +28,23 @@ interface MarkdownParser {
  * detected, instead of generating one span for representing the entire link, two spans
  * are generated -- one for coloring the link text and one for coloring the link url.
  *
- * Granularity of spans was needed so that [MarkdownParser.offsetSpansOnTextChange] could
- * individually adjust their bounds as needed.
+ * Granularity of spans allows parser implementations to individually adjust their bounds
+ * when re-applying stale spans across text changes for zero-flicker UX.
  */
 data class MarkdownSpan(
   val style: MarkdownSpanStyle,
   val range: SpanTextRange,
 )
 
-/**
- * Represents a text appearance.
- *
- * @param hasClosingMarker used by [MarkdownParser.offsetSpansOnTextChange] for determining whether
- * this span should be discarded if text is deleted at its last index. It is weird and may not apply
- * to all span styles, but is unavoidable.
- */
-abstract class MarkdownSpanStyle(val hasClosingMarker: Boolean) {
+/** Represents a text appearance. */
+abstract class MarkdownSpanStyle {
   abstract fun MarkdownRendererScope.render(
     text: AnnotatedString.Builder,
     range: SpanTextRange
   )
 }
 
-object MarkerColorSpanStyle : MarkdownSpanStyle(hasClosingMarker = true) {
+object MarkerColorSpanStyle : MarkdownSpanStyle() {
   override fun MarkdownRendererScope.render(text: AnnotatedString.Builder, range: SpanTextRange) {
     text.addStyle(
       style = SpanStyle(color = theme.markerColor),
@@ -79,7 +53,7 @@ object MarkerColorSpanStyle : MarkdownSpanStyle(hasClosingMarker = true) {
   }
 }
 
-object BoldSpanStyle : MarkdownSpanStyle(hasClosingMarker = true) {
+object BoldSpanStyle : MarkdownSpanStyle() {
   override fun MarkdownRendererScope.render(text: AnnotatedString.Builder, range: SpanTextRange) {
     text.addStyle(
       style = SpanStyle(fontWeight = FontWeight.Bold),
@@ -88,7 +62,7 @@ object BoldSpanStyle : MarkdownSpanStyle(hasClosingMarker = true) {
   }
 }
 
-object ItalicSpanStyle : MarkdownSpanStyle(hasClosingMarker = true) {
+object ItalicSpanStyle : MarkdownSpanStyle() {
   override fun MarkdownRendererScope.render(text: AnnotatedString.Builder, range: SpanTextRange) {
     text.addStyle(
       style = SpanStyle(fontStyle = FontStyle.Italic),
@@ -97,7 +71,7 @@ object ItalicSpanStyle : MarkdownSpanStyle(hasClosingMarker = true) {
   }
 }
 
-object StrikeThroughSpanStyle : MarkdownSpanStyle(hasClosingMarker = true) {
+object StrikeThroughSpanStyle : MarkdownSpanStyle() {
   override fun MarkdownRendererScope.render(text: AnnotatedString.Builder, range: SpanTextRange) {
     text.addStyle(
       style = SpanStyle(
@@ -109,7 +83,7 @@ object StrikeThroughSpanStyle : MarkdownSpanStyle(hasClosingMarker = true) {
   }
 }
 
-object LinkTextSpanStyle : MarkdownSpanStyle(hasClosingMarker = true) {
+object LinkTextSpanStyle : MarkdownSpanStyle() {
   override fun MarkdownRendererScope.render(text: AnnotatedString.Builder, range: SpanTextRange) {
     text.addStyle(
       style = SpanStyle(color = theme.linkTextColor),
@@ -118,7 +92,7 @@ object LinkTextSpanStyle : MarkdownSpanStyle(hasClosingMarker = true) {
   }
 }
 
-object LinkUrlSpanStyle : MarkdownSpanStyle(hasClosingMarker = true) {
+object LinkUrlSpanStyle : MarkdownSpanStyle() {
   override fun MarkdownRendererScope.render(text: AnnotatedString.Builder, range: SpanTextRange) {
     text.addStyle(
       style = SpanStyle(color = theme.linkUrlColor),
@@ -127,7 +101,7 @@ object LinkUrlSpanStyle : MarkdownSpanStyle(hasClosingMarker = true) {
   }
 }
 
-object InlineCodeSpanStyle : MarkdownSpanStyle(hasClosingMarker = true) {
+object InlineCodeSpanStyle : MarkdownSpanStyle() {
   override fun MarkdownRendererScope.render(text: AnnotatedString.Builder, range: SpanTextRange) {
     text.addStyle(
       style = SpanStyle(
@@ -139,7 +113,7 @@ object InlineCodeSpanStyle : MarkdownSpanStyle(hasClosingMarker = true) {
   }
 }
 
-object FencedCodeBlockSpanStyle : MarkdownSpanStyle(hasClosingMarker = true) {
+object FencedCodeBlockSpanStyle : MarkdownSpanStyle() {
   override fun MarkdownRendererScope.render(text: AnnotatedString.Builder, range: SpanTextRange) {
     text.addStyle(
       style = SpanStyle(
@@ -160,7 +134,7 @@ object FencedCodeBlockSpanStyle : MarkdownSpanStyle(hasClosingMarker = true) {
   }
 }
 
-object BlockQuoteBodySpanStyle : MarkdownSpanStyle(hasClosingMarker = false) {
+object BlockQuoteBodySpanStyle : MarkdownSpanStyle() {
   override fun MarkdownRendererScope.render(text: AnnotatedString.Builder, range: SpanTextRange) {
     text.addStyle(
       style = SpanStyle(color = theme.blockQuoteText),
@@ -178,7 +152,7 @@ object BlockQuoteBodySpanStyle : MarkdownSpanStyle(hasClosingMarker = false) {
   }
 }
 
-object BlockQuoteParagraphLineSpanStyle : MarkdownSpanStyle(hasClosingMarker = false) {
+object BlockQuoteParagraphLineSpanStyle : MarkdownSpanStyle() {
   override fun MarkdownRendererScope.render(text: AnnotatedString.Builder, range: SpanTextRange) {
     text.addStringAnnotation(
       tag = "blockquote",
@@ -189,7 +163,7 @@ object BlockQuoteParagraphLineSpanStyle : MarkdownSpanStyle(hasClosingMarker = f
   }
 }
 
-object ListBlockSpanStyle : MarkdownSpanStyle(hasClosingMarker = false) {
+object ListBlockSpanStyle : MarkdownSpanStyle() {
   override fun MarkdownRendererScope.render(text: AnnotatedString.Builder, range: SpanTextRange) {
     text.addStyle(
       style = ParagraphStyle(
@@ -203,7 +177,7 @@ object ListBlockSpanStyle : MarkdownSpanStyle(hasClosingMarker = false) {
   }
 }
 
-data class HeadingSpanStyle(private val level: Int) : MarkdownSpanStyle(hasClosingMarker = false) {
+data class HeadingSpanStyle(private val level: Int) : MarkdownSpanStyle() {
   override fun MarkdownRendererScope.render(text: AnnotatedString.Builder, range: SpanTextRange) {
     val fontSizeMultiplier = with(theme.headingFontSizes) {
       when (level) {
@@ -227,7 +201,7 @@ data class HeadingSpanStyle(private val level: Int) : MarkdownSpanStyle(hasClosi
   }
 }
 
-object ThematicBreakSpanStyle : MarkdownSpanStyle(hasClosingMarker = true) {
+object ThematicBreakSpanStyle : MarkdownSpanStyle() {
   override fun MarkdownRendererScope.render(text: AnnotatedString.Builder, range: SpanTextRange) {
     text.addStringAnnotation(
       tag = "thematic_break",
