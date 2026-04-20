@@ -15,7 +15,7 @@ import me.saket.wysiwyg.internal.MarkdownRendererScope
 import me.saket.wysiwyg.parser.FlexmarkMarkdownParserExtension
 import me.saket.wysiwyg.parser.MarkdownSpan
 import me.saket.wysiwyg.parser.MarkdownSpanStyle
-import me.saket.wysiwyg.parser.SyntaxColorSpanStyle
+import me.saket.wysiwyg.parser.MarkerColorSpanStyle
 
 class RedditSpoilersExtension : FlexmarkMarkdownParserExtension {
   override fun buildParser(builder: Parser.Builder) {
@@ -36,13 +36,13 @@ class RedditSpoilersExtension : FlexmarkMarkdownParserExtension {
     if (this is RedditSpoilersNode) {
       spans.add(
         MarkdownSpan(
-          style = SyntaxColorSpanStyle,
+          style = MarkerColorSpanStyle,
           range = SpanTextRange(openingMarker.startOffset, openingMarker.endOffset)
         )
       )
       spans.add(
         MarkdownSpan(
-          style = SyntaxColorSpanStyle,
+          style = MarkerColorSpanStyle,
           range = SpanTextRange(closingMarker.startOffset, closingMarker.endOffset)
         )
       )

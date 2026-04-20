@@ -31,7 +31,7 @@ class FlexmarkMarkdownParserTest {
         """.trimMargin(),
       expect = listOf(
         MarkdownSpan(
-          style = SyntaxColorSpanStyle,
+          style = MarkerColorSpanStyle,
           range = SpanTextRange(startIndex = 0, endIndexExclusive = 2),
         ),
         MarkdownSpan(
@@ -50,7 +50,7 @@ class FlexmarkMarkdownParserTest {
         """.trimMargin(),
       expect = listOf(
         MarkdownSpan(
-          style = SyntaxColorSpanStyle,
+          style = MarkerColorSpanStyle,
           range = SpanTextRange(startIndex = 0, endIndexExclusive = 2)
         ),
         MarkdownSpan(
@@ -75,7 +75,7 @@ class FlexmarkMarkdownParserTest {
         """.trimMargin(),
       expect = listOf(
         MarkdownSpan(
-          style = SyntaxColorSpanStyle,
+          style = MarkerColorSpanStyle,
           range = SpanTextRange(startIndex = 0, endIndexExclusive = 1)
         ),
         MarkdownSpan(
@@ -91,7 +91,7 @@ class FlexmarkMarkdownParserTest {
         """.trimMargin(),
       expect = listOf(
         MarkdownSpan(
-          style = SyntaxColorSpanStyle,
+          style = MarkerColorSpanStyle,
           range = SpanTextRange(startIndex = 0, endIndexExclusive = 2)
         ),
         MarkdownSpan(
@@ -442,7 +442,7 @@ class FlexmarkMarkdownParserTest {
     var offset = 0
     spans.forEach {
       val tag = when (it.style) {
-        SyntaxColorSpanStyle -> null
+        MarkerColorSpanStyle -> null
         BoldSpanStyle -> "b"
         ItalicSpanStyle -> "i"
         BlockQuoteBodySpanStyle -> "quote"

@@ -13,7 +13,7 @@ import me.saket.extendedspans.SpanDrawInstructions
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
 
-class BlockQuoteSpanPainter(private val syntaxColor: Color) : ExtendedSpanPainter() {
+class BlockQuoteSpanPainter(private val markerColor: Color) : ExtendedSpanPainter() {
   override fun decorate(
     span: SpanStyle,
     start: Int,
@@ -30,7 +30,7 @@ class BlockQuoteSpanPainter(private val syntaxColor: Color) : ExtendedSpanPainte
       annotations.fastForEach { annotation ->
         val box = layoutResult.getParagraphBox(annotation.start, annotation.end)
         drawRoundRect(
-          color = syntaxColor,
+          color = markerColor,
           topLeft = box.topLeft,
           size = Size(4f.dp.toPx(), box.height),
           cornerRadius = CornerRadius(2.dp.toPx(), 2.dp.toPx())

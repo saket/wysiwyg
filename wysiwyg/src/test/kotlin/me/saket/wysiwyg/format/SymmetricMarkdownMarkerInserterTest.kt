@@ -2,9 +2,9 @@ package me.saket.wysiwyg.format
 
 import org.junit.Test
 
-class SymmetricMarkdownSyntaxInserterTest {
-  private val inserter = SymmetricMarkdownSyntaxInserter(
-    syntax = "***",
+class SymmetricMarkdownMarkerInserterTest {
+  private val inserter = SymmetricMarkdownMarkerInserter(
+    marker = "***",
     placeholder = "stars",
   )
 

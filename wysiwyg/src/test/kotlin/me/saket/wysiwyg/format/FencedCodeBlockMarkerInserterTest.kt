@@ -2,11 +2,11 @@ package me.saket.wysiwyg.format
 
 import org.junit.Test
 
-class FencedCodeBlockSyntaxInserterTest {
-  private val syntaxInserter = FencedCodeBlockSyntaxInserter
+class FencedCodeBlockMarkerInserterTest {
+  private val markerInserter = FencedCodeBlockMarkerInserter
 
   @Test fun `insert at cursor position at the end of the first line in a paragraph`() {
-    syntaxInserter.assertOnInsert(
+    markerInserter.assertOnInsert(
       input = """
               |Gordon: What's your name son?▮
               |John Blake: Blake sir.
@@ -23,7 +23,7 @@ class FencedCodeBlockSyntaxInserterTest {
   }
 
   @Test fun `insert at cursor position at the end of a line in the middle of a paragraph`() {
-    syntaxInserter.assertOnInsert(
+    markerInserter.assertOnInsert(
       input = """
               |Gordon: What's your name son?
               |John Blake: Blake sir.▮
@@ -40,7 +40,7 @@ class FencedCodeBlockSyntaxInserterTest {
   }
 
   @Test fun `insert at cursor position at the end of the last line in a paragraph`() {
-    syntaxInserter.assertOnInsert(
+    markerInserter.assertOnInsert(
       input = """
               |Gordon: What's your name son?
               |John Blake: Blake sir.
@@ -57,7 +57,7 @@ class FencedCodeBlockSyntaxInserterTest {
   }
 
   @Test fun `insert at cursor position in blank content`() {
-    syntaxInserter.assertOnInsert(
+    markerInserter.assertOnInsert(
       input = """
               |▮
               """.trimMargin(),
@@ -70,7 +70,7 @@ class FencedCodeBlockSyntaxInserterTest {
   }
 
   @Test fun `insert at cursor position in blank content with leading new line`() {
-    syntaxInserter.assertOnInsert(
+    markerInserter.assertOnInsert(
       input = """
               |
               |▮
@@ -85,7 +85,7 @@ class FencedCodeBlockSyntaxInserterTest {
   }
 
   @Test fun `insert at cursor position in the middle of a paragraph`() {
-    syntaxInserter.assertOnInsert(
+    markerInserter.assertOnInsert(
       input = """
               |You have something you ▮ wanna ask me Officer Blake?
               """.trimMargin(),
@@ -98,7 +98,7 @@ class FencedCodeBlockSyntaxInserterTest {
   }
 
   @Test fun `apply to selection in the middle of a paragraph`() {
-    syntaxInserter.assertOnInsert(
+    markerInserter.assertOnInsert(
       input = """
               |You have something you wanna ▮ask me▮ Officer Blake?
               """.trimMargin(),
@@ -111,7 +111,7 @@ class FencedCodeBlockSyntaxInserterTest {
   }
 
   @Test fun `apply to selection to a whole paragraph`() {
-    syntaxInserter.assertOnInsert(
+    markerInserter.assertOnInsert(
       input = """
               |▮You have something you wanna ask me Officer Blake?▮
               """.trimMargin(),
@@ -124,7 +124,7 @@ class FencedCodeBlockSyntaxInserterTest {
   }
 
   @Test fun `insert at cursor position on a new line`() {
-    syntaxInserter.assertOnInsert(
+    markerInserter.assertOnInsert(
       input = """
               |What's your name son?
               |▮
@@ -139,7 +139,7 @@ class FencedCodeBlockSyntaxInserterTest {
   }
 
   @Test fun `insert at cursor position on a new line with leading spaces`() {
-    syntaxInserter.assertOnInsert(
+    markerInserter.assertOnInsert(
       input = """
               |What's your name son?
               |  ▮

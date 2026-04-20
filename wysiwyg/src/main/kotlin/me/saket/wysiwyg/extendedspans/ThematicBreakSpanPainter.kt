@@ -8,7 +8,7 @@ import androidx.compose.ui.unit.dp
 import me.saket.extendedspans.ExtendedSpanPainter
 import me.saket.extendedspans.SpanDrawInstructions
 
-class ThematicBreakSpanPainter(private val syntaxColor: Color) : ExtendedSpanPainter() {
+class ThematicBreakSpanPainter(private val markerColor: Color) : ExtendedSpanPainter() {
   override fun decorate(
     span: SpanStyle,
     start: Int,
@@ -25,7 +25,7 @@ class ThematicBreakSpanPainter(private val syntaxColor: Color) : ExtendedSpanPai
       annotations.fastForEach { annotation ->
         val box = layoutResult.getParagraphBox(annotation.start, annotation.end)
         drawLine(
-          color = syntaxColor.copy(alpha = 0.4f),
+          color = markerColor.copy(alpha = 0.4f),
           start = box.centerLeft,
           end = box.centerRight,
           strokeWidth = 4.dp.toPx()

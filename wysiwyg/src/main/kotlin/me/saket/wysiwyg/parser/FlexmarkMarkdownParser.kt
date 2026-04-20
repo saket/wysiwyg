@@ -74,8 +74,8 @@ class FlexmarkMarkdownParser(
   private fun Node.addSpansInto(buffer: MutableList<MarkdownSpan>) {
     when (this) {
       is Emphasis -> {
-        buffer.addSyntaxSpanForMarker(openingMarker)
-        buffer.addSyntaxSpanForMarker(closingMarker)
+        buffer.addMarkerSpan(openingMarker)
+        buffer.addMarkerSpan(closingMarker)
         buffer.add(
           MarkdownSpan(
             style = ItalicSpanStyle,
@@ -84,8 +84,8 @@ class FlexmarkMarkdownParser(
         )
       }
       is StrongEmphasis -> {
-        buffer.addSyntaxSpanForMarker(openingMarker)
-        buffer.addSyntaxSpanForMarker(closingMarker)
+        buffer.addMarkerSpan(openingMarker)
+        buffer.addMarkerSpan(closingMarker)
         buffer.add(
           MarkdownSpan(
             style = BoldSpanStyle,
@@ -102,8 +102,8 @@ class FlexmarkMarkdownParser(
         )
       }
       is Link -> {
-        buffer.addSyntaxSpanForMarker(textOpeningMarker)
-        buffer.addSyntaxSpanForMarker(textClosingMarker)
+        buffer.addMarkerSpan(textOpeningMarker)
+        buffer.addMarkerSpan(textClosingMarker)
         buffer.add(
           MarkdownSpan(
             style = LinkTextSpanStyle,
@@ -118,8 +118,8 @@ class FlexmarkMarkdownParser(
         )
       }
       is Code -> {
-        buffer.addSyntaxSpanForMarker(openingMarker)
-        buffer.addSyntaxSpanForMarker(closingMarker)
+        buffer.addMarkerSpan(openingMarker)
+        buffer.addMarkerSpan(closingMarker)
         buffer.add(
           MarkdownSpan(
             style = InlineCodeSpanStyle,
@@ -129,8 +129,8 @@ class FlexmarkMarkdownParser(
       }
       is FencedCodeBlock -> {
         if (openingMarker.contains('`') && closingMarker.isNotEmpty) {
-          buffer.addSyntaxSpanForMarker(openingMarker)
-          buffer.addSyntaxSpanForMarker(closingMarker)
+          buffer.addMarkerSpan(openingMarker)
+          buffer.addMarkerSpan(closingMarker)
           buffer.add(
             MarkdownSpan(
               style = FencedCodeBlockSpanStyle,
@@ -153,7 +153,7 @@ class FlexmarkMarkdownParser(
             range = SpanTextRange(startOffset, endOffset - withEndingLineBreaksTrimmed)
           )
         )
-        buffer.addSyntaxSpanForMarker(openingMarker)
+        buffer.addMarkerSpan(openingMarker)
       }
       is ListBlock -> {
         // Workaround for https://github.com/vsch/flexmark-java/issues/519.
@@ -172,7 +172,7 @@ class FlexmarkMarkdownParser(
         )
       }
       is ListItem -> {
-        buffer.addSyntaxSpanForMarker(openingMarker)
+        buffer.addMarkerSpan(openingMarker)
       }
       is Heading -> {
         // Setext headings aren't supported. They use underlines using "=" for H1 or "-" for H2.
@@ -189,7 +189,7 @@ class FlexmarkMarkdownParser(
               range = SpanTextRange(startOffset, endOffset)
             )
           )
-          buffer.addSyntaxSpanForMarker(openingMarker)
+          buffer.addMarkerSpan(openingMarker)
         }
       }
       is ThematicBreak -> {
@@ -201,7 +201,7 @@ class FlexmarkMarkdownParser(
         )
         buffer.add(
           MarkdownSpan(
-            style = SyntaxColorSpanStyle,
+            style = MarkerColorSpanStyle,
             range = SpanTextRange(startOffset, endOffset)
           )
         )
@@ -210,11 +210,11 @@ class FlexmarkMarkdownParser(
     }
   }
 
-  private fun MutableList<MarkdownSpan>.addSyntaxSpanForMarker(sequence: BasedSequence) {
+  private fun MutableList<MarkdownSpan>.addMarkerSpan(sequence: BasedSequence) {
     if (sequence.isNotEmpty) {
       add(
         MarkdownSpan(
-          style = SyntaxColorSpanStyle,
+          style = MarkerColorSpanStyle,
           range = SpanTextRange(sequence.startOffset, sequence.endOffset)
         )
       )

@@ -28,10 +28,10 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.unit.dp
-import me.saket.wysiwyg.format.insertBlockQuote
-import me.saket.wysiwyg.format.insertBold
-import me.saket.wysiwyg.format.insertHeading
-import me.saket.wysiwyg.format.insertItalic
+import me.saket.wysiwyg.format.insertBlockQuoteMarker
+import me.saket.wysiwyg.format.insertBoldMarker
+import me.saket.wysiwyg.format.insertHeadingMarker
+import me.saket.wysiwyg.format.insertItalicMarker
 
 @Composable
 fun MarkdownFormattingBar(
@@ -47,22 +47,22 @@ fun MarkdownFormattingBar(
     FormatButton(
       icon = Icons.TwoTone.FormatBold,
       contentDescription = "Insert bold markdown",
-      onClick = { state.insertBold() }
+      onClick = { state.insertBoldMarker() }
     )
     FormatButton(
       icon = Icons.TwoTone.FormatItalic,
       contentDescription = "Insert italic markdown",
-      onClick = { state.insertItalic() }
+      onClick = { state.insertItalicMarker() }
     )
     FormatButton(
       icon = Icons.TwoTone.FormatQuote,
       contentDescription = "Insert block quote",
-      onClick = { state.insertBlockQuote() }
+      onClick = { state.insertBlockQuoteMarker() }
     )
     FormatButton(
       icon = Icons.TwoTone.Tag,
       contentDescription = "Insert heading markdown",
-      onClick = { state.insertHeading() }
+      onClick = { state.insertHeadingMarker() }
     )
   }
 }

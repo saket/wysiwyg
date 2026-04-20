@@ -107,7 +107,7 @@ fun WysiwygEditor() {
 @Composable
 private fun wysiwygTheme(): WysiwygTheme {
   return WysiwygTheme(
-    syntaxColor = MaterialTheme.colorScheme.tertiary,
+    markerColor = MaterialTheme.colorScheme.tertiary,
     headingColor = MaterialTheme.colorScheme.primary,
     linkTextColor = MaterialTheme.colorScheme.primary,
     linkUrlColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),

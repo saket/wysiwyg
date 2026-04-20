@@ -10,7 +10,7 @@ internal fun OnEnterMarkdownFormatters.assertOnEnter(
   assertTextsAreEqual(output, expected)
 }
 
-internal fun MarkdownSyntaxInserter.assertOnInsert(
+internal fun MarkdownMarkerInserter.assertOnInsert(
   input: String,
   expect: String?,
 ) {

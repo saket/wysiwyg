@@ -70,10 +70,10 @@ abstract class MarkdownSpanStyle(val hasClosingMarker: Boolean) {
   )
 }
 
-object SyntaxColorSpanStyle : MarkdownSpanStyle(hasClosingMarker = true) {
+object MarkerColorSpanStyle : MarkdownSpanStyle(hasClosingMarker = true) {
   override fun MarkdownRendererScope.render(text: AnnotatedString.Builder, range: SpanTextRange) {
     text.addStyle(
-      style = SpanStyle(color = theme.syntaxColor),
+      style = SpanStyle(color = theme.markerColor),
       range = range,
     )
   }
