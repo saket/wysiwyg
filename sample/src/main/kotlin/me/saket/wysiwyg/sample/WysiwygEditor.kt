@@ -28,7 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
 import me.saket.wysiwyg.WysiwygTheme
-import me.saket.wysiwyg.parser.FlexmarkMarkdownParser
+import me.saket.wysiwyg.parser.flexmark.FlexmarkMarkdownParser
 import me.saket.wysiwyg.rememberWysiwyg
 import me.saket.wysiwyg.sample.extensions.RedditSpoilersExtension
 import me.saket.wysiwyg.sample.extensions.RedditSuperscriptExtension

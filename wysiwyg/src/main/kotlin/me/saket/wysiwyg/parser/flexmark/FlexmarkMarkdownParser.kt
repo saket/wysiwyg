@@ -1,4 +1,4 @@
-package me.saket.wysiwyg.parser
+package me.saket.wysiwyg.parser.flexmark
 
 import com.vladsch.flexmark.ast.BlockQuote
 import com.vladsch.flexmark.ast.Code
@@ -35,22 +35,10 @@ import me.saket.wysiwyg.MarkdownSpanTextRange
 import me.saket.wysiwyg.StrikeThroughSpanStyle
 import me.saket.wysiwyg.ThematicBreakSpanStyle
 import me.saket.wysiwyg.internal.fastForEach
+import me.saket.wysiwyg.parser.ChangeListSnapshot
+import me.saket.wysiwyg.parser.MarkdownParser
 import me.saket.wysiwyg.parser.MarkdownParser.ParseResult
 import com.vladsch.flexmark.parser.Parser as FlexmarkParser
-
-interface FlexmarkMarkdownParserExtension {
-  /**
-   * Flexmark extensions or post-processor factories can be registered
-   * here for parsing text and inserting custom nodes to the AST.
-   */
-  fun buildParser(builder: FlexmarkParser.Builder)
-
-  /**
-   * Once an AST is generated, this function is called for each markdown
-   * node in the tree to create markdown spans for them.
-   */
-  fun Node.addSpansInto(buffer: MutableList<MarkdownSpan>)
-}
 
 class FlexmarkMarkdownParser(
   vararg extensions: FlexmarkMarkdownParserExtension,

@@ -8,6 +8,7 @@ import me.saket.wysiwyg.ListBlockSpanStyle
 import me.saket.wysiwyg.MarkdownSpan
 import me.saket.wysiwyg.MarkerColorSpanStyle
 import me.saket.wysiwyg.MarkdownSpanTextRange
+import me.saket.wysiwyg.parser.flexmark.FlexmarkMarkdownParser
 import org.junit.Test
 
 class FlexmarkMarkdownParserTest {

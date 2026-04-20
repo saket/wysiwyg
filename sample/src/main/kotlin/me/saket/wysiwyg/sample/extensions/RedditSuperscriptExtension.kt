@@ -13,7 +13,7 @@ import com.vladsch.flexmark.util.ast.NodeTracker
 import com.vladsch.flexmark.util.sequence.BasedSequence
 import me.saket.wysiwyg.MarkdownSpanTextRange
 import me.saket.wysiwyg.internal.MarkdownRendererScope
-import me.saket.wysiwyg.parser.FlexmarkMarkdownParserExtension
+import me.saket.wysiwyg.parser.flexmark.FlexmarkMarkdownParserExtension
 import me.saket.wysiwyg.MarkdownSpan
 import me.saket.wysiwyg.MarkdownSpanStyle
 import me.saket.wysiwyg.MarkerColorSpanStyle
