@@ -53,6 +53,21 @@ fun WysiwygEditor() {
         |
         |Markdown is a **lightweight** and easy-to-use `syntax` for styling all forms of ~~web~~ writing.
         |> The overriding design goal for Markdown's formatting syntax is to make it as readable as possible.
+        |
+        |Markdown is a **lightweight** and easy-to-use `syntax` for styling all forms of ~~web~~ writing.
+        |> The overriding design goal for Markdown's formatting syntax is to make it as readable as possible.
+        |
+        |Markdown is a **lightweight** and easy-to-use `syntax` for styling all forms of ~~web~~ writing.
+        |> The overriding design goal for Markdown's formatting syntax is to make it as readable as possible.
+        |
+        |Markdown is a **lightweight** and easy-to-use `syntax` for styling all forms of ~~web~~ writing.
+        |> The overriding design goal for Markdown's formatting syntax is to make it as readable as possible.
+        |
+        |Markdown is a **lightweight** and easy-to-use `syntax` for styling all forms of ~~web~~ writing.
+        |> The overriding design goal for Markdown's formatting syntax is to make it as readable as possible.
+        |
+        |Markdown is a **lightweight** and easy-to-use `syntax` for styling all forms of ~~web~~ writing.
+        |> The overriding design goal for Markdown's formatting syntax is to make it as readable as possible.
         """.trimMargin()
     }
   )
