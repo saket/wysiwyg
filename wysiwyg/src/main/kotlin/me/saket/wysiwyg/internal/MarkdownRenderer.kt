@@ -5,6 +5,7 @@ import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.util.fastForEach
 import me.saket.wysiwyg.MarkdownSpanTextRange
 import me.saket.wysiwyg.WysiwygTheme
 import me.saket.wysiwyg.MarkdownSpan

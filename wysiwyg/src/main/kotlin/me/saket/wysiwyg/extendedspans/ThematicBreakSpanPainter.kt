@@ -5,6 +5,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastForEach
 import me.saket.extendedspans.ExtendedSpanPainter
 import me.saket.extendedspans.SpanDrawInstructions
 

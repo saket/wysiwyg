@@ -8,6 +8,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastForEach
 import me.saket.extendedspans.ExtendedSpanPainter
 import me.saket.extendedspans.SpanDrawInstructions
 import kotlin.contracts.ExperimentalContracts
@@ -49,17 +50,4 @@ internal fun TextLayoutResult.getParagraphBox(startOffset: Int, endOffset: Int):
     left = 0f,
     right = size.width.toFloat()
   )
-}
-
-
-/**
- * Copied from [androidx](https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:text/text/src/main/java/androidx/compose/ui/text/android/TempListUtils.kt;l=33;drc=b2e3d878411b7fb1147455b1a204cddb7bee1a1b).
- */
-@OptIn(ExperimentalContracts::class)
-internal inline fun <T> List<T>.fastForEach(action: (T) -> Unit) {
-  contract { callsInPlace(action) }
-  for (index in indices) {
-    val item = get(index)
-    action(item)
-  }
 }

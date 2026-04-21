@@ -1,5 +1,6 @@
 package me.saket.wysiwyg.parser.flexmark
 
+import androidx.compose.ui.util.fastForEach
 import com.vladsch.flexmark.ast.BlockQuote
 import com.vladsch.flexmark.ast.Code
 import com.vladsch.flexmark.ast.Emphasis
@@ -34,7 +35,6 @@ import me.saket.wysiwyg.MarkerColorSpanStyle
 import me.saket.wysiwyg.MarkdownSpanTextRange
 import me.saket.wysiwyg.StrikeThroughSpanStyle
 import me.saket.wysiwyg.ThematicBreakSpanStyle
-import me.saket.wysiwyg.internal.fastForEach
 import me.saket.wysiwyg.parser.ChangeListSnapshot
 import me.saket.wysiwyg.parser.MarkdownParser
 import me.saket.wysiwyg.parser.MarkdownParser.ParseResult

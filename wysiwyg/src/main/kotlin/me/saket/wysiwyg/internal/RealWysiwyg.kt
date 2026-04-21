@@ -9,6 +9,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.util.fastForEach
 import kotlinx.coroutines.flow.collectLatest
 import me.saket.wysiwyg.BuildConfig
 import me.saket.wysiwyg.Wysiwyg
