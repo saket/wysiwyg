@@ -70,6 +70,7 @@ android {
       cmake {
         arguments += [
           "-DGRAMMAR_DIR=${projectDir}/tree-sitter-markdown/tree-sitter-markdown",
+          "-DGRAMMAR_INLINE_DIR=${projectDir}/tree-sitter-markdown/tree-sitter-markdown-inline",
           "-DGENERATED_DIR=${layout.buildDirectory.get()}/generated",
         ]
       }

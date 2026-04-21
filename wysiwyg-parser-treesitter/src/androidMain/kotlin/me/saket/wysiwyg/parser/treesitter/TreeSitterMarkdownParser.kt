@@ -3,23 +3,31 @@ package me.saket.wysiwyg.parser.treesitter
 import io.github.treesitter.ktreesitter.Language
 import io.github.treesitter.ktreesitter.Parser
 import io.github.treesitter.ktreesitter.Query
+import io.github.treesitter.ktreesitter.Range
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import me.saket.wysiwyg.BlockQuoteBodySpanStyle
 import me.saket.wysiwyg.BlockQuoteParagraphLineSpanStyle
+import me.saket.wysiwyg.BoldSpanStyle
 import me.saket.wysiwyg.FencedCodeBlockSpanStyle
 import me.saket.wysiwyg.HeadingSpanStyle
+import me.saket.wysiwyg.InlineCodeSpanStyle
+import me.saket.wysiwyg.ItalicSpanStyle
+import me.saket.wysiwyg.LinkTextSpanStyle
+import me.saket.wysiwyg.LinkUrlSpanStyle
 import me.saket.wysiwyg.ListBlockSpanStyle
 import me.saket.wysiwyg.MarkdownSpan
 import me.saket.wysiwyg.MarkdownSpanTextRange
 import me.saket.wysiwyg.MarkerColorSpanStyle
+import me.saket.wysiwyg.StrikeThroughSpanStyle
 import me.saket.wysiwyg.ThematicBreakSpanStyle
 import me.saket.wysiwyg.parser.ChangeListSnapshot
 import me.saket.wysiwyg.parser.MarkdownParser
 import me.saket.wysiwyg.parser.MarkdownParser.ParseResult
 import me.saket.wysiwyg.parser.treesitter.grammar.TreeSitterMarkdown
+import me.saket.wysiwyg.parser.treesitter.grammar.TreeSitterMarkdownInline
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
 
@@ -29,10 +37,13 @@ import kotlin.contracts.contract
  * Uses tree-sitter queries rather than a manual tree walk to minimize JNI boundary crossings:
  * the C engine pre-filters matching nodes and hands Kotlin one batch per capture.
  *
+ * Markdown is parsed in two passes, matching the CommonMark spec: [blockParser] establishes
+ * block structure (headings, lists, block quotes, fenced code), and its `@inline` captures
+ * identify the byte ranges of actual inline content (with block markers stripped). Those
+ * ranges are fed to [inlineParser] via [Parser.includedRanges], which then parses emphasis,
+ * strong, links, code spans, and strikethroughs.
+ *
  * TODOs:
- * - **Inline grammar.** Currently emits only block-level spans (headings, code fences, block
- *   quotes, lists, thematic breaks). Emphasis, links, code spans, and strikethroughs need the
- *   inline grammar (`tree-sitter-markdown-inline`) wired via [Parser.includedRanges].
  * - **Incremental parsing.** The parser currently re-parses and re-walks the entire document
  *   on every call, ignoring [ChangeListSnapshot]. A real incremental pipeline would apply
  *   edits via `tree.edit(InputEdit)`, re-parse with `oldTree`, then use
@@ -42,16 +53,21 @@ import kotlin.contracts.contract
  *   we add a conversion layer.
  */
 class TreeSitterMarkdownParser : MarkdownParser {
-  private val language = Language(TreeSitterMarkdown.language())
-  private val parser = Parser(language)
-  private val query = Query(language, source = BlockQuery)
+  private val blockLanguage = Language(TreeSitterMarkdown.language())
+  private val blockParser = Parser(blockLanguage)
+  private val blockQuery = Query(blockLanguage, source = BlockQuery)
+
+  private val inlineLanguage = Language(TreeSitterMarkdownInline.language())
+  private val inlineParser = Parser(inlineLanguage)
+  private val inlineQuery = Query(inlineLanguage, source = InlineQuery)
 
   override fun parse(text: String, changes: ChangeListSnapshot): Flow<ParseResult> {
     return flow {
-      val tree = parser.parse(text)
       val spans = mutableListOf<MarkdownSpan>()
+      val inlineRanges = mutableListOf<Range>()
 
-      query.matches(tree.rootNode).forEach { match ->
+      val blockTree = blockParser.parse(text)
+      blockQuery.matches(blockTree.rootNode).forEach { match ->
         match.captures.fastForEach { capture ->
           val node = capture.node
           val range = MarkdownSpanTextRange(
@@ -89,6 +105,40 @@ class TreeSitterMarkdownParser : MarkdownParser {
               spans += MarkdownSpan(ThematicBreakSpanStyle, range)
               spans += MarkdownSpan(MarkerColorSpanStyle, range)
             }
+            "inline" -> {
+              // The block grammar's `inline` alias marks regions of raw inline content
+              // (paragraph/heading text, with block markers already stripped). Feed these
+              // byte ranges to the inline parser via includedRanges below.
+              inlineRanges += Range(
+                startPoint = node.startPoint,
+                endPoint = node.endPoint,
+                startByte = node.startByte,
+                endByte = node.endByte,
+              )
+            }
+          }
+        }
+      }
+
+      if (inlineRanges.isNotEmpty()) {
+        inlineParser.includedRanges = inlineRanges
+        val inlineTree = inlineParser.parse(text)
+        inlineQuery.matches(inlineTree.rootNode).forEach { match ->
+          match.captures.fastForEach { capture ->
+            val node = capture.node
+            val range = MarkdownSpanTextRange(
+              startIndex = node.startByte.toInt(),
+              endIndexExclusive = node.endByte.toInt(),
+            )
+            when (capture.name) {
+              "emphasis" -> spans += MarkdownSpan(ItalicSpanStyle, range)
+              "strong" -> spans += MarkdownSpan(BoldSpanStyle, range)
+              "strikethrough" -> spans += MarkdownSpan(StrikeThroughSpanStyle, range)
+              "code_span" -> spans += MarkdownSpan(InlineCodeSpanStyle, range)
+              "marker" -> spans += MarkdownSpan(MarkerColorSpanStyle, range)
+              "link.text" -> spans += MarkdownSpan(LinkTextSpanStyle, range)
+              "link.url" -> spans += MarkdownSpan(LinkUrlSpanStyle, range)
+            }
           }
         }
       }
@@ -106,6 +156,9 @@ class TreeSitterMarkdownParser : MarkdownParser {
      * so the level is encoded in the pattern's own capture name (`@heading.1` ... `@heading.6`).
      * [parse] can then build a [HeadingSpanStyle] without a second JNI round-trip to inspect the
      * marker node's type string.
+     *
+     * The `@inline` capture isn't rendered directly — [parse] collects those byte ranges and
+     * hands them to the inline parser via [Parser.includedRanges] to drive the second phase.
      *
      * Capture names are the dispatch key in the `when` inside [parse] — edit them both together.
      */
@@ -128,6 +181,31 @@ class TreeSitterMarkdownParser : MarkdownParser {
          (list_marker_plus) (list_marker_star)] @list.item.marker)
 
       (thematic_break) @thematic_break
+
+      (inline) @inline
+    """.trimIndent()
+
+    /**
+     * Tree-sitter query matching every inline node we render. Runs against the inline parser's
+     * tree, which only sees the byte ranges captured as `@inline` by [BlockQuery] (scoped via
+     * [Parser.includedRanges]). So `(emphasis)` here matches `*foo*` inside a paragraph without
+     * tripping on a `*` that's a list marker at block level — the inline parser literally
+     * can't see list markers.
+     *
+     * Capture names are the dispatch key in the `when` inside [parse] — edit them both together.
+     */
+    private val InlineQuery = """
+      (emphasis) @emphasis
+      (strong_emphasis) @strong
+      (strikethrough) @strikethrough
+      (code_span) @code_span
+
+      (emphasis_delimiter) @marker
+      (code_span_delimiter) @marker
+
+      (inline_link
+        (link_text) @link.text
+        (link_destination) @link.url)
     """.trimIndent()
   }
 }
