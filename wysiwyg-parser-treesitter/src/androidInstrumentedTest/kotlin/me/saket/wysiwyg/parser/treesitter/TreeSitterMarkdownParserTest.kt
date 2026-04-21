@@ -77,6 +77,40 @@ class TreeSitterMarkdownParserTest {
       dropshots.assertSnapshot(composeRule.activity)
     }
   }
+
+  @Test fun unicode_text() {
+    composeRule.setContent {
+      val textState = rememberTextFieldState(
+        initialText = """
+          |# Héllo café
+          |
+          |Markdown with **bold café** and `résumé` and ~~émoji~~.
+          |> Déjà vu — **context** matters.
+          |---
+          |By [André](example.com).
+          """.trimMargin(),
+      )
+      val wysiwyg = rememberWysiwyg(
+        textState = textState,
+        theme = wysiwygTheme(),
+        markdownParser = remember { TreeSitterMarkdownParser() },
+      )
+
+      MaterialTheme {
+        BasicTextField(
+          modifier = Modifier.padding(16.dp),
+          state = textState,
+          inputTransformation = wysiwyg.inputTransformation,
+          outputTransformation = wysiwyg.outputTransformation,
+          cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+          textStyle = LocalTextStyle.current.copy(color = LocalContentColor.current),
+        )
+      }
+    }
+    composeRule.runOnIdle {
+      dropshots.assertSnapshot(composeRule.activity)
+    }
+  }
 }
 
 @Composable
