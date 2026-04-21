@@ -104,7 +104,7 @@ private fun wysiwygTheme(): WysiwygTheme {
     struckThroughTextColor = LocalContentColor.current.copy(alpha = 0.5f),
     spoilersBackground = Color.Transparent,
     spoilersTextColor = MaterialTheme.colorScheme.error,
-    codeBackground = Color.Black.copy(alpha = 0.3f),
+    codeBackground = LocalContentColor.current.copy(alpha = 0.1f),
     codeBlockLeadingPadding = 16.sp,
     blockQuoteText = LocalContentColor.current.copy(alpha = 0.9f),
     blockQuoteLeadingPadding = 16.sp,
