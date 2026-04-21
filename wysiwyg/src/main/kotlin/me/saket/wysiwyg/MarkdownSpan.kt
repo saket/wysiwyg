@@ -43,7 +43,7 @@ object MarkerColorSpanStyle : MarkdownSpanStyle() {
 object BoldSpanStyle : MarkdownSpanStyle() {
   override fun MarkdownRendererScope.render(text: AnnotatedString.Builder, range: MarkdownSpanTextRange) {
     text.addStyle(
-      style = SpanStyle(fontWeight = FontWeight.Companion.Bold),
+      style = SpanStyle(fontWeight = FontWeight.Bold),
       range = range,
     )
   }
@@ -52,7 +52,7 @@ object BoldSpanStyle : MarkdownSpanStyle() {
 object ItalicSpanStyle : MarkdownSpanStyle() {
   override fun MarkdownRendererScope.render(text: AnnotatedString.Builder, range: MarkdownSpanTextRange) {
     text.addStyle(
-      style = SpanStyle(fontStyle = FontStyle.Companion.Italic),
+      style = SpanStyle(fontStyle = FontStyle.Italic),
       range = range,
     )
   }
@@ -62,7 +62,7 @@ object StrikeThroughSpanStyle : MarkdownSpanStyle() {
   override fun MarkdownRendererScope.render(text: AnnotatedString.Builder, range: MarkdownSpanTextRange) {
     text.addStyle(
       style = SpanStyle(
-        textDecoration = TextDecoration.Companion.LineThrough,
+        textDecoration = TextDecoration.LineThrough,
         color = theme.struckThroughTextColor,
       ),
       range = range,
@@ -93,7 +93,7 @@ object InlineCodeSpanStyle : MarkdownSpanStyle() {
     text.addStyle(
       style = SpanStyle(
         background = theme.codeBackground,
-        fontFamily = FontFamily.Companion.Monospace,
+        fontFamily = FontFamily.Monospace,
       ),
       range = range
     )
