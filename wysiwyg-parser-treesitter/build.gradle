@@ -1,0 +1,83 @@
+plugins {
+  alias(libs.plugins.android.library)
+  alias(libs.plugins.kotlin.multiplatform)
+  alias(libs.plugins.kotlinx.treesitter)
+}
+
+kotlin {
+  androidTarget {
+    compilations.configureEach {
+      kotlinOptions.jvmTarget = "17"
+    }
+  }
+
+  sourceSets {
+    commonMain {
+      kotlin.srcDir("${layout.buildDirectory.get()}/generated/src/commonMain/kotlin")
+    }
+    androidMain {
+      kotlin.srcDir("${layout.buildDirectory.get()}/generated/src/androidMain/kotlin")
+      dependencies {
+        api project(':wysiwyg')
+        implementation libs.kotlinx.treesitter
+      }
+    }
+  }
+}
+
+grammar {
+  baseDir = file("tree-sitter-markdown/tree-sitter-markdown")
+  grammarName = "markdown"
+  className = "TreeSitterMarkdown"
+  packageName = "me.saket.wysiwyg.parser.treesitter.grammar"
+  files = [
+    file("tree-sitter-markdown/tree-sitter-markdown/src/parser.c"),
+    file("tree-sitter-markdown/tree-sitter-markdown/src/scanner.c"),
+  ] as File[]
+}
+
+android {
+  namespace "me.saket.wysiwyg.parser.treesitter"
+
+  compileSdk libs.versions.compileSdk.get().toInteger()
+  defaultConfig.minSdk 23
+
+  externalNativeBuild {
+    cmake {
+      path = tasks.named("generateGrammarFiles").flatMap { it.cmakeListsFile }.get().asFile
+      version = "3.22.1"
+    }
+  }
+
+  java {
+    toolchain.languageVersion.set(JavaLanguageVersion.of(17))
+  }
+  lint {
+    abortOnError true
+  }
+}
+
+// Auto-initialize the tree-sitter-markdown git submodule on first build so contributors
+// don't have to remember `git submodule update --init`. Runs only when the grammar source
+// is missing AND this is a git checkout (not a source-only tarball).
+def grammarSourceFile = file("tree-sitter-markdown/tree-sitter-markdown/src/parser.c")
+if (!grammarSourceFile.exists() && new File(rootDir, ".git").exists()) {
+  println "Initializing git submodules (fetching tree-sitter-markdown grammar source)..."
+  def proc = new ProcessBuilder("git", "submodule", "update", "--init", "--recursive")
+    .directory(rootDir)
+    .inheritIO()
+    .start()
+  if (proc.waitFor() != 0) {
+    throw new GradleException("Failed to initialize git submodules. Run `git submodule update --init --recursive` manually.")
+  }
+}
+
+// The ktreesitter plugin adds build/generated/src/**/kotlin as Kotlin srcDirs and writes binding.c
+// into build/generated/src/jni. Kotlin compile tasks and CMake configure/build tasks all need
+// generateGrammarFiles to run first.
+def generateGrammarFiles = tasks.named("generateGrammarFiles")
+tasks.matching {
+  it.name.startsWith("compile") && it.name.contains("Kotlin")
+    || it.name.startsWith("configureCMake")
+    || it.name.startsWith("buildCMake")
+}.configureEach { dependsOn(generateGrammarFiles) }

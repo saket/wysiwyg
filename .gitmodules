@@ -1,0 +1,3 @@
+[submodule "wysiwyg-parser-treesitter/tree-sitter-markdown"]
+	path = wysiwyg-parser-treesitter/tree-sitter-markdown
+	url = https://github.com/tree-sitter-grammars/tree-sitter-markdown.git
