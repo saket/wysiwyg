@@ -2,6 +2,7 @@ package me.saket.wysiwyg.parser.treesitter
 
 import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import androidx.activity.ComponentActivity
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.LocalContentColor
@@ -13,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -62,7 +64,7 @@ class TreeSitterMarkdownParserTest {
 
       MaterialTheme {
         BasicTextField(
-          modifier = Modifier,
+          modifier = Modifier.padding(16.dp),
           state = textState,
           inputTransformation = wysiwyg.inputTransformation,
           outputTransformation = wysiwyg.outputTransformation,
