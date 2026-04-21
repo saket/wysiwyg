@@ -4,8 +4,8 @@ import androidx.compose.ui.text.TextRange
 
 // todo:
 //  - does this need to exist instead of just TextRange?
-@JvmInline
-value class MarkdownSpanTextRange private constructor(private val range: TextRange) {
+@ConsistentCopyVisibility
+data class MarkdownSpanTextRange private constructor(private val range: TextRange) {
   val startIndex: Int get() = range.start
   val endIndexExclusive: Int get() = range.end
   val endIndexInclusive: Int get() = range.end - 1

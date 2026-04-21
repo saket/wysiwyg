@@ -20,7 +20,7 @@ if(NOT DEFINED GRAMMAR_DIR OR NOT DEFINED GENERATED_DIR)
   message(FATAL_ERROR "GRAMMAR_DIR and GENERATED_DIR must be passed via -D")
 endif()
 
-include_directories(${GRAMMAR_DIR}/bindings/c/tree-sitter)
+include_directories(${GRAMMAR_DIR}/bindings/c)
 
 add_library(ktreesitter-markdown SHARED
   ${GENERATED_DIR}/src/jni/binding.c
@@ -28,9 +28,10 @@ add_library(ktreesitter-markdown SHARED
   ${GRAMMAR_DIR}/src/scanner.c
 )
 
-# TODO: remove once https://github.com/tree-sitter/kotlin-tree-sitter/issues/59 is resolved.
-# Forces 16 KB page alignment in the ELF LOAD segments, required for Android devices using
-# 16 KB memory pages (Pixel 8+ and other newer ARM hardware running Android 15+).
+# Force 16 KB page alignment in the ELF LOAD segments, required for Android devices using
+# 16 KB memory pages (Pixel 8+ and other newer ARM hardware running Android 15+). This whole
+# file can go away once https://github.com/tree-sitter/kotlin-tree-sitter/issues/60 is fixed
+# and we can use the plugin's generated CMakeLists.txt directly.
 target_link_options(ktreesitter-markdown PRIVATE "-Wl,-z,max-page-size=16384")
 
 set_target_properties(ktreesitter-markdown PROPERTIES DEFINE_SYMBOL "")

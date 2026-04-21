@@ -27,11 +27,13 @@ import androidx.compose.ui.layout.WindowInsetsRulers
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
+import me.saket.extendedspans.ExtendedSpans
+import me.saket.extendedspans.RoundedCornerSpanPainter
 import me.saket.wysiwyg.WysiwygTheme
-import me.saket.wysiwyg.parser.flexmark.FlexmarkMarkdownParser
+import me.saket.wysiwyg.extendedspans.BlockQuoteSpanPainter
+import me.saket.wysiwyg.extendedspans.ThematicBreakSpanPainter
+import me.saket.wysiwyg.parser.treesitter.TreeSitterMarkdownParser
 import me.saket.wysiwyg.rememberWysiwyg
-import me.saket.wysiwyg.sample.extensions.RedditSpoilersExtension
-import me.saket.wysiwyg.sample.extensions.RedditSuperscriptExtension
 
 @Composable
 fun WysiwygEditor(
@@ -58,13 +60,23 @@ fun WysiwygEditor(
   val wysiwyg = rememberWysiwyg(
     textState = textState,
     theme = wysiwygTheme(),
-    markdownParser = remember {
-      FlexmarkMarkdownParser(
-        RedditSuperscriptExtension(),
-        RedditSpoilersExtension(),
-      )
-    },
+    markdownParser = remember { TreeSitterMarkdownParser() },
   )
+
+  // todo: make this work.
+  val extendedSpans = remember {
+    ExtendedSpans(
+      RoundedCornerSpanPainter(
+        cornerRadius = 4.sp,
+        padding = RoundedCornerSpanPainter.TextPaddingValues(horizontal = 2.sp),
+        topMargin = 2.sp,
+        bottomMargin = 2.sp,
+        stroke = null,
+      ),
+      BlockQuoteSpanPainter(wysiwyg.theme.markerColor),
+      ThematicBreakSpanPainter(wysiwyg.theme.markerColor),
+    )
+  }
 
   Column(modifier) {
     Box(
@@ -77,8 +89,7 @@ fun WysiwygEditor(
         .padding(16.dp),
     ) {
       BasicTextField(
-        modifier = Modifier
-          .focusRequester(focusRequester),
+        modifier = Modifier.focusRequester(focusRequester),
         state = textState,
         inputTransformation = wysiwyg.inputTransformation,
         outputTransformation = wysiwyg.outputTransformation,

@@ -83,3 +83,31 @@ See `TreeSitterMarkdownParserExtension` for the hook shape.
 See [`BUILDING.md`](../BUILDING.md) at the repo root for submodule setup and NDK/CMake
 details. tl;dr: `./gradlew :wysiwyg-parser-treesitter:assembleDebug` should work on a fresh
 clone — submodules auto-initialize.
+
+### Grammar ABI pinning
+
+The `tree-sitter-markdown` submodule is pinned to **v0.4.1**. Do not bump past v0.4.x without
+verifying that kotlin-tree-sitter supports the newer language ABI.
+
+Tree-sitter grammars bake a language-ABI version into their generated `parser.c`
+(`#define LANGUAGE_VERSION N`). kotlin-tree-sitter's runtime rejects grammars whose ABI
+falls outside a supported range — loading an incompatible one throws
+`IllegalArgumentException: Incompatible language version N. Must be between X and Y.` at
+`Language(...)` construction time.
+
+Current state:
+
+| component            | version            | grammar ABI   |
+|----------------------|--------------------|---------------|
+| kotlin-tree-sitter   | 0.24.1             | accepts 13–14 |
+| tree-sitter-markdown | v0.4.1 (ABI 14) ✅  | —             |
+| tree-sitter-markdown | v0.5.0+ (ABI 15) ❌ | —             |
+
+When bumping either dependency:
+
+1. Check the grammar's `parser.c` for `LANGUAGE_VERSION` after checkout.
+2. Check kotlin-tree-sitter's supported ABI range (it's in
+   `ktreesitter/src/commonMain/kotlin/io/github/treesitter/ktreesitter/Language.kt` or the
+   runtime error message).
+3. If they disagree, either find a compatible grammar tag or wait for a kotlin-tree-sitter
+   release that supports the newer ABI.
