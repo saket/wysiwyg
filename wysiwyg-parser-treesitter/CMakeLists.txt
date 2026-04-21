@@ -3,7 +3,7 @@
 # The ktreesitter-plugin's generated CMakeLists.txt uses find_package(JNI REQUIRED), which
 # fails under AGP's externalNativeBuild — the NDK toolchain doesn't satisfy FindJNI's
 # desktop-JDK expectations. This file bypasses that by relying on the NDK's sysroot for
-# jni.h. Tracking: https://github.com/tree-sitter/kotlin-tree-sitter/issues/<TODO: filed>
+# jni.h. Tracking: https://github.com/tree-sitter/kotlin-tree-sitter/issues/60.
 #
 # GRAMMAR_DIR and GENERATED_DIR are passed in from the module's build.gradle via
 # externalNativeBuild.cmake.arguments.
