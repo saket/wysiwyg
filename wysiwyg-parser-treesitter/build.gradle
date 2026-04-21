@@ -1,7 +1,9 @@
 plugins {
   alias(libs.plugins.android.library)
   alias(libs.plugins.kotlin.multiplatform)
+  alias(libs.plugins.kotlin.compose)
   alias(libs.plugins.kotlinx.treesitter)
+  alias(libs.plugins.dropshots)
 }
 
 kotlin {
@@ -20,7 +22,23 @@ kotlin {
       dependencies {
         api project(':wysiwyg')
         implementation libs.kotlinx.treesitter
+        // Compose runtime needs to be on the main classpath because the compose compiler
+        // plugin is applied module-wide (even though we only use @Composable in tests today).
+        implementation libs.androidx.compose.runtime
       }
+    }
+    androidInstrumentedTest.dependencies {
+      implementation libs.junit
+      implementation libs.dropshots
+      implementation libs.androidx.test.runner
+      implementation libs.androidx.test.rules
+      implementation libs.androidx.test.ext.junit
+      implementation libs.androidx.compose.ui.test.junit4
+      implementation libs.androidx.compose.ui.test.manifest
+      implementation libs.androidx.compose.ui
+      implementation libs.androidx.compose.foundation
+      implementation libs.androidx.compose.material3
+      implementation libs.androidx.activity.compose
     }
   }
 }
@@ -40,16 +58,14 @@ android {
   namespace "me.saket.wysiwyg.parser.treesitter"
 
   compileSdk libs.versions.compileSdk.get().toInteger()
-  defaultConfig.minSdk 23
-
-  externalNativeBuild {
-    cmake {
-      path = file("CMakeLists.txt")
-      version = "3.22.1"
-    }
-  }
-
   defaultConfig {
+    minSdk 23
+    // targetSdk has no effect on library modules, but it IS used for the test APK. Without it,
+    // the test APK inherits minSdk as targetSdk, which degrades Compose rendering and triggers
+    // the "built for an older version of Android" platform warning dialog. See
+    // https://issuetracker.google.com/issues/283219177.
+    targetSdk libs.versions.compileSdk.get().toInteger()
+    testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     externalNativeBuild {
       cmake {
         arguments += [
@@ -57,6 +73,17 @@ android {
           "-DGENERATED_DIR=${layout.buildDirectory.get()}/generated",
         ]
       }
+    }
+  }
+
+  buildFeatures {
+    compose = true
+  }
+
+  externalNativeBuild {
+    cmake {
+      path = file("CMakeLists.txt")
+      version = "3.22.1"
     }
   }
 
