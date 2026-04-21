@@ -1,7 +1,7 @@
 // Hand-written counterpart to the plugin-generated binding.c. The ktreesitter-plugin's
-// Gradle DSL only supports one grammar per module, so we mirror its output for the inline
-// grammar. Kept in sync with TreeSitterMarkdownInline.kt — the JNI export name must match
-// the Kotlin package + class + method name exactly (underscores encoded as _1).
+// Gradle DSL only supports one grammar per module, so this file mirrors its output for the
+// inline grammar. Kept in sync with TreeSitterMarkdownInline.kt — the JNI export name must
+// match the Kotlin package + class + method name exactly (underscores encoded as _1).
 
 #include <jni.h>
 #include <tree-sitter-markdown-inline.h>

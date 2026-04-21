@@ -34,23 +34,14 @@ import kotlin.contracts.contract
 /**
  * Markdown parser backed by tree-sitter.
  *
- * Uses tree-sitter queries rather than a manual tree walk to minimize JNI boundary crossings:
- * the C engine pre-filters matching nodes and hands Kotlin one batch per capture.
- *
- * Markdown is parsed in two passes, matching the CommonMark spec: [blockParser] establishes
- * block structure (headings, lists, block quotes, fenced code), and its `@inline` captures
- * identify the byte ranges of actual inline content (with block markers stripped). Those
- * ranges are fed to [inlineParser] via [Parser.includedRanges], which then parses emphasis,
- * strong, links, code spans, and strikethroughs.
- *
- * TODOs:
+ *  TODOs:
  * - **Incremental parsing.** The parser currently re-parses and re-walks the entire document
  *   on every call, ignoring [ChangeListSnapshot]. A real incremental pipeline would apply
  *   edits via `tree.edit(InputEdit)`, re-parse with `oldTree`, then use
  *   `newTree.getChangedRanges(oldTree)` to scope span re-emission to just the changed regions.
  * - **UTF-8 vs UTF-16 offsets.** Tree-sitter byte offsets assume UTF-8. Compose's
  *   `AnnotatedString` uses UTF-16 char indices. Non-ASCII text will mis-align spans until
- *   we add a conversion layer.
+ *   a conversion layer is added.
  */
 class TreeSitterMarkdownParser : MarkdownParser {
   private val blockLanguage = Language(TreeSitterMarkdown.language())
@@ -67,6 +58,9 @@ class TreeSitterMarkdownParser : MarkdownParser {
       val inlineRanges = mutableListOf<Range>()
 
       val blockTree = blockParser.parse(text)
+
+      // Use tree-sitter queries rather than a manual tree walk to minimize JNI boundary crossings.
+      // The C engine pre-filters matching nodes and hands Kotlin one batch per capture.
       blockQuery.matches(blockTree.rootNode).forEach { match ->
         match.captures.fastForEach { capture ->
           val node = capture.node
@@ -120,6 +114,11 @@ class TreeSitterMarkdownParser : MarkdownParser {
         }
       }
 
+      // Markdown is parsed in two passes, matching the CommonMark spec: [blockParser] establishes
+      // block structure (headings, lists, block quotes, fenced code), and its `@inline` captures
+      // identify the byte ranges of actual inline content (with block markers stripped). Those
+      // ranges are fed to [inlineParser] via [Parser.includedRanges], which then parses emphasis,
+      // strong, links, code spans, and strikethroughs.
       if (inlineRanges.isNotEmpty()) {
         inlineParser.includedRanges = inlineRanges
         val inlineTree = inlineParser.parse(text)
@@ -148,9 +147,9 @@ class TreeSitterMarkdownParser : MarkdownParser {
 
   companion object {
     /**
-     * Tree-sitter query matching every block-level node we render. Evaluated natively by the
-     * C engine and returned as a batch of `QueryMatch`es, so one JNI call covers an entire
-     * document instead of one call per node visited — see README §2.
+     * Tree-sitter query matching every block-level node rendered as a span. Evaluated natively
+     * by the C engine and returned as a batch of `QueryMatch`es, so one JNI call covers an
+     * entire document instead of one call per node visited — see README §2.
      *
      * Heading patterns are deliberately split one-per-level (`atx_h1_marker` ... `atx_h6_marker`)
      * so the level is encoded in the pattern's own capture name (`@heading.1` ... `@heading.6`).
@@ -186,11 +185,11 @@ class TreeSitterMarkdownParser : MarkdownParser {
     """.trimIndent()
 
     /**
-     * Tree-sitter query matching every inline node we render. Runs against the inline parser's
-     * tree, which only sees the byte ranges captured as `@inline` by [BlockQuery] (scoped via
-     * [Parser.includedRanges]). So `(emphasis)` here matches `*foo*` inside a paragraph without
-     * tripping on a `*` that's a list marker at block level — the inline parser literally
-     * can't see list markers.
+     * Tree-sitter query matching every inline node rendered as a span. Runs against the inline
+     * parser's tree, which only sees the byte ranges captured as `@inline` by [BlockQuery]
+     * (scoped via [Parser.includedRanges]). So `(emphasis)` here matches `*foo*` inside a
+     * paragraph without tripping on a `*` that's a list marker at block level — the inline
+     * parser literally can't see list markers.
      *
      * Capture names are the dispatch key in the `when` inside [parse] — edit them both together.
      */

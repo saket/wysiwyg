@@ -23,7 +23,7 @@ kotlin {
         api project(':wysiwyg')
         implementation libs.kotlinx.treesitter
         // Compose runtime needs to be on the main classpath because the compose compiler
-        // plugin is applied module-wide (even though we only use @Composable in tests today).
+        // plugin is applied module-wide (even though @Composable is only used in tests today).
         implementation libs.androidx.compose.runtime
       }
     }

@@ -53,7 +53,7 @@ first parse of a large document. Strategies:
 
 ### 5. Batch UTF-8 ↔ UTF-16 conversions
 
-Tree-sitter byte offsets are UTF-8; Kotlin `String` is UTF-16. Every span we emit needs
+Tree-sitter byte offsets are UTF-8; Kotlin `String` is UTF-16. Every emitted span needs
 byte→char conversion. Naive per-span conversion is O(length) each time — quadratic in total
 spans for the whole document.
 
