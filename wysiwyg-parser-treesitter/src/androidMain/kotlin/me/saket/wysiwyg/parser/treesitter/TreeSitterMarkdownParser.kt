@@ -26,6 +26,7 @@ import me.saket.wysiwyg.ThematicBreakSpanStyle
 import me.saket.wysiwyg.parser.ChangeListSnapshot
 import me.saket.wysiwyg.parser.MarkdownParser
 import me.saket.wysiwyg.parser.MarkdownParser.ParseResult
+import me.saket.wysiwyg.parser.treesitter.TreeSitterMarkdownParser.Companion.BlockQuery
 import me.saket.wysiwyg.parser.treesitter.grammar.TreeSitterMarkdown
 import me.saket.wysiwyg.parser.treesitter.grammar.TreeSitterMarkdownInline
 import kotlin.contracts.ExperimentalContracts
@@ -39,9 +40,6 @@ import kotlin.contracts.contract
  *   on every call, ignoring [ChangeListSnapshot]. A real incremental pipeline would apply
  *   edits via `tree.edit(InputEdit)`, re-parse with `oldTree`, then use
  *   `newTree.getChangedRanges(oldTree)` to scope span re-emission to just the changed regions.
- * - **UTF-8 vs UTF-16 offsets.** Tree-sitter byte offsets assume UTF-8. Compose's
- *   `AnnotatedString` uses UTF-16 char indices. Non-ASCII text will mis-align spans until
- *   a conversion layer is added.
  */
 class TreeSitterMarkdownParser : MarkdownParser {
   private val blockLanguage = Language(TreeSitterMarkdown.language())
@@ -57,16 +55,20 @@ class TreeSitterMarkdownParser : MarkdownParser {
       val spans = mutableListOf<MarkdownSpan>()
       val inlineRanges = mutableListOf<Range>()
 
-      val blockTree = blockParser.parse(text)
+      // Tree-sitter reports byte offsets (UTF-8), but spans get applied to Compose's
+      // AnnotatedString, which is indexed in UTF-16 char offsets. The table converts
+      // between the two.
+      val offsets = ByteToCharOffsets(text)
 
       // Use tree-sitter queries rather than a manual tree walk to minimize JNI boundary crossings.
       // The C engine pre-filters matching nodes and hands Kotlin one batch per capture.
+      val blockTree = blockParser.parse(text)
       blockQuery.matches(blockTree.rootNode).forEach { match ->
         match.captures.fastForEach { capture ->
           val node = capture.node
           val range = MarkdownSpanTextRange(
-            startIndex = node.startByte.toInt(),
-            endIndexExclusive = node.endByte.toInt(),
+            startIndex = offsets.byteToChar(node.startByte.toInt()),
+            endIndexExclusive = offsets.byteToChar(node.endByte.toInt()),
           )
           when (val name = capture.name) {
             "heading.1",
@@ -120,14 +122,16 @@ class TreeSitterMarkdownParser : MarkdownParser {
       // ranges are fed to [inlineParser] via [Parser.includedRanges], which then parses emphasis,
       // strong, links, code spans, and strikethroughs.
       if (inlineRanges.isNotEmpty()) {
+        // Note to self: inline parsing does not need UTF-8 -> UTF-16 conversion. tree-sitter's
+        // includedRanges API is UTF-8 native.
         inlineParser.includedRanges = inlineRanges
         val inlineTree = inlineParser.parse(text)
         inlineQuery.matches(inlineTree.rootNode).forEach { match ->
           match.captures.fastForEach { capture ->
             val node = capture.node
             val range = MarkdownSpanTextRange(
-              startIndex = node.startByte.toInt(),
-              endIndexExclusive = node.endByte.toInt(),
+              startIndex = offsets.byteToChar(node.startByte.toInt()),
+              endIndexExclusive = offsets.byteToChar(node.endByte.toInt()),
             )
             when (capture.name) {
               "emphasis" -> spans += MarkdownSpan(ItalicSpanStyle, range)
