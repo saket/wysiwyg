@@ -17,6 +17,7 @@ import com.vladsch.flexmark.ext.gfm.strikethrough.StrikethroughExtension
 import com.vladsch.flexmark.util.ast.Node
 import com.vladsch.flexmark.util.misc.CharPredicate
 import com.vladsch.flexmark.util.sequence.BasedSequence
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import me.saket.wysiwyg.BlockQuoteBodySpanStyle
@@ -39,9 +40,14 @@ import me.saket.wysiwyg.highlight.MarkdownHighlighter.HighlightResult
 import com.vladsch.flexmark.parser.Parser as FlexmarkParser
 
 // todo: break :wysiwyg into :wysiwyg-core + :wysiwyg-flexmark
-/** Backed by [flexmark-java](https://github.com/vsch/flexmark-java). */
+/**
+ * Backed by [flexmark-java](https://github.com/vsch/flexmark-java).
+ *
+ * @param dispatcher The dispatcher on which flexmark's parsing + span emission runs.
+ */
 class FlexmarkMarkdownHighlighter(
   private val extensions: List<FlexmarkMarkdownHighlighterExtension> = emptyList(),
+  private val dispatcher: CoroutineDispatcher = Dispatchers.Default,
 ) : MarkdownHighlighter {
 
   private val parser = FlexmarkParser.builder()
@@ -53,9 +59,6 @@ class FlexmarkMarkdownHighlighter(
 
       // List items should start with a space.
       set(FlexmarkParser.LISTS_ITEM_MARKER_SPACE, true)
-
-      // "#" should always be followed by a character to be considered a heading.
-      set(FlexmarkParser.HEADING_NO_EMPTY_HEADING_WITHOUT_SPACE, true)
     }
     .extensions(listOf(StrikethroughExtension.create()))
     .apply { extensions.forEach { it.buildParser(this) } }
@@ -63,7 +66,7 @@ class FlexmarkMarkdownHighlighter(
 
   override suspend fun highlight(text: String, changes: ChangeListSnapshot): HighlightResult {
     val buffer = mutableListOf<MarkdownSpan>()
-    withContext(Dispatchers.Default) {
+    withContext(dispatcher) {
       parser.parse(text).traverse { node ->
         node.addSpansInto(buffer)
         extensions.fastForEach { extension ->
@@ -187,7 +190,7 @@ class FlexmarkMarkdownHighlighter(
         //
         // This is an H2
         // -------------
-        if (isAtxHeading) {
+        if (isAtxHeading && text.isNotBlank) {
           buffer.add(
             MarkdownSpan(
               style = HeadingSpanStyle(level),
