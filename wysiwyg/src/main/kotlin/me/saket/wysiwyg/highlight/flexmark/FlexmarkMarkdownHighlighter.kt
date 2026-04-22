@@ -1,4 +1,4 @@
-package me.saket.wysiwyg.parser.flexmark
+package me.saket.wysiwyg.highlight.flexmark
 
 import androidx.compose.ui.util.fastForEach
 import com.vladsch.flexmark.ast.BlockQuote
@@ -33,16 +33,16 @@ import me.saket.wysiwyg.MarkerColorSpanStyle
 import me.saket.wysiwyg.MarkdownSpanTextRange
 import me.saket.wysiwyg.StrikeThroughSpanStyle
 import me.saket.wysiwyg.ThematicBreakSpanStyle
-import me.saket.wysiwyg.parser.ChangeListSnapshot
-import me.saket.wysiwyg.parser.MarkdownParser
-import me.saket.wysiwyg.parser.MarkdownParser.ParseResult
+import me.saket.wysiwyg.highlight.ChangeListSnapshot
+import me.saket.wysiwyg.highlight.MarkdownHighlighter
+import me.saket.wysiwyg.highlight.MarkdownHighlighter.HighlightResult
 import com.vladsch.flexmark.parser.Parser as FlexmarkParser
 
 // todo: break :wysiwyg into :wysiwyg-core + :wysiwyg-flexmark
 /** Backed by [flexmark-java](https://github.com/vsch/flexmark-java). */
-class FlexmarkMarkdownParser(
-  vararg extensions: FlexmarkMarkdownParserExtension,
-) : MarkdownParser {
+class FlexmarkMarkdownHighlighter(
+  vararg extensions: FlexmarkMarkdownHighlighterExtension,
+) : MarkdownHighlighter {
   private val extensions = extensions.toList()
 
   private val parser = FlexmarkParser.builder()
@@ -62,7 +62,7 @@ class FlexmarkMarkdownParser(
     .apply { extensions.forEach { it.buildParser(this) } }
     .build()
 
-  override suspend fun parse(text: String, changes: ChangeListSnapshot): ParseResult {
+  override suspend fun highlight(text: String, changes: ChangeListSnapshot): HighlightResult {
     val buffer = mutableListOf<MarkdownSpan>()
     withContext(Dispatchers.Default) {
       parser.parse(text).traverse { node ->
@@ -74,7 +74,7 @@ class FlexmarkMarkdownParser(
         }
       }
     }
-    return ParseResult(buffer)
+    return HighlightResult(buffer)
   }
 
   private fun Node.addSpansInto(buffer: MutableList<MarkdownSpan>) {

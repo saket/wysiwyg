@@ -18,22 +18,22 @@ import me.saket.wysiwyg.BuildConfig
 import me.saket.wysiwyg.Wysiwyg
 import me.saket.wysiwyg.WysiwygTheme
 import me.saket.wysiwyg.format.OnEnterMarkdownFormatters
-import me.saket.wysiwyg.parser.ChangeListSnapshot
-import me.saket.wysiwyg.parser.MarkdownParser
-import me.saket.wysiwyg.parser.ShiftingMarkdownParser
+import me.saket.wysiwyg.highlight.ChangeListSnapshot
+import me.saket.wysiwyg.highlight.MarkdownHighlighter
+import me.saket.wysiwyg.highlight.ShiftingMarkdownHighlighter
 
 @Stable
 internal class RealWysiwyg internal constructor(
   override val textState: TextFieldState,
   override val theme: WysiwygTheme,
-  parser: MarkdownParser,
+  highlighter: MarkdownHighlighter,
   onEnterFormatters: OnEnterMarkdownFormatters,
 ) : Wysiwyg {
-  private val parser = ShiftingMarkdownParser(parser)
+  private val highlighter = ShiftingMarkdownHighlighter(highlighter)
 
   // Holds the ChangeList from the most recent InputTransformation invocation, awaiting consumption.
   // FWIW, this value isn't updated for non-user edits made directly using TextFieldState#edit().
-  // In those cases, the parser will do a full re-scan even if it supported incremental parsing.
+  // In those cases, the highlighter will do a full re-scan even if it supported incremental highlighting.
   private var pendingChangeList: ChangeListSnapshot? = null
 
   @OptIn(ExperimentalFoundationApi::class)
@@ -53,9 +53,9 @@ internal class RealWysiwyg internal constructor(
         val changes = this.pendingChangeList.also { this.pendingChangeList = null }
           ?: ChangeListSnapshot.Empty
 
-        parser.parse(text.toString(), changes).collect { parsed ->
+        highlighter.highlight(text.toString(), changes).collect { highlighted ->
           outputTransformation = StyledOutputTransformation(
-            parseResult = parsed,
+            highlightResult = highlighted,
             renderer = MarkdownRenderer(theme),
           )
         }
@@ -71,7 +71,7 @@ internal class RealWysiwyg internal constructor(
 }
 
 private data class StyledOutputTransformation(
-  val parseResult: MarkdownParser.ParseResult,
+  val highlightResult: MarkdownHighlighter.HighlightResult,
   private val renderer: MarkdownRenderer,
 ) : OutputTransformation {
 
@@ -80,13 +80,13 @@ private data class StyledOutputTransformation(
   }
 
   private fun TextFieldBuffer.applyMarkdownStyles() {
-    if (parseResult.spans.isEmpty()) {
+    if (highlightResult.spans.isEmpty()) {
       return
     }
 
     val styled = renderer.buildAnnotatedString(
       text = AnnotatedString(toString()),
-      spans = parseResult.spans,
+      spans = highlightResult.spans,
     )
     styled.spanStyles.fastForEach { range ->
       addStyle(range.item, range.start, range.end)

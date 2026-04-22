@@ -1,4 +1,4 @@
-package me.saket.wysiwyg.parser
+package me.saket.wysiwyg.highlight
 
 import androidx.compose.ui.util.fastMapNotNull
 import androidx.compose.ui.util.fastSumBy
@@ -6,51 +6,51 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import me.saket.wysiwyg.MarkdownSpan
 import me.saket.wysiwyg.MarkdownSpanTextRange
-import me.saket.wysiwyg.parser.MarkdownParser.ParseResult
+import me.saket.wysiwyg.highlight.MarkdownHighlighter.HighlightResult
 
 /**
  * Wraps a non-incremental [delegate] to emit an approximate, flicker-free
- * first result before the delegate's full re-parse completes.
+ * first result before the delegate's full re-highlight completes.
  */
-internal class ShiftingMarkdownParser(
-  private val delegate: MarkdownParser,
+internal class ShiftingMarkdownHighlighter(
+  private val delegate: MarkdownHighlighter,
 ) {
-  private var previousParseResult: ParseSnapshot? = null
+  private var previousHighlightResult: HighlightSnapshot? = null
 
-  fun parse(text: String, changes: ChangeListSnapshot): Flow<ParseResult> {
+  fun highlight(text: String, changes: ChangeListSnapshot): Flow<HighlightResult> {
     return flow {
-      val shifted = previousParseResult?.rebasedOn(text, changes)
+      val shifted = previousHighlightResult?.rebasedOn(text, changes)
       if (shifted != null) {
         emit(shifted)
       }
 
-      val result = delegate.parse(text, changes)
-      previousParseResult = ParseSnapshot(textLength = text.length, result = result)
+      val result = delegate.highlight(text, changes)
+      previousHighlightResult = HighlightSnapshot(textLength = text.length, result = result)
       emit(result)
     }
   }
 }
 
-private data class ParseSnapshot(
+private data class HighlightSnapshot(
   val textLength: Int,
-  val result: ParseResult,
+  val result: HighlightResult,
 ) {
-  fun rebasedOn(text: String, changes: ChangeListSnapshot): ParseResult? {
+  fun rebasedOn(text: String, changes: ChangeListSnapshot): HighlightResult? {
     val canShift = if (changes.changes.isEmpty()) {
       false
     } else {
       // If [changes] genuinely describes the path from the cached text to [text], then the
       // cached length plus the changes' net delta must equal the new text's length. A mismatch
-      // means some edits aren't represented — e.g. a prior parse was cancelled before it could
-      // update the cache, or a programmatic textState.edit {} slipped in between user edits
-      // (which bypasses InputTransformation). Shifting by a partial [changes] would produce
-      // wrong offsets; fall back to waiting for the full parse.
+      // means some edits aren't represented — e.g. a prior highlight was cancelled before it
+      // could update the cache, or a programmatic textState.edit {} slipped in between user
+      // edits (which bypasses InputTransformation). Shifting by a partial [changes] would
+      // produce wrong offsets; fall back to waiting for the full re-highlight.
       val totalDelta = changes.changes.fastSumBy {
         it.range.length - it.originalRange.length
       }
       textLength + totalDelta == text.length
     }
-    return if (canShift) ParseResult(result.spans.shiftedBy(changes)) else null
+    return if (canShift) HighlightResult(result.spans.shiftedBy(changes)) else null
   }
 }
 

@@ -1,10 +1,10 @@
-package me.saket.wysiwyg.parser.flexmark
+package me.saket.wysiwyg.highlight.flexmark
 
 import com.vladsch.flexmark.parser.Parser
 import com.vladsch.flexmark.util.ast.Node
 import me.saket.wysiwyg.MarkdownSpan
 
-interface FlexmarkMarkdownParserExtension {
+interface FlexmarkMarkdownHighlighterExtension {
   /**
    * Flexmark extensions or post-processor factories can be registered
    * here for parsing text and inserting custom nodes to the AST.

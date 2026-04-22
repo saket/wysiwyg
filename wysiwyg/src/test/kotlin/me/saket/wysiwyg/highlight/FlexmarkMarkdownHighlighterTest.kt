@@ -1,4 +1,4 @@
-package me.saket.wysiwyg.parser
+package me.saket.wysiwyg.highlight
 
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
@@ -7,11 +7,11 @@ import me.saket.wysiwyg.ListBlockSpanStyle
 import me.saket.wysiwyg.MarkdownSpan
 import me.saket.wysiwyg.MarkerColorSpanStyle
 import me.saket.wysiwyg.MarkdownSpanTextRange
-import me.saket.wysiwyg.parser.flexmark.FlexmarkMarkdownParser
+import me.saket.wysiwyg.highlight.flexmark.FlexmarkMarkdownHighlighter
 import org.junit.Test
 
-class FlexmarkMarkdownParserTest {
-  private val parser = FlexmarkMarkdownParser()
+class FlexmarkMarkdownHighlighterTest {
+  private val highlighter = FlexmarkMarkdownHighlighter()
 
   @Test fun `list items without leading space shouldn't be highlighted`() {
     assertSpansFor(
@@ -111,7 +111,7 @@ class FlexmarkMarkdownParserTest {
     input: String,
     expect: List<MarkdownSpan>
   ) = runTest {
-    val result = parser.parse(input, ChangeListSnapshot.Empty)
+    val result = highlighter.highlight(input, ChangeListSnapshot.Empty)
     assertThat(result.spans).containsExactlyElementsIn(expect)
   }
 }

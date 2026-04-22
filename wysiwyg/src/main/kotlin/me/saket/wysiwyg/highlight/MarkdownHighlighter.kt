@@ -1,24 +1,24 @@
-package me.saket.wysiwyg.parser
+package me.saket.wysiwyg.highlight
 
 import androidx.compose.foundation.text.input.TextFieldBuffer
 import androidx.compose.ui.text.TextRange
 import me.saket.wysiwyg.MarkdownSpan
 
-interface MarkdownParser {
+interface MarkdownHighlighter {
   /**
    * Produces markdown spans for [text]. Called on every edit.
    *
    * Implementations don't produce interim results. Flicker-free rendering is handled automatically
-   * by Wysiwyg, which wraps every parser in [ShiftingMarkdownParser] to emit a shifted-spans
-   * approximation between calls.
+   * by Wysiwyg, which wraps every highlighter in [ShiftingMarkdownHighlighter] to emit a
+   * shifted-spans approximation between calls.
    *
-   * @param changes Describes what changed since the previous call. This can be used by parsers
-   * that support incremental invalidation of their markdown ASTs.
+   * @param changes Describes what changed since the previous call. This can be used by
+   * highlighters that support incremental invalidation of their markdown ASTs.
    */
-  suspend fun parse(text: String, changes: ChangeListSnapshot): ParseResult
+  suspend fun highlight(text: String, changes: ChangeListSnapshot): HighlightResult
 
   @JvmInline
-  value class ParseResult(
+  value class HighlightResult(
     val spans: List<MarkdownSpan>,
   )
 }
