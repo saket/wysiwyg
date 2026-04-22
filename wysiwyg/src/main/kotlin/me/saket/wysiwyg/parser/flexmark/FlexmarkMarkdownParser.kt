@@ -40,6 +40,16 @@ import me.saket.wysiwyg.parser.MarkdownParser
 import me.saket.wysiwyg.parser.MarkdownParser.ParseResult
 import com.vladsch.flexmark.parser.Parser as FlexmarkParser
 
+/**
+ * Backed by [flexmark-java](https://github.com/vsch/flexmark-java). Not incremental — every
+ * edit triggers a full re-parse.
+ *
+ * An incremental tree-sitter implementation was tried and removed (see git history). On a
+ * Pixel 10 Pro, flexmark cold-parse was 2.3–3.7× faster across 100/1k/5k-line fixtures
+ * (5.2/15.2/69.6 ms vs 11.8/50.5/259.1 ms), and tree-sitter's "hot" path failed to beat its
+ * own cold path at 1k+ lines because span emission still walked the full tree — so the
+ * native tax (JNI, UTF-16 offset conversion, grammar quirks) bought nothing.
+ */
 class FlexmarkMarkdownParser(
   vararg extensions: FlexmarkMarkdownParserExtension,
 ) : MarkdownParser {

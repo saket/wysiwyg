@@ -46,7 +46,6 @@ android {
 
 dependencies {
   implementation project(':wysiwyg')
-  implementation project(':wysiwyg-parser-treesitter')
   implementation libs.androidx.appcompat
   implementation libs.androidx.activity.compose
   implementation libs.androidx.compose.ui

@@ -6,4 +6,4 @@ pluginManagement {
   }
 }
 
-include ':sample', ':wysiwyg', ':wysiwyg-parser-treesitter'
+include ':sample', ':wysiwyg'

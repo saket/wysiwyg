@@ -32,7 +32,7 @@ import me.saket.extendedspans.RoundedCornerSpanPainter
 import me.saket.wysiwyg.WysiwygTheme
 import me.saket.wysiwyg.extendedspans.BlockQuoteSpanPainter
 import me.saket.wysiwyg.extendedspans.ThematicBreakSpanPainter
-import me.saket.wysiwyg.parser.treesitter.TreeSitterMarkdownParser
+import me.saket.wysiwyg.parser.flexmark.FlexmarkMarkdownParser
 import me.saket.wysiwyg.rememberWysiwyg
 
 @Composable
@@ -60,7 +60,7 @@ fun WysiwygEditor(
   val wysiwyg = rememberWysiwyg(
     textState = textState,
     theme = wysiwygTheme(),
-    markdownParser = remember { TreeSitterMarkdownParser() },
+    markdownParser = remember { FlexmarkMarkdownParser() },
   )
 
   // todo: make this work.
