@@ -17,8 +17,6 @@ import com.vladsch.flexmark.util.ast.Node
 import com.vladsch.flexmark.util.misc.CharPredicate
 import com.vladsch.flexmark.util.sequence.BasedSequence
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 import me.saket.wysiwyg.BlockQuoteBodySpanStyle
 import me.saket.wysiwyg.BlockQuoteParagraphLineSpanStyle
@@ -40,16 +38,8 @@ import me.saket.wysiwyg.parser.MarkdownParser
 import me.saket.wysiwyg.parser.MarkdownParser.ParseResult
 import com.vladsch.flexmark.parser.Parser as FlexmarkParser
 
-/**
- * Backed by [flexmark-java](https://github.com/vsch/flexmark-java). Not incremental — every
- * edit triggers a full re-parse.
- *
- * An incremental tree-sitter implementation was tried and removed (see git history). On a
- * Pixel 10 Pro, flexmark cold-parse was 2.3–3.7× faster across 100/1k/5k-line fixtures
- * (5.2/15.2/69.6 ms vs 11.8/50.5/259.1 ms), and tree-sitter's "hot" path failed to beat its
- * own cold path at 1k+ lines because span emission still walked the full tree — so the
- * native tax (JNI, UTF-16 offset conversion, grammar quirks) bought nothing.
- */
+// todo: break :wysiwyg into :wysiwyg-core + :wysiwyg-flexmark
+/** Backed by [flexmark-java](https://github.com/vsch/flexmark-java). */
 class FlexmarkMarkdownParser(
   vararg extensions: FlexmarkMarkdownParserExtension,
 ) : MarkdownParser {
@@ -72,22 +62,19 @@ class FlexmarkMarkdownParser(
     .apply { extensions.forEach { it.buildParser(this) } }
     .build()
 
-  override fun parse(text: String, changes: ChangeListSnapshot): Flow<ParseResult> {
-    return flow {
-      // Flexmark is not incremental, so [changes] is ignored and the flow emits exactly once.
-      val buffer = mutableListOf<MarkdownSpan>()
-      withContext(Dispatchers.Default) {
-        parser.parse(text).traverse { node ->
-          node.addSpansInto(buffer)
-          extensions.fastForEach { extension ->
-            with(extension) {
-              node.addSpansInto(buffer)
-            }
+  override suspend fun parse(text: String, changes: ChangeListSnapshot): ParseResult {
+    val buffer = mutableListOf<MarkdownSpan>()
+    withContext(Dispatchers.Default) {
+      parser.parse(text).traverse { node ->
+        node.addSpansInto(buffer)
+        extensions.fastForEach { extension ->
+          with(extension) {
+            node.addSpansInto(buffer)
           }
         }
       }
-      emit(ParseResult(spans = buffer))
     }
+    return ParseResult(buffer)
   }
 
   private fun Node.addSpansInto(buffer: MutableList<MarkdownSpan>) {
@@ -249,7 +236,7 @@ class FlexmarkMarkdownParser(
       next = stack.removeFirst()
 
       // Wysiwyg keeps it simple and avoids nested markdown blocks.
-      // For example, nested block/italic styling inside headings feels overkill.
+      // For example, nested block/italic styling inside code blocks feel overkill.
       val isNestedSyntax = (next is ListBlock && next.parent is ListItem)
           || next.parent is BlockQuote
           || next.parent is FencedCodeBlock
@@ -262,5 +249,4 @@ class FlexmarkMarkdownParser(
       }
     }
   }
-
 }

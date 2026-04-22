@@ -18,6 +18,7 @@ import me.saket.wysiwyg.internal.MarkdownRendererScope
  * detected, instead of generating one span for representing the entire link, two spans
  * are generated -- one for coloring the link text and one for coloring the link url.
  */
+// todo: use @Poko.
 data class MarkdownSpan(
   val style: MarkdownSpanStyle,
   val range: MarkdownSpanTextRange,

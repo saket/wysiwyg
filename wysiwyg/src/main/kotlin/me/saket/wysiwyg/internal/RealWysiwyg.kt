@@ -20,14 +20,17 @@ import me.saket.wysiwyg.WysiwygTheme
 import me.saket.wysiwyg.format.OnEnterMarkdownFormatters
 import me.saket.wysiwyg.parser.ChangeListSnapshot
 import me.saket.wysiwyg.parser.MarkdownParser
+import me.saket.wysiwyg.parser.ShiftingMarkdownParser
 
 @Stable
 internal class RealWysiwyg internal constructor(
   override val textState: TextFieldState,
   override val theme: WysiwygTheme,
-  val parser: MarkdownParser,
+  parser: MarkdownParser,
   onEnterFormatters: OnEnterMarkdownFormatters,
 ) : Wysiwyg {
+  private val parser = ShiftingMarkdownParser(parser)
+
   // Holds the ChangeList from the most recent InputTransformation invocation, awaiting consumption.
   // FWIW, this value isn't updated for non-user edits made directly using TextFieldState#edit().
   // In those cases, the parser will do a full re-scan even if it supported incremental parsing.

@@ -2,21 +2,20 @@ package me.saket.wysiwyg.parser
 
 import androidx.compose.foundation.text.input.TextFieldBuffer
 import androidx.compose.ui.text.TextRange
-import kotlinx.coroutines.flow.Flow
 import me.saket.wysiwyg.MarkdownSpan
 
 interface MarkdownParser {
   /**
-   * Produces markdown spans for [text]. The returned flow may emit multiple times:
-   * an initial synchronous approximate result (for flicker-free rendering while a full parse
-   * runs), followed by the final correct result. Parsers that can't produce an interim
-   * result emit once.
+   * Produces markdown spans for [text]. Called on every edit.
    *
-   * @param changes describes what changed since the previous call. Incremental parsers use
-   * this to skip re-diffing the text; non-incremental parsers ignore it. Pass
-   * [ChangeListSnapshot.Empty] for the initial parse or when edit info isn't available.
+   * Implementations don't produce interim results. Flicker-free rendering is handled automatically
+   * by Wysiwyg, which wraps every parser in [ShiftingMarkdownParser] to emit a shifted-spans
+   * approximation between calls.
+   *
+   * @param changes Describes what changed since the previous call. This can be used by parsers
+   * that support incremental invalidation of their markdown ASTs.
    */
-  fun parse(text: String, changes: ChangeListSnapshot): Flow<ParseResult>
+  suspend fun parse(text: String, changes: ChangeListSnapshot): ParseResult
 
   @JvmInline
   value class ParseResult(
