@@ -1,8 +1,11 @@
 package me.saket.wysiwyg.internal
 
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.text.input.InputTransformation
 import androidx.compose.foundation.text.input.OutputTransformation
 import androidx.compose.foundation.text.input.TextFieldBuffer
 import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.foundation.text.input.then
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -25,13 +28,29 @@ internal class RealWysiwyg internal constructor(
   val parser: MarkdownParser,
   onEnterFormatters: OnEnterMarkdownFormatters,
 ) : Wysiwyg {
-  override val inputTransformation = onEnterFormatters.asInputTransformation()
+  // Holds the ChangeList from the most recent InputTransformation invocation, awaiting consumption.
+  // FWIW, this value isn't updated for non-user edits made directly using TextFieldState#edit().
+  // In those cases, the parser will do a full re-scan even if it supported incremental parsing.
+  private var pendingChangeList: ChangeListSnapshot? = null
+
+  @OptIn(ExperimentalFoundationApi::class)
+  private val captureChangeList = InputTransformation {
+    pendingChangeList = ChangeListSnapshot.from(changes)
+  }
+
   override var outputTransformation by mutableStateOf(OutputTransformation {})
+
+  override val inputTransformation: InputTransformation = onEnterFormatters
+    .asInputTransformation()
+    .then(captureChangeList)
 
   suspend fun syncOutputTransformationWithText() {
     snapshotFlow { textState.text }.collectLatest { text ->
       try {
-        parser.parse(text.toString(), ChangeListSnapshot.Empty).collect { parsed ->
+        val changes = this.pendingChangeList.also { this.pendingChangeList = null }
+          ?: ChangeListSnapshot.Empty
+
+        parser.parse(text.toString(), changes).collect { parsed ->
           outputTransformation = StyledOutputTransformation(
             parseResult = parsed,
             renderer = MarkdownRenderer(theme),
