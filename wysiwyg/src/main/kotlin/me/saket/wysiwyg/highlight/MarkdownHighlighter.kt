@@ -4,7 +4,7 @@ import androidx.compose.foundation.text.input.TextFieldBuffer
 import androidx.compose.ui.text.TextRange
 import me.saket.wysiwyg.MarkdownSpan
 
-interface MarkdownHighlighter {
+fun interface MarkdownHighlighter {
   /**
    * Produces markdown spans for [text]. Called on every edit.
    *

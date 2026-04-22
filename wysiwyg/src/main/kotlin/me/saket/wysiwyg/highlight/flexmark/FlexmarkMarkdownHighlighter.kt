@@ -41,9 +41,8 @@ import com.vladsch.flexmark.parser.Parser as FlexmarkParser
 // todo: break :wysiwyg into :wysiwyg-core + :wysiwyg-flexmark
 /** Backed by [flexmark-java](https://github.com/vsch/flexmark-java). */
 class FlexmarkMarkdownHighlighter(
-  vararg extensions: FlexmarkMarkdownHighlighterExtension,
+  private val extensions: List<FlexmarkMarkdownHighlighterExtension> = emptyList(),
 ) : MarkdownHighlighter {
-  private val extensions = extensions.toList()
 
   private val parser = FlexmarkParser.builder()
     .apply {
