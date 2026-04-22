@@ -1,5 +1,6 @@
 package me.saket.wysiwyg.highlight.flexmark
 
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.util.fastForEach
 import com.vladsch.flexmark.ast.BlockQuote
 import com.vladsch.flexmark.ast.Code
@@ -30,7 +31,6 @@ import me.saket.wysiwyg.LinkUrlSpanStyle
 import me.saket.wysiwyg.ListBlockSpanStyle
 import me.saket.wysiwyg.MarkdownSpan
 import me.saket.wysiwyg.MarkerColorSpanStyle
-import me.saket.wysiwyg.MarkdownSpanTextRange
 import me.saket.wysiwyg.StrikeThroughSpanStyle
 import me.saket.wysiwyg.ThematicBreakSpanStyle
 import me.saket.wysiwyg.highlight.ChangeListSnapshot
@@ -84,7 +84,7 @@ class FlexmarkMarkdownHighlighter(
         buffer.add(
           MarkdownSpan(
             style = ItalicSpanStyle,
-            range = MarkdownSpanTextRange(startOffset, endOffset)
+            range = TextRange(startOffset, endOffset)
           )
         )
       }
@@ -94,7 +94,7 @@ class FlexmarkMarkdownHighlighter(
         buffer.add(
           MarkdownSpan(
             style = BoldSpanStyle,
-            range = MarkdownSpanTextRange(startOffset, endOffset)
+            range = TextRange(startOffset, endOffset)
           )
         )
       }
@@ -102,7 +102,7 @@ class FlexmarkMarkdownHighlighter(
         buffer.add(
           MarkdownSpan(
             style = StrikeThroughSpanStyle,
-            range = MarkdownSpanTextRange(startOffset, endOffset)
+            range = TextRange(startOffset, endOffset)
           )
         )
       }
@@ -112,13 +112,13 @@ class FlexmarkMarkdownHighlighter(
         buffer.add(
           MarkdownSpan(
             style = LinkTextSpanStyle,
-            range = MarkdownSpanTextRange(textOpeningMarker.endOffset, textClosingMarker.startOffset)
+            range = TextRange(textOpeningMarker.endOffset, textClosingMarker.startOffset)
           )
         )
         buffer.add(
           MarkdownSpan(
             style = LinkUrlSpanStyle,
-            range = MarkdownSpanTextRange(linkOpeningMarker.startOffset, linkClosingMarker.endOffset)
+            range = TextRange(linkOpeningMarker.startOffset, linkClosingMarker.endOffset)
           )
         )
       }
@@ -128,7 +128,7 @@ class FlexmarkMarkdownHighlighter(
         buffer.add(
           MarkdownSpan(
             style = InlineCodeSpanStyle,
-            range = MarkdownSpanTextRange(startOffset, endOffset)
+            range = TextRange(startOffset, endOffset)
           )
         )
       }
@@ -139,7 +139,7 @@ class FlexmarkMarkdownHighlighter(
           buffer.add(
             MarkdownSpan(
               style = FencedCodeBlockSpanStyle,
-              range = MarkdownSpanTextRange(startOffset, closingMarker.endOffset)
+              range = TextRange(startOffset, closingMarker.endOffset)
             )
           )
         }
@@ -148,14 +148,14 @@ class FlexmarkMarkdownHighlighter(
         buffer.add(
           MarkdownSpan(
             style = BlockQuoteBodySpanStyle,
-            range = MarkdownSpanTextRange(startOffset, endOffset)
+            range = TextRange(startOffset, endOffset)
           )
         )
         val withEndingLineBreaksTrimmed = chars.countTrailing(CharPredicate.anyOf('\n'))
         buffer.add(
           MarkdownSpan(
             style = BlockQuoteParagraphLineSpanStyle,
-            range = MarkdownSpanTextRange(startOffset, endOffset - withEndingLineBreaksTrimmed)
+            range = TextRange(startOffset, endOffset - withEndingLineBreaksTrimmed)
           )
         )
         buffer.addMarkerSpan(openingMarker)
@@ -172,7 +172,7 @@ class FlexmarkMarkdownHighlighter(
         buffer.add(
           MarkdownSpan(
             style = ListBlockSpanStyle,
-            range = MarkdownSpanTextRange(startOffset, correctEndOffset)
+            range = TextRange(startOffset, correctEndOffset)
           )
         )
       }
@@ -191,7 +191,7 @@ class FlexmarkMarkdownHighlighter(
           buffer.add(
             MarkdownSpan(
               style = HeadingSpanStyle(level),
-              range = MarkdownSpanTextRange(startOffset, endOffset)
+              range = TextRange(startOffset, endOffset)
             )
           )
           buffer.addMarkerSpan(openingMarker)
@@ -201,13 +201,13 @@ class FlexmarkMarkdownHighlighter(
         buffer.add(
           MarkdownSpan(
             style = ThematicBreakSpanStyle,
-            range = MarkdownSpanTextRange(startOffset, endOffset)
+            range = TextRange(startOffset, endOffset)
           )
         )
         buffer.add(
           MarkdownSpan(
             style = MarkerColorSpanStyle,
-            range = MarkdownSpanTextRange(startOffset, endOffset)
+            range = TextRange(startOffset, endOffset)
           )
         )
       }
@@ -220,7 +220,7 @@ class FlexmarkMarkdownHighlighter(
       add(
         MarkdownSpan(
           style = MarkerColorSpanStyle,
-          range = MarkdownSpanTextRange(sequence.startOffset, sequence.endOffset)
+          range = TextRange(sequence.startOffset, sequence.endOffset)
         )
       )
     }

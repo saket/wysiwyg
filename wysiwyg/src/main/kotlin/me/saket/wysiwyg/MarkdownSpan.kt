@@ -3,6 +3,7 @@ package me.saket.wysiwyg
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -21,19 +22,19 @@ import me.saket.wysiwyg.internal.MarkdownRendererScope
 // todo: use @Poko.
 data class MarkdownSpan(
   val style: MarkdownSpanStyle,
-  val range: MarkdownSpanTextRange,
+  val range: TextRange,
 )
 
 /** Represents a text appearance. */
 abstract class MarkdownSpanStyle {
   abstract fun MarkdownRendererScope.render(
     text: AnnotatedString.Builder,
-    range: MarkdownSpanTextRange
+    range: TextRange,
   )
 }
 
 object MarkerColorSpanStyle : MarkdownSpanStyle() {
-  override fun MarkdownRendererScope.render(text: AnnotatedString.Builder, range: MarkdownSpanTextRange) {
+  override fun MarkdownRendererScope.render(text: AnnotatedString.Builder, range: TextRange) {
     text.addStyle(
       style = SpanStyle(color = theme.markerColor),
       range = range,
@@ -42,7 +43,7 @@ object MarkerColorSpanStyle : MarkdownSpanStyle() {
 }
 
 object BoldSpanStyle : MarkdownSpanStyle() {
-  override fun MarkdownRendererScope.render(text: AnnotatedString.Builder, range: MarkdownSpanTextRange) {
+  override fun MarkdownRendererScope.render(text: AnnotatedString.Builder, range: TextRange) {
     text.addStyle(
       style = SpanStyle(fontWeight = FontWeight.Bold),
       range = range,
@@ -51,7 +52,7 @@ object BoldSpanStyle : MarkdownSpanStyle() {
 }
 
 object ItalicSpanStyle : MarkdownSpanStyle() {
-  override fun MarkdownRendererScope.render(text: AnnotatedString.Builder, range: MarkdownSpanTextRange) {
+  override fun MarkdownRendererScope.render(text: AnnotatedString.Builder, range: TextRange) {
     text.addStyle(
       style = SpanStyle(fontStyle = FontStyle.Italic),
       range = range,
@@ -60,7 +61,7 @@ object ItalicSpanStyle : MarkdownSpanStyle() {
 }
 
 object StrikeThroughSpanStyle : MarkdownSpanStyle() {
-  override fun MarkdownRendererScope.render(text: AnnotatedString.Builder, range: MarkdownSpanTextRange) {
+  override fun MarkdownRendererScope.render(text: AnnotatedString.Builder, range: TextRange) {
     text.addStyle(
       style = SpanStyle(
         textDecoration = TextDecoration.LineThrough,
@@ -72,7 +73,7 @@ object StrikeThroughSpanStyle : MarkdownSpanStyle() {
 }
 
 object LinkTextSpanStyle : MarkdownSpanStyle() {
-  override fun MarkdownRendererScope.render(text: AnnotatedString.Builder, range: MarkdownSpanTextRange) {
+  override fun MarkdownRendererScope.render(text: AnnotatedString.Builder, range: TextRange) {
     text.addStyle(
       style = SpanStyle(color = theme.linkTextColor),
       range = range,
@@ -81,7 +82,7 @@ object LinkTextSpanStyle : MarkdownSpanStyle() {
 }
 
 object LinkUrlSpanStyle : MarkdownSpanStyle() {
-  override fun MarkdownRendererScope.render(text: AnnotatedString.Builder, range: MarkdownSpanTextRange) {
+  override fun MarkdownRendererScope.render(text: AnnotatedString.Builder, range: TextRange) {
     text.addStyle(
       style = SpanStyle(color = theme.linkUrlColor),
       range = range,
@@ -90,7 +91,7 @@ object LinkUrlSpanStyle : MarkdownSpanStyle() {
 }
 
 object InlineCodeSpanStyle : MarkdownSpanStyle() {
-  override fun MarkdownRendererScope.render(text: AnnotatedString.Builder, range: MarkdownSpanTextRange) {
+  override fun MarkdownRendererScope.render(text: AnnotatedString.Builder, range: TextRange) {
     text.addStyle(
       style = SpanStyle(
         background = theme.codeBackground,
@@ -102,7 +103,7 @@ object InlineCodeSpanStyle : MarkdownSpanStyle() {
 }
 
 object FencedCodeBlockSpanStyle : MarkdownSpanStyle() {
-  override fun MarkdownRendererScope.render(text: AnnotatedString.Builder, range: MarkdownSpanTextRange) {
+  override fun MarkdownRendererScope.render(text: AnnotatedString.Builder, range: TextRange) {
     text.addStyle(
       style = SpanStyle(
         background = theme.codeBackground,
@@ -123,7 +124,7 @@ object FencedCodeBlockSpanStyle : MarkdownSpanStyle() {
 }
 
 object BlockQuoteBodySpanStyle : MarkdownSpanStyle() {
-  override fun MarkdownRendererScope.render(text: AnnotatedString.Builder, range: MarkdownSpanTextRange) {
+  override fun MarkdownRendererScope.render(text: AnnotatedString.Builder, range: TextRange) {
     text.addStyle(
       style = SpanStyle(color = theme.blockQuoteText),
       range = range,
@@ -141,18 +142,18 @@ object BlockQuoteBodySpanStyle : MarkdownSpanStyle() {
 }
 
 object BlockQuoteParagraphLineSpanStyle : MarkdownSpanStyle() {
-  override fun MarkdownRendererScope.render(text: AnnotatedString.Builder, range: MarkdownSpanTextRange) {
+  override fun MarkdownRendererScope.render(text: AnnotatedString.Builder, range: TextRange) {
     text.addStringAnnotation(
       tag = "blockquote",
       annotation = "ignored",
-      start = range.startIndex,
-      end = range.endIndexExclusive
+      start = range.start,
+      end = range.end
     )
   }
 }
 
 object ListBlockSpanStyle : MarkdownSpanStyle() {
-  override fun MarkdownRendererScope.render(text: AnnotatedString.Builder, range: MarkdownSpanTextRange) {
+  override fun MarkdownRendererScope.render(text: AnnotatedString.Builder, range: TextRange) {
     text.addStyle(
       style = ParagraphStyle(
         textIndent = TextIndent(
@@ -166,7 +167,7 @@ object ListBlockSpanStyle : MarkdownSpanStyle() {
 }
 
 data class HeadingSpanStyle(private val level: Int) : MarkdownSpanStyle() {
-  override fun MarkdownRendererScope.render(text: AnnotatedString.Builder, range: MarkdownSpanTextRange) {
+  override fun MarkdownRendererScope.render(text: AnnotatedString.Builder, range: TextRange) {
     val fontSizeMultiplier = with(theme.headingFontSizes) {
       when (level) {
         1 -> h1
@@ -190,12 +191,12 @@ data class HeadingSpanStyle(private val level: Int) : MarkdownSpanStyle() {
 }
 
 object ThematicBreakSpanStyle : MarkdownSpanStyle() {
-  override fun MarkdownRendererScope.render(text: AnnotatedString.Builder, range: MarkdownSpanTextRange) {
+  override fun MarkdownRendererScope.render(text: AnnotatedString.Builder, range: TextRange) {
     text.addStringAnnotation(
       tag = "thematic_break",
       annotation = "ignored",
-      start = range.startIndex,
-      end = range.endIndexExclusive
+      start = range.start,
+      end = range.end
     )
   }
 }

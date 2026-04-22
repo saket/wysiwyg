@@ -3,10 +3,10 @@ package me.saket.wysiwyg.internal
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastForEach
-import me.saket.wysiwyg.MarkdownSpanTextRange
 import me.saket.wysiwyg.WysiwygTheme
 import me.saket.wysiwyg.MarkdownSpan
 
@@ -17,7 +17,7 @@ internal value class MarkdownRenderer(
   fun buildAnnotatedString(text: AnnotatedString, spans: List<MarkdownSpan>): AnnotatedString {
     // TODO: remove once this is available in a stable release:
     //  https://android-review.googlesource.com/c/platform/frameworks/support/+/2171623/
-    val spans = spans.sortedBy { it.range.startIndex }
+    val spans = spans.sortedBy { it.range.start }
 
     val scope = object : MarkdownRendererScope {
       override val theme: WysiwygTheme get() = this@MarkdownRenderer.theme
@@ -43,31 +43,31 @@ interface MarkdownRendererScope {
   val theme: WysiwygTheme
   val unstyledText: AnnotatedString
 
-  fun AnnotatedString.Builder.addStyle(style: SpanStyle, range: MarkdownSpanTextRange) {
+  fun AnnotatedString.Builder.addStyle(style: SpanStyle, range: TextRange) {
     addStyle(
       style = style,
-      start = range.startIndex.coerceAtMost(unstyledText.lastIndex),
-      end = range.endIndexExclusive.coerceAtMost(length),
+      start = range.start.coerceAtMost(unstyledText.lastIndex),
+      end = range.end.coerceAtMost(length),
     )
   }
 
-  fun AnnotatedString.Builder.addStyle(style: ParagraphStyle, range: MarkdownSpanTextRange) {
+  fun AnnotatedString.Builder.addStyle(style: ParagraphStyle, range: TextRange) {
     addStyle(
       style = style,
-      start = range.startIndex.coerceAtMost(unstyledText.lastIndex),
-      end = range.endIndexExclusive.coerceAtMost(length),
+      start = range.start.coerceAtMost(unstyledText.lastIndex),
+      end = range.end.coerceAtMost(length),
     )
     // Compose UI adds a lot of vertical paddings around paragraphs.
     // Reduce the font size of line breaks to make them smaller.
     // https://issuetracker.google.com/u/1/issues/241426911
-    if (unstyledText.getOrNull(range.startIndex - 1) == '\n') {
-      addStyle(SpanStyle(fontSize = 1.sp), start = range.startIndex - 1, end = range.startIndex)
+    if (unstyledText.getOrNull(range.start - 1) == '\n') {
+      addStyle(SpanStyle(fontSize = 1.sp), start = range.start - 1, end = range.start)
     }
-    if (unstyledText.getOrNull(range.endIndexExclusive) == '\n') {
+    if (unstyledText.getOrNull(range.end) == '\n') {
       addStyle(
         SpanStyle(fontSize = 1.sp),
-        start = range.endIndexExclusive - 1,
-        end = range.endIndexExclusive + 1,
+        start = range.end - 1,
+        end = range.end + 1,
       )
     }
   }

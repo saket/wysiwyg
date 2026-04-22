@@ -149,8 +149,8 @@ private class TestHighlighter {
     val events = buildList {
       for (span in spans) {
         val tag = tagFor(span.style) ?: continue
-        add(span.range.startIndex to "<$tag>")
-        add(span.range.endIndexExclusive to "</$tag>")
+        add(span.range.start to "<$tag>")
+        add(span.range.end to "</$tag>")
       }
     }.sortedWith(compareBy({ it.first }, { if (it.second.startsWith("</")) 0 else 1 }))
 

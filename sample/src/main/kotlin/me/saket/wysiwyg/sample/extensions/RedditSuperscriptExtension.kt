@@ -2,6 +2,7 @@ package me.saket.wysiwyg.sample.extensions
 
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.style.BaselineShift
 import com.vladsch.flexmark.ast.Text
 import com.vladsch.flexmark.parser.Parser
@@ -11,7 +12,6 @@ import com.vladsch.flexmark.util.ast.Document
 import com.vladsch.flexmark.util.ast.Node
 import com.vladsch.flexmark.util.ast.NodeTracker
 import com.vladsch.flexmark.util.sequence.BasedSequence
-import me.saket.wysiwyg.MarkdownSpanTextRange
 import me.saket.wysiwyg.internal.MarkdownRendererScope
 import me.saket.wysiwyg.highlight.flexmark.FlexmarkMarkdownHighlighterExtension
 import me.saket.wysiwyg.MarkdownSpan
@@ -38,21 +38,21 @@ class RedditSuperscriptExtension : FlexmarkMarkdownHighlighterExtension {
       buffer.add(
         MarkdownSpan(
           style = MarkerColorSpanStyle,
-          range = MarkdownSpanTextRange(openingMarker.startOffset, openingMarker.endOffset)
+          range = TextRange(openingMarker.startOffset, openingMarker.endOffset)
         )
       )
       if (closingMarker != null) {
         buffer.add(
           MarkdownSpan(
             style = MarkerColorSpanStyle,
-            range = MarkdownSpanTextRange(closingMarker.startOffset, closingMarker.endOffset)
+            range = TextRange(closingMarker.startOffset, closingMarker.endOffset)
           )
         )
       }
       buffer.add(
         MarkdownSpan(
           style = SuperscriptSpanStyle(isMultiWord = closingMarker != null),
-          range = MarkdownSpanTextRange(startOffset, endOffset)
+          range = TextRange(startOffset, endOffset)
         )
       )
     }
@@ -124,7 +124,7 @@ class RedditSuperscriptNode(
 }
 
 data class SuperscriptSpanStyle(val isMultiWord: Boolean) : MarkdownSpanStyle() {
-  override fun MarkdownRendererScope.render(text: AnnotatedString.Builder, range: MarkdownSpanTextRange) {
+  override fun MarkdownRendererScope.render(text: AnnotatedString.Builder, range: TextRange) {
     text.addStyle(
       style = SpanStyle(baselineShift = BaselineShift.Superscript),
       range = range

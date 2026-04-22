@@ -1,11 +1,11 @@
 package me.saket.wysiwyg.highlight
 
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.util.fastMapNotNull
 import androidx.compose.ui.util.fastSumBy
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import me.saket.wysiwyg.MarkdownSpan
-import me.saket.wysiwyg.MarkdownSpanTextRange
 import me.saket.wysiwyg.highlight.MarkdownHighlighter.HighlightResult
 
 /**
@@ -60,8 +60,8 @@ private data class HighlightSnapshot(
  */
 private fun List<MarkdownSpan>.shiftedBy(changes: ChangeListSnapshot): List<MarkdownSpan> {
   return fastMapNotNull { span ->
-    val spanStart = span.range.startIndex
-    val spanEnd = span.range.endIndexExclusive
+    val spanStart = span.range.start
+    val spanEnd = span.range.end
     var startShift = 0
     var endShift = 0
 
@@ -98,7 +98,7 @@ private fun List<MarkdownSpan>.shiftedBy(changes: ChangeListSnapshot): List<Mark
 
     return@fastMapNotNull MarkdownSpan(
       style = span.style,
-      range = MarkdownSpanTextRange(spanStart + startShift, spanEnd + endShift),
+      range = TextRange(spanStart + startShift, spanEnd + endShift),
     )
   }
 }

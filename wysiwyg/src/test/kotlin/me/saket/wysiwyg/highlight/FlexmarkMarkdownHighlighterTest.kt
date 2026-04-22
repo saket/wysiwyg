@@ -1,12 +1,12 @@
 package me.saket.wysiwyg.highlight
 
+import androidx.compose.ui.text.TextRange
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
 import me.saket.wysiwyg.HeadingSpanStyle
 import me.saket.wysiwyg.ListBlockSpanStyle
 import me.saket.wysiwyg.MarkdownSpan
 import me.saket.wysiwyg.MarkerColorSpanStyle
-import me.saket.wysiwyg.MarkdownSpanTextRange
 import me.saket.wysiwyg.highlight.flexmark.FlexmarkMarkdownHighlighter
 import org.junit.Test
 
@@ -37,12 +37,12 @@ class FlexmarkMarkdownHighlighterTest {
       expect = listOf(
         MarkdownSpan(
           style = MarkerColorSpanStyle,
-          range = MarkdownSpanTextRange(startIndex = 0, endIndexExclusive = 2),
+          range = TextRange(0, 2),
         ),
         MarkdownSpan(
           style = ListBlockSpanStyle,
-          range = MarkdownSpanTextRange(startIndex = 0, endIndexExclusive = 7)
-        )
+          range = TextRange(0, 7),
+        ),
       )
     )
 
@@ -56,12 +56,12 @@ class FlexmarkMarkdownHighlighterTest {
       expect = listOf(
         MarkdownSpan(
           style = MarkerColorSpanStyle,
-          range = MarkdownSpanTextRange(startIndex = 0, endIndexExclusive = 2)
+          range = TextRange(0, 2),
         ),
         MarkdownSpan(
           style = ListBlockSpanStyle,
-          range = MarkdownSpanTextRange(startIndex = 0, endIndexExclusive = 11)
-        )
+          range = TextRange(0, 11),
+        ),
       )
     )
   }
@@ -81,11 +81,11 @@ class FlexmarkMarkdownHighlighterTest {
       expect = listOf(
         MarkdownSpan(
           style = MarkerColorSpanStyle,
-          range = MarkdownSpanTextRange(startIndex = 0, endIndexExclusive = 1)
+          range = TextRange(0, 1),
         ),
         MarkdownSpan(
           style = HeadingSpanStyle(level = 1),
-          range = MarkdownSpanTextRange(startIndex = 0, endIndexExclusive = 8)
+          range = TextRange(0, 8),
         ),
       )
     )
@@ -97,11 +97,11 @@ class FlexmarkMarkdownHighlighterTest {
       expect = listOf(
         MarkdownSpan(
           style = MarkerColorSpanStyle,
-          range = MarkdownSpanTextRange(startIndex = 0, endIndexExclusive = 2)
+          range = TextRange(0, 2),
         ),
         MarkdownSpan(
           style = HeadingSpanStyle(level = 2),
-          range = MarkdownSpanTextRange(startIndex = 0, endIndexExclusive = 10)
+          range = TextRange(0, 10),
         ),
       )
     )
