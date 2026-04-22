@@ -22,7 +22,6 @@ kotlin {
       dependencies {
         api project(':wysiwyg')
         implementation libs.kotlinx.treesitter
-        implementation libs.kotlin.codepoints.deluxe
         // Compose runtime needs to be on the main classpath because the compose compiler
         // plugin is applied module-wide (even though @Composable is only used in tests today).
         implementation libs.androidx.compose.runtime
@@ -73,6 +72,7 @@ android {
           "-DGRAMMAR_DIR=${projectDir}/tree-sitter-markdown/tree-sitter-markdown",
           "-DGRAMMAR_INLINE_DIR=${projectDir}/tree-sitter-markdown/tree-sitter-markdown-inline",
           "-DGENERATED_DIR=${layout.buildDirectory.get()}/generated",
+          "-DTREE_SITTER_DIR=${projectDir}/tree-sitter-core",
         ]
       }
     }

@@ -55,20 +55,15 @@ class TreeSitterMarkdownParser : MarkdownParser {
       val spans = mutableListOf<MarkdownSpan>()
       val inlineRanges = mutableListOf<Range>()
 
-      // Tree-sitter reports byte offsets (UTF-8), but spans get applied to Compose's
-      // AnnotatedString, which is indexed in UTF-16 char offsets. The table converts
-      // between the two.
-      val offsets = ByteToCharOffsets(text)
-
-      // Use tree-sitter queries rather than a manual tree walk to minimize JNI boundary crossings.
-      // The C engine pre-filters matching nodes and hands Kotlin one batch per capture.
-      val blockTree = blockParser.parse(text)
+      // Tree-sitter queries (vs a manual tree walk) minimize JNI boundary crossings: the C
+      // engine pre-filters matching nodes and hands Kotlin one batch per capture.
+      val blockTree = blockParser.parseUtf16(blockLanguage, text)
       blockQuery.matches(blockTree.rootNode).forEach { match ->
         match.captures.fastForEach { capture ->
           val node = capture.node
           val range = MarkdownSpanTextRange(
-            startIndex = offsets.byteToChar(node.startByte.toInt()),
-            endIndexExclusive = offsets.byteToChar(node.endByte.toInt()),
+            startIndex = node.startByte.toInt() / 2,
+            endIndexExclusive = node.endByte.toInt() / 2,
           )
           when (val name = capture.name) {
             "heading.1",
@@ -122,16 +117,14 @@ class TreeSitterMarkdownParser : MarkdownParser {
       // ranges are fed to [inlineParser] via [Parser.includedRanges], which then parses emphasis,
       // strong, links, code spans, and strikethroughs.
       if (inlineRanges.isNotEmpty()) {
-        // Note to self: inline parsing does not need UTF-8 -> UTF-16 conversion. tree-sitter's
-        // includedRanges API is UTF-8 native.
         inlineParser.includedRanges = inlineRanges
-        val inlineTree = inlineParser.parse(text)
+        val inlineTree = inlineParser.parseUtf16(inlineLanguage, text)
         inlineQuery.matches(inlineTree.rootNode).forEach { match ->
           match.captures.fastForEach { capture ->
             val node = capture.node
             val range = MarkdownSpanTextRange(
-              startIndex = offsets.byteToChar(node.startByte.toInt()),
-              endIndexExclusive = offsets.byteToChar(node.endByte.toInt()),
+              startIndex = node.startByte.toInt() / 2,
+              endIndexExclusive = node.endByte.toInt() / 2,
             )
             when (capture.name) {
               "emphasis" -> spans += MarkdownSpan(ItalicSpanStyle, range)
