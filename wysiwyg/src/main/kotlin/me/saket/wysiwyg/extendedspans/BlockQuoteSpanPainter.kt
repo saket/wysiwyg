@@ -25,10 +25,10 @@ class BlockQuoteSpanPainter(private val markerColor: Color) : ExtendedSpanPainte
 
   override fun drawInstructionsFor(layoutResult: TextLayoutResult): SpanDrawInstructions {
     val text = layoutResult.layoutInput.text
-    val annotations = text.getStringAnnotations("blockquote", start = 0, end = text.length)
+    val blockQuotes = text.paragraphStyles.filter { it.item.textIndent != null }
 
     return SpanDrawInstructions {
-      annotations.fastForEach { annotation ->
+      blockQuotes.fastForEach { annotation ->
         val box = layoutResult.getParagraphBox(annotation.start, annotation.end)
         drawRoundRect(
           color = markerColor,

@@ -3,7 +3,6 @@ package me.saket.wysiwyg
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
@@ -119,6 +118,41 @@ class WysiwygTest {
     }
   }
 
+  @Test fun `invalid block quotes`() {
+    paparazzi.snapshot {
+      WysiwygEditor(
+        """
+          |Empty marker:
+          |
+          |>${""}
+          |
+          |Marker with whitespaces:
+          |
+          |>${" "}
+          |
+          |Quote without leading whitespaces:
+          |
+          |Marker without a leading newline:
+          |> Quote
+          |
+          |^ A bare `#` isn't followed by content, so it shouldn't render as a heading.
+          |""".trimMargin()
+      )
+    }
+  }
+
+  @Test fun `valid block quotes`() {
+    paparazzi.snapshot {
+      WysiwygEditor(
+        """
+          |>Quote without leading whitespaces.
+          |
+          |> Quote with a leading whitespace.
+          |""".trimMargin()
+      )
+    }
+  }
+
   @Test fun `valid headings`() {
     paparazzi.snapshot {
       WysiwygEditor(
@@ -134,7 +168,8 @@ class WysiwygTest {
         |##### H5
         |
         |###### H6
-        |""".trimMargin())
+        |""".trimMargin()
+      )
     }
   }
 }
@@ -144,21 +179,18 @@ private fun WysiwygEditor(markdown: String) {
   MaterialTheme {
     Surface(
       Modifier
-      .fillMaxWidth()
-      .heightIn(min = 300.dp)
+        .fillMaxWidth()
+        .heightIn(min = 300.dp)
     ) {
-      val wysiwyg = rememberWysiwyg(
-        textState = rememberTextFieldState(markdown),
-        theme = wysiwygTheme(),
-        // Dispatchers.Unconfined runs the highlight inline on the calling (recomposer) thread,
-        // so the outputTransformation state update lands before Paparazzi captures the frame.
-        highlighter = remember { FlexmarkMarkdownHighlighter(dispatcher = Dispatchers.Unconfined) },
-      )
-      BasicTextField(
+      WsyiwygTextField(
         modifier = Modifier.padding(16.dp),
-        state = wysiwyg.textState,
-        inputTransformation = wysiwyg.inputTransformation,
-        outputTransformation = wysiwyg.outputTransformation,
+        wysiwyg = rememberWysiwyg(
+          textState = rememberTextFieldState(markdown),
+          theme = wysiwygTheme(),
+          highlighter = remember {
+            FlexmarkMarkdownHighlighter(dispatcher = Dispatchers.Unconfined)
+          },
+        ),
         cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
         textStyle = LocalTextStyle.current.copy(color = LocalContentColor.current),
       )

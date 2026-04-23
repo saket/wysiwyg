@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.fitInside
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -27,11 +26,8 @@ import androidx.compose.ui.layout.WindowInsetsRulers
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
-import me.saket.extendedspans.ExtendedSpans
-import me.saket.extendedspans.RoundedCornerSpanPainter
+import me.saket.wysiwyg.WsyiwygTextField
 import me.saket.wysiwyg.WysiwygTheme
-import me.saket.wysiwyg.extendedspans.BlockQuoteSpanPainter
-import me.saket.wysiwyg.extendedspans.ThematicBreakSpanPainter
 import me.saket.wysiwyg.highlight.flexmark.FlexmarkMarkdownHighlighter
 import me.saket.wysiwyg.rememberWysiwyg
 
@@ -63,21 +59,6 @@ fun WysiwygEditor(
     highlighter = remember { FlexmarkMarkdownHighlighter() },
   )
 
-  // todo: make this work.
-  val extendedSpans = remember {
-    ExtendedSpans(
-      RoundedCornerSpanPainter(
-        cornerRadius = 4.sp,
-        padding = RoundedCornerSpanPainter.TextPaddingValues(horizontal = 2.sp),
-        topMargin = 2.sp,
-        bottomMargin = 2.sp,
-        stroke = null,
-      ),
-      BlockQuoteSpanPainter(wysiwyg.theme.markerColor),
-      ThematicBreakSpanPainter(wysiwyg.theme.markerColor),
-    )
-  }
-
   Column(modifier) {
     Box(
       Modifier
@@ -88,11 +69,9 @@ fun WysiwygEditor(
         .verticalScroll(rememberScrollState())
         .padding(16.dp),
     ) {
-      BasicTextField(
+      WsyiwygTextField(
         modifier = Modifier.focusRequester(focusRequester),
-        state = textState,
-        inputTransformation = wysiwyg.inputTransformation,
-        outputTransformation = wysiwyg.outputTransformation,
+        wysiwyg = wysiwyg,
         cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
         textStyle = LocalTextStyle.current.copy(color = LocalContentColor.current),
       )
