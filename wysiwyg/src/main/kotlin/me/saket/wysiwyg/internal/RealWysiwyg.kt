@@ -63,6 +63,7 @@ internal class RealWysiwyg internal constructor(
         if (BuildConfig.DEBUG) {
           throw e
         } else {
+          // todo: expose errors to consumers
           outputTransformation = OutputTransformation {}
         }
       }

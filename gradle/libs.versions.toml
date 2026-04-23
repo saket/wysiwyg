@@ -22,6 +22,7 @@ androidx-test = "1.7.0" # https://developer.android.com/jetpack/androidx/release
 androidx-test-ext-junit = "1.3.0"
 mavenPublish = "0.36.0"
 composeLintChecks = "1.4.2" # https://github.com/slackhq/compose-lints/releases
+errorprone = "2.41.0"
 
 [libraries]
 androidx-compose-ui = { module = "androidx.compose.ui:ui", version.ref = "androidx-compose-ui" }
@@ -49,6 +50,7 @@ androidx-test-rules = { module = "androidx.test:rules", version.ref = "androidx-
 androidx-test-ext-junit = { module = "androidx.test.ext:junit", version.ref = "androidx-test-ext-junit" }
 androidx-compose-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4", version.ref = "androidx-compose-ui" }
 androidx-compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest", version.ref = "androidx-compose-ui" }
+errorprone-annotations = { module = "com.google.errorprone:error_prone_annotations", version.ref = "errorprone" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
