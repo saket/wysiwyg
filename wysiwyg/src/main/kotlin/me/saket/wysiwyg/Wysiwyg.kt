@@ -40,5 +40,6 @@ interface Wysiwyg {
   // todo: onEnterFormatters should probably be mutable.
   val inputTransformation: InputTransformation
 
+  // todo: this is incredibly slow for large text. typing experience is bad.
   val outputTransformation: OutputTransformation
 }

@@ -80,11 +80,16 @@ fun WsyiwygTextField(
     },
     enabled = enabled,
     readOnly = readOnly,
-    inputTransformation = inputTransformation.maybeThen(wysiwyg.inputTransformation),
     textStyle = textStyle,
     keyboardOptions = keyboardOptions,
     onKeyboardAction = onKeyboardAction,
     lineLimits = lineLimits,
+    interactionSource = interactionSource,
+    cursorBrush = cursorBrush,
+    inputTransformation = inputTransformation.maybeThen(wysiwyg.inputTransformation),
+    outputTransformation = outputTransformation.maybeThen(wysiwyg.outputTransformation),
+    decorator = decorator,
+    scrollState = scrollState,
     onTextLayout = { result ->
       if (onTextLayout != null) {
         onTextLayout(result)
@@ -93,16 +98,10 @@ fun WsyiwygTextField(
       // todo: find out why result is a lambda. do i need to evaluate it on every call?
       val result = result()
       if (result != null) {
-        println("on text layout")
         // todo: draw these instructions.
         drawInstructions = spanPainters.fastMap { it.drawInstructionsFor(result) }
       }
     },
-    interactionSource = interactionSource,
-    cursorBrush = cursorBrush,
-    outputTransformation = outputTransformation.maybeThen(wysiwyg.outputTransformation),
-    decorator = decorator,
-    scrollState = scrollState,
   )
 }
 
