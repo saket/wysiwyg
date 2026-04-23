@@ -15,8 +15,8 @@ class OnEnterContinueList : OnEnterMarkdownFormatter {
     cursorPositionBeforeEnter: Int,
   ): TextReplacement? {
     val paragraphString = paragraph.text.toString()
-    val paragraphMargin = paragraphString.takeWhile { it.isWhitespace() }
     val paragraphText = paragraphString.trimStart()
+    fun paragraphMargin() = paragraphString.takeWhile { it.isWhitespace() }
 
     if (paragraphText.length >= 2 && paragraphText[0] in itemMarkers && paragraphText[1].isWhitespace()) {
       val isItemEmpty = paragraphText.length == 2
@@ -30,7 +30,7 @@ class OnEnterContinueList : OnEnterMarkdownFormatter {
         continueListSyntax(
           text = text,
           cursorPositionBeforeEnter = cursorPositionBeforeEnter,
-          paragraphLeadingMargin = paragraphMargin,
+          paragraphLeadingMargin = paragraphMargin(),
           syntax = "${paragraphText[0]} ",
         )
       }
@@ -53,7 +53,7 @@ class OnEnterContinueList : OnEnterMarkdownFormatter {
           continueListSyntax(
             text = text,
             cursorPositionBeforeEnter = cursorPositionBeforeEnter,
-            paragraphLeadingMargin = paragraphMargin,
+            paragraphLeadingMargin = paragraphMargin(),
             syntax = "$nextNumber. ",
           )
         }

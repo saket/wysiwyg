@@ -20,6 +20,7 @@ class OnEnterMarkdownFormatters(
       return null
     }
 
+    // todo: use a fast variant of firstNotNullOfOrNull.
     return formatters.firstNotNullOfOrNull {
       it.onEnterPressed(
         text = text,
