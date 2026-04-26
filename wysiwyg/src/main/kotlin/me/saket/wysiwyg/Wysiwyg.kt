@@ -8,20 +8,20 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import me.saket.wysiwyg.format.OnEnterMarkdownFormatters
 import me.saket.wysiwyg.internal.RealWysiwyg
-import me.saket.wysiwyg.highlight.MarkdownHighlighter
+import me.saket.wysiwyg.highlight.MarkdownParser
 
 @Composable
 fun rememberWysiwyg(
   textState: TextFieldState,
   theme: WysiwygTheme,
-  highlighter: MarkdownHighlighter,
+  parser: MarkdownParser,
   onEnterFormatters: OnEnterMarkdownFormatters = OnEnterMarkdownFormatters.Default,
 ): Wysiwyg {
-  val wysiwyg = remember(textState, theme, highlighter, onEnterFormatters) {
+  val wysiwyg = remember(textState, theme, parser, onEnterFormatters) {
     RealWysiwyg(
       textState = textState,
       theme = theme,
-      highlighter = highlighter,
+      parser = parser,
       onEnterFormatters = onEnterFormatters,
     )
   }

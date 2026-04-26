@@ -19,17 +19,18 @@ import me.saket.wysiwyg.Wysiwyg
 import me.saket.wysiwyg.WysiwygTheme
 import me.saket.wysiwyg.format.OnEnterMarkdownFormatters
 import me.saket.wysiwyg.highlight.ChangeListSnapshot
-import me.saket.wysiwyg.highlight.MarkdownHighlighter
-import me.saket.wysiwyg.highlight.ShiftingMarkdownHighlighter
+import me.saket.wysiwyg.highlight.IncrementalMarkdownParser
+import me.saket.wysiwyg.highlight.MarkdownDocument
+import me.saket.wysiwyg.highlight.MarkdownParser
 
 @Stable
 internal class RealWysiwyg internal constructor(
   override val textState: TextFieldState,
   override val theme: WysiwygTheme,
-  highlighter: MarkdownHighlighter,
+  parser: MarkdownParser,
   onEnterFormatters: OnEnterMarkdownFormatters,
 ) : Wysiwyg {
-  private val highlighter = ShiftingMarkdownHighlighter(highlighter)
+  private val parser = IncrementalMarkdownParser(parser)
 
   // Holds the ChangeList from the most recent InputTransformation invocation, awaiting consumption.
   // FWIW, this value isn't updated for non-user edits made directly using TextFieldState#edit().
@@ -53,9 +54,9 @@ internal class RealWysiwyg internal constructor(
         val changes = this.pendingChangeList.also { this.pendingChangeList = null }
           ?: ChangeListSnapshot.Empty
 
-        highlighter.highlight(text.toString(), changes).collect { highlighted ->
+        parser.parse(text.toString(), changes).collect { document ->
           outputTransformation = StyledOutputTransformation(
-            highlightResult = highlighted,
+            document = document,
             renderer = MarkdownRenderer(theme),
           )
         }
@@ -72,7 +73,7 @@ internal class RealWysiwyg internal constructor(
 }
 
 private data class StyledOutputTransformation(
-  val highlightResult: MarkdownHighlighter.HighlightResult,
+  private val document: MarkdownDocument,
   private val renderer: MarkdownRenderer,
 ) : OutputTransformation {
 
@@ -81,13 +82,13 @@ private data class StyledOutputTransformation(
   }
 
   private fun TextFieldBuffer.applyMarkdownStyles() {
-    if (highlightResult.spans.isEmpty()) {
+    if (document.children.isEmpty()) {
       return
     }
 
     val styled = renderer.buildAnnotatedString(
       text = AnnotatedString(toString()),
-      spans = highlightResult.spans,
+      document = document,
     )
     styled.spanStyles.fastForEach { range ->
       addStyle(range.item, range.start, range.end)

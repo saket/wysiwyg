@@ -2,7 +2,7 @@ package me.saket.wysiwyg.highlight.flexmark
 
 import com.vladsch.flexmark.parser.Parser
 import com.vladsch.flexmark.util.ast.Node
-import me.saket.wysiwyg.MarkdownSpan
+import me.saket.wysiwyg.highlight.MarkdownNode
 
 interface FlexmarkMarkdownHighlighterExtension {
   /**
@@ -13,7 +13,7 @@ interface FlexmarkMarkdownHighlighterExtension {
 
   /**
    * Once an AST is generated, this function is called for each markdown
-   * node in the tree to create markdown spans for them.
+   * node in the tree to create markdown nodes for them.
    */
-  fun Node.addSpansInto(buffer: MutableList<MarkdownSpan>)
+  fun Node.addNodesInto(buffer: MutableList<MarkdownNode>)
 }

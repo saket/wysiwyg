@@ -6,6 +6,7 @@ plugins {
   alias(libs.plugins.kotlin.compose) apply false
   alias(libs.plugins.vanniktech.maven.publish) apply false
   alias(libs.plugins.paparazzi) apply false
+  alias(libs.plugins.poko) apply false
 }
 
 allprojects {

@@ -19,7 +19,7 @@ import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
 import com.android.ide.common.rendering.api.SessionParams
 import kotlinx.coroutines.Dispatchers
-import me.saket.wysiwyg.highlight.flexmark.FlexmarkMarkdownHighlighter
+import me.saket.wysiwyg.highlight.flexmark.FlexmarkMarkdownParser
 import org.junit.Rule
 import org.junit.Test
 
@@ -75,11 +75,10 @@ class WysiwygTest {
   }
 
   @Test fun `blank list item`() {
-    val leadingSpaces = "    "
     paparazzi.snapshot {
       WysiwygEditor(
         markdown = """
-          |1.$leadingSpaces
+          |1.${"    "}
           |
           |Although the list item above is blank, its indentation should not extend into this paragraph.
           """.trimMargin(),
@@ -88,11 +87,10 @@ class WysiwygTest {
   }
 
   @Test fun `list items`() {
-    val leadingSpaces = "    "
     paparazzi.snapshot {
       WysiwygEditor(
         markdown = """
-          |1.${leadingSpaces}Milk
+          |1.    Milk
           |2. Mangoes
           |3. Notebooks
           |
@@ -187,8 +185,8 @@ private fun WysiwygEditor(markdown: String) {
         wysiwyg = rememberWysiwyg(
           textState = rememberTextFieldState(markdown),
           theme = wysiwygTheme(),
-          highlighter = remember {
-            FlexmarkMarkdownHighlighter(dispatcher = Dispatchers.Unconfined)
+          parser = remember {
+            FlexmarkMarkdownParser(dispatcher = Dispatchers.Unconfined)
           },
         ),
         cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),

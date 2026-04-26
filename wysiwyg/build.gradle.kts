@@ -6,6 +6,7 @@ plugins {
   alias(libs.plugins.kotlin.compose)
   alias(libs.plugins.vanniktech.maven.publish)
   alias(libs.plugins.paparazzi)
+  alias(libs.plugins.poko)
 }
 
 android {
@@ -47,6 +48,7 @@ dependencies {
 
   implementation(libs.androidx.compose.ui)
   implementation(libs.androidx.compose.foundation)
+  implementation(libs.poko.annotations)
 
   lintChecks(libs.composeLintChecks)
 

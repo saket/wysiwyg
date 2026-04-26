@@ -6,39 +6,28 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.util.fastForEach
 import me.saket.wysiwyg.WysiwygTheme
-import me.saket.wysiwyg.MarkdownSpan
+import me.saket.wysiwyg.highlight.MarkdownDocument
 
 @JvmInline
 internal value class MarkdownRenderer(
   private val theme: WysiwygTheme,
 ) {
-  fun buildAnnotatedString(text: AnnotatedString, spans: List<MarkdownSpan>): AnnotatedString {
-    // TODO: remove once this is available in a stable release:
-    //  https://android-review.googlesource.com/c/platform/frameworks/support/+/2171623/
-    val spans = spans.sortedBy { it.range.start }
-
+  fun buildAnnotatedString(text: AnnotatedString, document: MarkdownDocument): AnnotatedString {
     val scope = object : MarkdownRendererScope {
       override val theme: WysiwygTheme get() = this@MarkdownRenderer.theme
       override val unstyledText: AnnotatedString get() = text
     }
-
     return buildAnnotatedString {
       // Discard any previous styles that may have gotten restored after a config change.
       // This is slightly unfortunate because any spans added by user will also be discarded.
       append(text.text)
-
-      val textBuilder: AnnotatedString.Builder = this
-      spans.fastForEach { span ->
-        with(span.style) {
-          scope.render(text = textBuilder, span.range)
-        }
-      }
+      with(document) { scope.render(text = this@buildAnnotatedString) }
     }
   }
 }
 
+// todo: rename to MarkdownRenderScope.
 interface MarkdownRendererScope {
   val theme: WysiwygTheme
   val unstyledText: AnnotatedString

@@ -11,11 +11,12 @@ import com.vladsch.flexmark.util.ast.Document
 import com.vladsch.flexmark.util.ast.Node
 import com.vladsch.flexmark.util.ast.NodeTracker
 import com.vladsch.flexmark.util.sequence.BasedSequence
-import me.saket.wysiwyg.internal.MarkdownRendererScope
+import me.saket.wysiwyg.highlight.ChangeListSnapshot
+import me.saket.wysiwyg.highlight.MarkdownNode
 import me.saket.wysiwyg.highlight.flexmark.FlexmarkMarkdownHighlighterExtension
-import me.saket.wysiwyg.MarkdownSpan
-import me.saket.wysiwyg.MarkdownSpanStyle
-import me.saket.wysiwyg.MarkerColorSpanStyle
+import me.saket.wysiwyg.highlight.rebased
+import me.saket.wysiwyg.highlight.touchesAny
+import me.saket.wysiwyg.internal.MarkdownRendererScope
 
 class RedditSpoilersExtension : FlexmarkMarkdownHighlighterExtension {
   override fun buildParser(builder: Parser.Builder) {
@@ -32,24 +33,14 @@ class RedditSpoilersExtension : FlexmarkMarkdownHighlighterExtension {
     )
   }
 
-  override fun Node.addSpansInto(buffer: MutableList<MarkdownSpan>) {
+  override fun Node.addNodesInto(buffer: MutableList<MarkdownNode>) {
     if (this is RedditSpoilersNode) {
       buffer.add(
-        MarkdownSpan(
-          style = MarkerColorSpanStyle,
-          range = TextRange(openingMarker.startOffset, openingMarker.endOffset)
-        )
-      )
-      buffer.add(
-        MarkdownSpan(
-          style = MarkerColorSpanStyle,
-          range = TextRange(closingMarker.startOffset, closingMarker.endOffset)
-        )
-      )
-      buffer.add(
-        MarkdownSpan(
-          style = SpoilersSpanStyle,
-          range = TextRange(body.startOffset, body.endOffset)
+        SpoilersNode(
+          range = TextRange(startOffset, endOffset),
+          bodyRange = TextRange(body.startOffset, body.endOffset),
+          openingMarkerRange = TextRange(openingMarker.startOffset, openingMarker.endOffset),
+          closingMarkerRange = TextRange(closingMarker.startOffset, closingMarker.endOffset),
         )
       )
     }
@@ -64,11 +55,15 @@ class SpoilersProcessorFactory : NodePostProcessor() {
         if (endIndex != -1) {
           val openingMarker = node.chars.subSequence(startIndex, startIndex + 2)
           val closingMarker = node.chars.subSequence(endIndex, endIndex + 2)
-          val spoilerBody = node.baseSequence.subSequence(openingMarker.endOffset, closingMarker.startOffset)
+          val spoilerBody =
+            node.baseSequence.subSequence(openingMarker.endOffset, closingMarker.startOffset)
 
           if (spoilerBody.isNotEmpty) {
             val spoilers = RedditSpoilersNode(
-              chars = node.baseSequence.subSequence(openingMarker.startOffset, closingMarker.endOffset),
+              chars = node.baseSequence.subSequence(
+                openingMarker.startOffset,
+                closingMarker.endOffset
+              ),
               body = spoilerBody,
               openingMarker = openingMarker,
               closingMarker = closingMarker,
@@ -82,8 +77,9 @@ class SpoilersProcessorFactory : NodePostProcessor() {
   }
 }
 
-class RedditSpoilersNode(
-  chars: BasedSequence,
+// todo: get rid of intermediate nodes. emit MarkdownNode directly.
+private data class RedditSpoilersNode(
+  private val chars: BasedSequence,
   val body: BasedSequence,
   val openingMarker: BasedSequence,
   val closingMarker: BasedSequence,
@@ -93,14 +89,39 @@ class RedditSpoilersNode(
   }
 }
 
-object SpoilersSpanStyle : MarkdownSpanStyle() {
-  override fun MarkdownRendererScope.render(text: AnnotatedString.Builder, range: TextRange) {
+data class SpoilersNode(
+  override val range: TextRange,
+  val bodyRange: TextRange,
+  val openingMarkerRange: TextRange,
+  val closingMarkerRange: TextRange,
+) : MarkdownNode {
+
+  override fun MarkdownRendererScope.render(text: AnnotatedString.Builder) {
+    text.addStyle(
+      style = SpanStyle(color = theme.markerColor),
+      range = openingMarkerRange,
+    )
+    text.addStyle(
+      style = SpanStyle(color = theme.markerColor),
+      range = closingMarkerRange,
+    )
     text.addStyle(
       style = SpanStyle(
         color = theme.spoilersTextColor,
         background = theme.spoilersBackground,
       ),
-      range = range,
+      range = bodyRange,
+    )
+  }
+
+  override fun rebased(changes: ChangeListSnapshot): MarkdownNode? {
+    if (changes.touchesAny(openingMarkerRange, closingMarkerRange)) return null
+
+    return SpoilersNode(
+      range = range.rebased(changes) ?: return null,
+      bodyRange = bodyRange.rebased(changes) ?: return null,
+      openingMarkerRange = openingMarkerRange.rebased(changes) ?: return null,
+      closingMarkerRange = closingMarkerRange.rebased(changes) ?: return null,
     )
   }
 }

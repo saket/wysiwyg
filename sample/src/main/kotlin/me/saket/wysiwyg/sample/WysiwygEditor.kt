@@ -28,7 +28,7 @@ import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
 import me.saket.wysiwyg.WsyiwygTextField
 import me.saket.wysiwyg.WysiwygTheme
-import me.saket.wysiwyg.highlight.flexmark.FlexmarkMarkdownHighlighter
+import me.saket.wysiwyg.highlight.flexmark.FlexmarkMarkdownParser
 import me.saket.wysiwyg.rememberWysiwyg
 
 @Composable
@@ -56,7 +56,7 @@ fun WysiwygEditor(
   val wysiwyg = rememberWysiwyg(
     textState = textState,
     theme = wysiwygTheme(),
-    highlighter = remember { FlexmarkMarkdownHighlighter() },
+    parser = remember { FlexmarkMarkdownParser() },
   )
 
   Column(modifier) {

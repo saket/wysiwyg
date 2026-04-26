@@ -7,14 +7,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.runTest
-import me.saket.wysiwyg.BoldSpanStyle
-import me.saket.wysiwyg.HeadingSpanStyle
-import me.saket.wysiwyg.MarkdownSpan
-import me.saket.wysiwyg.MarkdownSpanStyle
-import me.saket.wysiwyg.highlight.flexmark.FlexmarkMarkdownHighlighter
+import me.saket.wysiwyg.highlight.flexmark.FlexmarkMarkdownParser
 import org.junit.Test
 
-class ShiftingMarkdownHighlighterTest {
+class IncrementalMarkdownParserTest {
   @Test fun `edit inside a span extends the span's end`() = runTest {
     val highlighter = TestHighlighter()
 
@@ -120,10 +116,42 @@ class ShiftingMarkdownHighlighterTest {
       awaitComplete()
     }
   }
+
+  @Test fun `deleting one list item marker keeps the list block for surviving items`() = runTest {
+    val highlighter = TestHighlighter()
+
+    assertThat(
+      highlighter.highlight(
+        """
+        |- first
+        |- second
+        |""".trimMargin()
+      )
+    ).isEqualTo(
+      """
+      |<list>- first
+      |- second
+      |</list>""".trimMargin()
+    )
+
+    assertThat(
+      highlighter.highlight(
+        """
+        | first
+        |- second
+        |""".trimMargin()
+      )
+    ).isEqualTo(
+      """
+      |<list> first
+      |- second
+      |</list>""".trimMargin()
+    )
+  }
 }
 
 private class TestHighlighter {
-  private val highlighter = ShiftingMarkdownHighlighter(FlexmarkMarkdownHighlighter())
+  private val parser = IncrementalMarkdownParser(FlexmarkMarkdownParser())
   private var lastText: String? = null
 
   suspend fun highlight(text: String): String {
@@ -136,39 +164,10 @@ private class TestHighlighter {
         ?: lastText?.let { changeListSnapshot(it, text) }
         ?: ChangeListSnapshot.Empty
       lastText = text
-      highlighter.highlight(text, changes).collect { result ->
-        emit(encodeTagged(text, result.spans))
+      parser.parse(text, changes).collect { document ->
+        emit(document.renderHtml(text))
       }
     }
-  }
-
-  /** Re-encodes recognized spans inline as tags (`<b>`, `<h>`) around their ranges in [text]. */
-  private fun encodeTagged(text: String, spans: List<MarkdownSpan>): String {
-    // Sort events by position; close tags come before open tags at the same
-    // position so adjacent spans produce "</b><b>" rather than "<b></b>".
-    val events = buildList {
-      for (span in spans) {
-        val tag = tagFor(span.style) ?: continue
-        add(span.range.start to "<$tag>")
-        add(span.range.end to "</$tag>")
-      }
-    }.sortedWith(compareBy({ it.first }, { if (it.second.startsWith("</")) 0 else 1 }))
-
-    val output = StringBuilder()
-    var cursor = 0
-    for ((position, tag) in events) {
-      output.append(text, cursor, position)
-      output.append(tag)
-      cursor = position
-    }
-    output.append(text, cursor, text.length)
-    return output.toString()
-  }
-
-  private fun tagFor(style: MarkdownSpanStyle): String? = when (style) {
-    is BoldSpanStyle -> "b"
-    is HeadingSpanStyle -> "h1"
-    else -> null
   }
 }
 

@@ -5,7 +5,7 @@ import assertk.assertThat
 import assertk.assertions.isNotEmpty
 import kotlinx.coroutines.runBlocking
 import me.saket.wysiwyg.highlight.ChangeListSnapshot
-import me.saket.wysiwyg.highlight.flexmark.FlexmarkMarkdownHighlighter
+import me.saket.wysiwyg.highlight.flexmark.FlexmarkMarkdownParser
 import org.junit.Test
 import org.junit.runner.RunWith
 import kotlin.coroutines.EmptyCoroutineContext
@@ -14,7 +14,7 @@ import kotlin.coroutines.EmptyCoroutineContext
 class FlexmarkReleaseSmokeTest {
 
   @Test fun can_parse_markdown_in_release() = runBlocking(EmptyCoroutineContext) {
-    val result = FlexmarkMarkdownHighlighter().highlight(
+    val result = FlexmarkMarkdownParser().parse(
       text = """
         |# Wysiwyg
         |
@@ -22,6 +22,6 @@ class FlexmarkReleaseSmokeTest {
       """.trimMargin(),
       changes = ChangeListSnapshot.Empty,
     )
-    assertThat(result.spans).isNotEmpty()
+    assertThat(result.render()).isNotEmpty()
   }
 }

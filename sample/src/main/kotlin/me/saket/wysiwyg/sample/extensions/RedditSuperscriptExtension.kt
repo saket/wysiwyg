@@ -12,11 +12,12 @@ import com.vladsch.flexmark.util.ast.Document
 import com.vladsch.flexmark.util.ast.Node
 import com.vladsch.flexmark.util.ast.NodeTracker
 import com.vladsch.flexmark.util.sequence.BasedSequence
-import me.saket.wysiwyg.internal.MarkdownRendererScope
+import me.saket.wysiwyg.highlight.ChangeListSnapshot
+import me.saket.wysiwyg.highlight.MarkdownNode
 import me.saket.wysiwyg.highlight.flexmark.FlexmarkMarkdownHighlighterExtension
-import me.saket.wysiwyg.MarkdownSpan
-import me.saket.wysiwyg.MarkdownSpanStyle
-import me.saket.wysiwyg.MarkerColorSpanStyle
+import me.saket.wysiwyg.highlight.rebased
+import me.saket.wysiwyg.highlight.touches
+import me.saket.wysiwyg.internal.MarkdownRendererScope
 
 class RedditSuperscriptExtension : FlexmarkMarkdownHighlighterExtension {
   override fun buildParser(builder: Parser.Builder) {
@@ -33,26 +34,17 @@ class RedditSuperscriptExtension : FlexmarkMarkdownHighlighterExtension {
     )
   }
 
-  override fun Node.addSpansInto(buffer: MutableList<MarkdownSpan>) {
+  override fun Node.addNodesInto(buffer: MutableList<MarkdownNode>) {
     if (this is RedditSuperscriptNode) {
       buffer.add(
-        MarkdownSpan(
-          style = MarkerColorSpanStyle,
-          range = TextRange(openingMarker.startOffset, openingMarker.endOffset)
-        )
-      )
-      if (closingMarker != null) {
-        buffer.add(
-          MarkdownSpan(
-            style = MarkerColorSpanStyle,
-            range = TextRange(closingMarker.startOffset, closingMarker.endOffset)
-          )
-        )
-      }
-      buffer.add(
-        MarkdownSpan(
-          style = SuperscriptSpanStyle(isMultiWord = closingMarker != null),
-          range = TextRange(startOffset, endOffset)
+        SuperscriptNode(
+          range = TextRange(openingMarker.startOffset, endOffset),
+          bodyRange = TextRange(openingMarker.endOffset, endOffset),
+          openingMarkerRange = TextRange(openingMarker.startOffset, openingMarker.endOffset),
+          closingMarkerRange = closingMarker?.let {
+            TextRange(it.startOffset, it.endOffset)
+          },
+          isMultiWord = closingMarker != null,
         )
       )
     }
@@ -63,7 +55,8 @@ private class SuperscriptNodePostProcessor : NodePostProcessor() {
   override fun process(state: NodeTracker, node: Node) {
     runCatchingOnRelease {
       node.chars.indexOfAll("^").forEach { startIndex ->
-        val isMultiWord = node.chars.getOrNull(startIndex - 1) == ' ' && node.chars.getOrNull(startIndex + 1) == '('
+        val isMultiWord =
+          node.chars.getOrNull(startIndex - 1) == ' ' && node.chars.getOrNull(startIndex + 1) == '('
         val superscript = if (isMultiWord) {
           val endIndex = node.chars.indexOf(")", /* fromIndex = */ startIndex)
           if (endIndex != -1) {
@@ -110,8 +103,8 @@ private class SuperscriptNodePostProcessor : NodePostProcessor() {
   }
 }
 
-class RedditSuperscriptNode(
-  chars: BasedSequence,
+private data class RedditSuperscriptNode(
+  private val chars: BasedSequence,
   val openingMarker: BasedSequence,
   val closingMarker: BasedSequence?,
 ) : Node(chars) {
@@ -123,11 +116,40 @@ class RedditSuperscriptNode(
   }
 }
 
-data class SuperscriptSpanStyle(val isMultiWord: Boolean) : MarkdownSpanStyle() {
-  override fun MarkdownRendererScope.render(text: AnnotatedString.Builder, range: TextRange) {
+data class SuperscriptNode(
+  override val range: TextRange,
+  val bodyRange: TextRange,
+  val openingMarkerRange: TextRange,
+  val closingMarkerRange: TextRange?,
+  val isMultiWord: Boolean,
+) : MarkdownNode {
+  override fun MarkdownRendererScope.render(text: AnnotatedString.Builder) {
+    text.addStyle(
+      style = SpanStyle(color = theme.markerColor),
+      range = openingMarkerRange,
+    )
+    if (closingMarkerRange != null) {
+      text.addStyle(
+        style = SpanStyle(color = theme.markerColor),
+        range = closingMarkerRange,
+      )
+    }
     text.addStyle(
       style = SpanStyle(baselineShift = BaselineShift.Superscript),
-      range = range
+      range = bodyRange,
+    )
+  }
+
+  override fun rebased(changes: ChangeListSnapshot): MarkdownNode? {
+    if (changes.touches(openingMarkerRange)) return null
+    if (closingMarkerRange != null && changes.touches(closingMarkerRange)) return null
+
+    return SuperscriptNode(
+      range = range.rebased(changes) ?: return null,
+      bodyRange = bodyRange.rebased(changes) ?: return null,
+      openingMarkerRange = openingMarkerRange.rebased(changes) ?: return null,
+      closingMarkerRange = closingMarkerRange?.rebased(changes),
+      isMultiWord = isMultiWord,
     )
   }
 }
