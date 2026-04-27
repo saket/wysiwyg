@@ -169,6 +169,45 @@ class IncrementalMarkdownParserTest {
     }
   }
 
+  @Test fun `editing a later list marker drops only that item while tail content stays aligned`() = runTest {
+    parser().test {
+      sendInput(
+        """
+        |- first
+        |- second
+        |
+        |tail
+        |""".trimMargin()
+      )
+      assertThat(awaitItem()).isEqualTo(
+        """
+        |<list>- first
+        |- second
+        |</list>
+        |tail
+        |""".trimMargin()
+      )
+
+      sendInput(
+        """
+        |- first
+        | second
+        |
+        |tail
+        |""".trimMargin()
+      )
+      assertThat(awaitItem()).isEqualTo(
+        """
+        |<list>- first
+        | second
+        |</list>
+        |tail
+        |""".trimMargin()
+      )
+      cancelAndIgnoreRemainingEvents()
+    }
+  }
+
   @Test fun `editing a nested list keeps unaffected siblings aligned`() = runTest {
     parser().test {
       sendInput(
@@ -217,6 +256,17 @@ class IncrementalMarkdownParserTest {
     }
   }
 
+  @Test fun `editing a link marker drops only the link while preserving following content`() = runTest {
+    parser().test {
+      sendInput("[label](url) tail **bold**")
+      assertThat(awaitItem()).isEqualTo("<link>[label](url)</link> tail <b>**bold**</b>")
+
+      sendInput("[label]url) tail **bold**")
+      assertThat(awaitItem()).isEqualTo("[label]url) tail <b>**bold**</b>")
+      cancelAndIgnoreRemainingEvents()
+    }
+  }
+
   @Test fun `block quotes headings and inline spans survive overlay shifts together`() = runTest {
     parser().test {
       sendInput(
@@ -255,6 +305,41 @@ class IncrementalMarkdownParserTest {
           |
           |<b>**bold**</b>
           |""".trimMargin()
+      )
+      cancelAndIgnoreRemainingEvents()
+    }
+  }
+
+  @Test fun `touching a heading marker drops only that heading while later nodes still render`() = runTest {
+    parser().test {
+      sendInput(
+        """
+        |# heading
+        |
+        |**bold**
+        |""".trimMargin()
+      )
+      assertThat(awaitItem()).isEqualTo(
+        """
+        |<h1># heading</h1>
+        |
+        |<b>**bold**</b>
+        |""".trimMargin()
+      )
+
+      sendInput(
+        """
+        |#heading
+        |
+        |**bold**
+        |""".trimMargin()
+      )
+      assertThat(awaitItem()).isEqualTo(
+        """
+        |#heading
+        |
+        |<b>**bold**</b>
+        |""".trimMargin()
       )
       cancelAndIgnoreRemainingEvents()
     }
