@@ -11,357 +11,290 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextIndent
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.util.fastForEach
-import androidx.compose.ui.util.fastMapNotNull
 import dev.drewhamilton.poko.Poko
+import me.saket.wysiwyg.highlight.MarkdownEditOverlay.Companion.overlayed
 import me.saket.wysiwyg.internal.MarkdownRendererScope
 
 interface MarkdownNode {
-  val range: TextRange
+  val offsetInParent: Int
+  val totalLength: Int
 
-  /**
-   * Produces an interim version of this node after [changes], using only the previously parsed AST.
-   *
-   * Called by [IncrementalMarkdownParser] to keep highlighting flicker-free while the parser
-   * computes a fresh AST for the edited text in background. Implementations should shift or resize
-   * their cached ranges when the edit preserves the node's syntax, without doing any reparsing.
-   *
-   * Returns `null` when the edit crosses syntax that this node depends on, meaning the cached node
-   * can no longer be trusted and should be dropped from the interim result.
-   */
-  fun rebased(changes: ChangeListSnapshot): MarkdownNode?
-
-  fun MarkdownRendererScope.render(text: AnnotatedString.Builder)
+  fun MarkdownRendererScope.render(text: AnnotatedString.Builder, startOffset: Int)
 }
 
+@Poko
 class MarkdownDocument(
-  override val range: TextRange,
+  override val offsetInParent: Int = 0,
+  override val totalLength: Int,
   val children: List<MarkdownNode>,
+  val overlay: MarkdownEditOverlay = MarkdownEditOverlay.Empty,
 ) : MarkdownNode {
 
-  override fun MarkdownRendererScope.render(text: AnnotatedString.Builder) {
-    children.fastForEach { child ->
-      with(child) { render(text) }
-    }
+  override fun MarkdownRendererScope.render(text: AnnotatedString.Builder, startOffset: Int) {
+    children.renderEach(text, startOffset)
   }
 
-  override fun rebased(changes: ChangeListSnapshot): MarkdownDocument {
+  fun copy(overlay: MarkdownEditOverlay): MarkdownDocument {
     return MarkdownDocument(
-      range = range.rebased(changes) ?: TextRange.Zero,
-      children = children.fastMapNotNull { child -> child.rebased(changes) },
+      totalLength = this.totalLength,
+      children = this.children,
+      overlay = overlay,
     )
   }
 }
 
-abstract class DelimitedNode : MarkdownNode {
-  abstract override val range: TextRange
-  abstract val openingMarker: TextRange
-  abstract val closingMarker: TextRange
+interface DelimitedMarkdownNode : MarkdownNode {
+  val openingMarkerLength: Int
+  val closingMarkerLength: Int
 
-  final override fun rebased(changes: ChangeListSnapshot): DelimitedNode? {
-    if (changes.touchesAny(openingMarker, closingMarker)) return null
-    return copy(
-      range = range.rebased(changes) ?: return null,
-      openingMarker = openingMarker.rebased(changes) ?: return null,
-      closingMarker = closingMarker.rebased(changes) ?: return null,
-    )
+  fun MarkdownRendererScope.renderText(text: AnnotatedString.Builder, range: TextRange)
+
+  override fun MarkdownRendererScope.render(text: AnnotatedString.Builder, startOffset: Int) {
+    // Note to self: resolve the ranges before adding any style/span objects to avoid
+    // allocating objects that aren't needed, and more importantly to avoid adding partial styles.
+    val textRange = TextRange.span(startOffset, totalLength).overlayed(editOverlay) ?: return
+    val openingMarkerRange = openingMarkerRange(startOffset, editOverlay) ?: return
+    val closingMarkerRange = closingMarkerRange(startOffset, editOverlay) ?: return
+
+    val markerSpan = SpanStyle(theme.markerColor)
+    text.addStyle(markerSpan, openingMarkerRange)
+    text.addStyle(markerSpan, closingMarkerRange)
+    renderText(text, textRange)
   }
 
-  protected abstract fun copy(
-    range: TextRange,
-    openingMarker: TextRange,
-    closingMarker: TextRange,
-  ): DelimitedNode
+  companion object {
+    @Suppress("NOTHING_TO_INLINE")
+    inline fun DelimitedMarkdownNode.openingMarkerRange(
+      startOffset: Int,
+      overlay: MarkdownEditOverlay
+    ): TextRange? {
+      return TextRange.span(startOffset, openingMarkerLength).overlayed(overlay)
+    }
+
+    @Suppress("NOTHING_TO_INLINE")
+    inline fun DelimitedMarkdownNode.closingMarkerRange(
+      startOffset: Int,
+      overlay: MarkdownEditOverlay
+    ): TextRange? {
+      return TextRange(totalLength - closingMarkerLength, totalLength)
+        .translated(startOffset)
+        .overlayed(overlay)
+    }
+  }
 }
 
 @Poko
 class BoldNode(
-  override val range: TextRange,
-  override val openingMarker: TextRange,
-  override val closingMarker: TextRange,
-) : DelimitedNode() {
+  override val offsetInParent: Int,
+  override val totalLength: Int,
+  override val openingMarkerLength: Int,
+  override val closingMarkerLength: Int,
+) : DelimitedMarkdownNode {
 
-  override fun MarkdownRendererScope.render(text: AnnotatedString.Builder) {
+  override fun MarkdownRendererScope.renderText(text: AnnotatedString.Builder, range: TextRange) {
     text.addStyle(SpanStyle(fontWeight = FontWeight.Bold), range)
-    text.addStyle(SpanStyle(color = theme.markerColor), openingMarker)
-    text.addStyle(SpanStyle(color = theme.markerColor), closingMarker)
-  }
-
-  override fun copy(
-    range: TextRange,
-    openingMarker: TextRange,
-    closingMarker: TextRange,
-  ): BoldNode {
-    return BoldNode(range, openingMarker, closingMarker)
   }
 }
 
 @Poko
 class ItalicNode(
-  override val range: TextRange,
-  override val openingMarker: TextRange,
-  override val closingMarker: TextRange,
-) : DelimitedNode() {
+  override val offsetInParent: Int,
+  override val totalLength: Int,
+  override val openingMarkerLength: Int,
+  override val closingMarkerLength: Int,
+) : DelimitedMarkdownNode {
 
-  override fun MarkdownRendererScope.render(text: AnnotatedString.Builder) {
+  override fun MarkdownRendererScope.renderText(text: AnnotatedString.Builder, range: TextRange) {
     text.addStyle(SpanStyle(fontStyle = FontStyle.Italic), range)
-    text.addStyle(SpanStyle(color = theme.markerColor), openingMarker)
-    text.addStyle(SpanStyle(color = theme.markerColor), closingMarker)
-  }
-
-  override fun copy(
-    range: TextRange,
-    openingMarker: TextRange,
-    closingMarker: TextRange,
-  ): ItalicNode {
-    return ItalicNode(range, openingMarker, closingMarker)
   }
 }
 
 @Poko
 class InlineCodeNode(
-  override val range: TextRange,
-  override val openingMarker: TextRange,
-  override val closingMarker: TextRange,
-) : DelimitedNode() {
+  override val offsetInParent: Int,
+  override val totalLength: Int,
+  override val openingMarkerLength: Int,
+  override val closingMarkerLength: Int,
+) : DelimitedMarkdownNode {
 
-  override fun MarkdownRendererScope.render(text: AnnotatedString.Builder) {
+  override fun MarkdownRendererScope.renderText(text: AnnotatedString.Builder, range: TextRange) {
     text.addStyle(
-      style = SpanStyle(
-        background = theme.codeBackground,
-        fontFamily = FontFamily.Monospace,
-      ),
-      range = range,
+      SpanStyle(background = theme.codeBackground, fontFamily = FontFamily.Monospace),
+      range,
     )
-    text.addStyle(SpanStyle(color = theme.markerColor), openingMarker)
-    text.addStyle(SpanStyle(color = theme.markerColor), closingMarker)
-  }
-
-  override fun copy(
-    range: TextRange,
-    openingMarker: TextRange,
-    closingMarker: TextRange,
-  ): InlineCodeNode {
-    return InlineCodeNode(range, openingMarker, closingMarker)
   }
 }
 
 @Poko
 class FencedCodeBlockNode(
-  override val range: TextRange,
-  override val openingMarker: TextRange,
-  override val closingMarker: TextRange,
-) : DelimitedNode() {
+  override val offsetInParent: Int,
+  override val totalLength: Int,
+  override val openingMarkerLength: Int,
+  override val closingMarkerLength: Int,
+) : DelimitedMarkdownNode {
 
-  override fun MarkdownRendererScope.render(text: AnnotatedString.Builder) {
-    text.addStyle(
-      style = SpanStyle(
-        background = theme.codeBackground,
-        fontFamily = FontFamily.Monospace,
-      ),
-      range = range,
+  override fun MarkdownRendererScope.renderText(text: AnnotatedString.Builder, range: TextRange) {
+    val textStyle = SpanStyle(
+      background = theme.codeBackground,
+      fontFamily = FontFamily.Monospace,
     )
-    text.addStyle(
-      style = ParagraphStyle(
-        textIndent = TextIndent(
-          firstLine = theme.codeBlockLeadingPadding,
-          restLine = theme.codeBlockLeadingPadding,
-        )
-      ),
-      range = range,
+    val paragraphStyle = ParagraphStyle(
+      textIndent = TextIndent(
+        firstLine = theme.codeBlockLeadingPadding,
+        restLine = theme.codeBlockLeadingPadding,
+      )
     )
-    text.addStyle(
-      style = SpanStyle(color = theme.markerColor),
-      range = openingMarker,
-    )
-    text.addStyle(
-      style = SpanStyle(color = theme.markerColor),
-      range = closingMarker,
-    )
-  }
-
-  override fun copy(
-    range: TextRange,
-    openingMarker: TextRange,
-    closingMarker: TextRange,
-  ): FencedCodeBlockNode {
-    return FencedCodeBlockNode(range, openingMarker, closingMarker)
+    text.addStyle(textStyle, range)
+    text.addStyle(paragraphStyle, range)
   }
 }
 
 @Poko
 class StrikeThroughNode(
-  override val range: TextRange,
+  override val offsetInParent: Int,
+  override val totalLength: Int,
 ) : MarkdownNode {
 
-  override fun MarkdownRendererScope.render(text: AnnotatedString.Builder) {
-    text.addStyle(
-      style = SpanStyle(
-        textDecoration = TextDecoration.LineThrough,
-        color = theme.struckThroughTextColor,
-      ),
-      range = range,
+  override fun MarkdownRendererScope.render(text: AnnotatedString.Builder, startOffset: Int) {
+    val textRange = TextRange.span(startOffset, totalLength).overlayed(editOverlay) ?: return
+    val style = SpanStyle(
+      color = theme.struckThroughTextColor,
+      textDecoration = TextDecoration.LineThrough,
     )
-  }
-
-  override fun rebased(changes: ChangeListSnapshot): StrikeThroughNode? {
-    return StrikeThroughNode(
-      range = range.rebased(changes) ?: return null,
-    )
+    text.addStyle(style, textRange)
   }
 }
 
 @Poko
 class LinkNode(
-  override val range: TextRange,
-  val textRange: TextRange,
-  val urlRange: TextRange,
-  val textOpeningMarker: TextRange,
-  val textClosingMarker: TextRange,
-  val linkOpeningMarker: TextRange,
-  val linkClosingMarker: TextRange,
+  override val offsetInParent: Int,
+  override val totalLength: Int,
+  val textLength: Int,
+  val textOpeningMarkerLength: Int,
+  val textClosingMarkerLength: Int,
+  val urlLength: Int,
+  val linkOpeningMarkerLength: Int,
 ) : MarkdownNode {
 
-  override fun MarkdownRendererScope.render(text: AnnotatedString.Builder) {
-    text.addStyle(SpanStyle(color = theme.linkTextColor), textRange)
-    text.addStyle(SpanStyle(color = theme.linkUrlColor), urlRange)
-    text.addStyle(SpanStyle(color = theme.markerColor), textOpeningMarker)
-    text.addStyle(SpanStyle(color = theme.markerColor), textClosingMarker)
-    text.addStyle(SpanStyle(color = theme.markerColor), linkOpeningMarker)
-    text.addStyle(SpanStyle(color = theme.markerColor), linkClosingMarker)
-  }
+  override fun MarkdownRendererScope.render(text: AnnotatedString.Builder, startOffset: Int) {
+    val textOpeningMarkerRange = TextRange.span(startOffset, textOpeningMarkerLength)
+      .overlayed(editOverlay)
+      ?: return
 
-  override fun rebased(changes: ChangeListSnapshot): LinkNode? {
-    if (changes.touchesAny(
-        textOpeningMarker,
-        textClosingMarker,
-        linkOpeningMarker,
-        linkClosingMarker
-      )
-    ) {
-      return null
-    }
-    return LinkNode(
-      range = range.rebased(changes) ?: return null,
-      textRange = textRange.rebased(changes) ?: return null,
-      urlRange = urlRange.rebased(changes) ?: return null,
-      textOpeningMarker = textOpeningMarker.rebased(changes) ?: return null,
-      textClosingMarker = textClosingMarker.rebased(changes) ?: return null,
-      linkOpeningMarker = linkOpeningMarker.rebased(changes) ?: return null,
-      linkClosingMarker = linkClosingMarker.rebased(changes) ?: return null,
-    )
+    val textRange = TextRange.span(textOpeningMarkerRange.end, textLength)
+      .overlayed(editOverlay)
+      ?: return
+
+    val textClosingMarkerRange = TextRange.span(textRange.end, textClosingMarkerLength)
+      .overlayed(editOverlay)
+      ?: return
+
+    val linkOpeningMarkerRange = TextRange.span(textClosingMarkerRange.end, linkOpeningMarkerLength)
+      .overlayed(editOverlay)
+      ?: return
+
+    val urlRange = TextRange.span(linkOpeningMarkerRange.end, urlLength)
+      .overlayed(editOverlay)
+      ?: return
+
+    val linkClosingMarkerRange = TextRange(urlRange.end, startOffset + totalLength)
+      .overlayed(editOverlay)
+      ?: return
+
+    text.addStyle(SpanStyle(theme.linkTextColor), textRange)
+    text.addStyle(SpanStyle(theme.linkUrlColor), urlRange)
+
+    val markerStyle = SpanStyle(color = theme.markerColor)
+    text.addStyle(markerStyle, textOpeningMarkerRange)
+    text.addStyle(markerStyle, textClosingMarkerRange)
+    text.addStyle(markerStyle, linkOpeningMarkerRange)
+    text.addStyle(markerStyle, linkClosingMarkerRange)
   }
 }
 
 @Poko
 class BlockQuoteNode(
-  override val range: TextRange,
-  val paragraphRange: TextRange,
-  val openingMarker: TextRange,
+  override val offsetInParent: Int,
+  override val totalLength: Int,
+  val markerLength: Int,
 ) : MarkdownNode {
 
-  override fun MarkdownRendererScope.render(text: AnnotatedString.Builder) {
-    text.addStyle(
-      style = SpanStyle(color = theme.blockQuoteText),
-      range = range,
+  override fun MarkdownRendererScope.render(text: AnnotatedString.Builder, startOffset: Int) {
+    val textRange = TextRange.span(startOffset, totalLength).overlayed(editOverlay) ?: return
+    val markerRange = TextRange.span(startOffset, markerLength).overlayed(editOverlay) ?: return
+
+    val textStyle = SpanStyle(color = theme.blockQuoteText)
+    val paragraphStyle = ParagraphStyle(
+      textIndent = TextIndent(
+        firstLine = theme.blockQuoteLeadingPadding,
+        restLine = theme.blockQuoteLeadingPadding,
+      )
     )
-    text.addStyle(
-      style = ParagraphStyle(
-        textIndent = TextIndent(
-          firstLine = theme.blockQuoteLeadingPadding,
-          restLine = theme.blockQuoteLeadingPadding,
-        )
-      ),
-      range = range,
-    )
-    text.addStyle(
-      style = SpanStyle(color = theme.markerColor),
-      range = openingMarker,
-    )
+    text.addStyle(SpanStyle(color = theme.markerColor), markerRange)
+    text.addStyle(textStyle, textRange)
+    text.addStyle(paragraphStyle, textRange)
+
     text.addStringAnnotation(
       tag = "blockquote",
       annotation = "ignored",
-      start = paragraphRange.start,
-      end = paragraphRange.end,
-    )
-  }
-
-  override fun rebased(changes: ChangeListSnapshot): BlockQuoteNode? {
-    if (changes.touches(openingMarker)) return null
-    return BlockQuoteNode(
-      range = range.rebased(changes) ?: return null,
-      paragraphRange = paragraphRange.rebased(changes) ?: return null,
-      openingMarker = openingMarker.rebased(changes) ?: return null,
+      start = textRange.start,
+      end = textRange.end,
     )
   }
 }
 
 @Poko
 class ListBlockNode(
-  override val range: TextRange,
-  val items: List<MarkdownNode>,
+  override val offsetInParent: Int,
+  override val totalLength: Int,
+  val children: List<MarkdownNode>,
 ) : MarkdownNode {
 
-  override fun MarkdownRendererScope.render(text: AnnotatedString.Builder) {
-    text.addStyle(
-      style = ParagraphStyle(
+  override fun MarkdownRendererScope.render(text: AnnotatedString.Builder, startOffset: Int) {
+    val paragraphRange = TextRange.span(startOffset, totalLength).overlayed(editOverlay)
+    if (paragraphRange != null) {
+      val paragraphStyle = ParagraphStyle(
         textIndent = TextIndent(
           firstLine = theme.listBlockLeadingPadding,
           restLine = theme.listBlockLeadingPadding,
         )
-      ),
-      range = range,
-    )
-    items.fastForEach { item ->
-      with(item) { render(text) }
+      )
+      text.addStyle(paragraphStyle, paragraphRange)
     }
-  }
-
-  override fun rebased(changes: ChangeListSnapshot): MarkdownNode? {
-    return ListBlockNode(
-      range = range.rebased(changes) ?: return null,
-      items = items
-        .fastMapNotNull { item -> item.rebased(changes) }
-        .ifEmpty { return null },
-    )
+    children.renderEach(text, startOffset)
   }
 }
 
 @Poko
 class ListItemNode(
-  override val range: TextRange,
-  val marker: TextRange,
+  override val offsetInParent: Int,
+  override val totalLength: Int,
+  val markerLength: Int,
   val children: List<MarkdownNode>,
 ) : MarkdownNode {
 
-  override fun MarkdownRendererScope.render(text: AnnotatedString.Builder) {
-    text.addStyle(
-      style = SpanStyle(color = theme.markerColor),
-      range = marker,
-    )
-    children.fastForEach { child ->
-      with(child) { render(text) }
-    }
-  }
+  override fun MarkdownRendererScope.render(text: AnnotatedString.Builder, startOffset: Int) {
+    val textRange = TextRange.span(startOffset, markerLength).overlayed(editOverlay) ?: return
+    text.addStyle(SpanStyle(theme.markerColor), textRange)
 
-  override fun rebased(changes: ChangeListSnapshot): ListItemNode? {
-    if (changes.touches(marker)) return null
-
-    return ListItemNode(
-      range = range.rebased(changes) ?: return null,
-      marker = marker.rebased(changes) ?: return null,
-      children = children.fastMapNotNull { child -> child.rebased(changes) },
-    )
+    children.renderEach(text, startOffset)
   }
 }
 
 @Poko
 class HeadingNode(
-  override val range: TextRange,
-  val openingMarker: TextRange,
+  override val offsetInParent: Int,
+  override val totalLength: Int,
+  val openingMarkerLength: Int,
   val level: Int,
 ) : MarkdownNode {
 
-  override fun MarkdownRendererScope.render(text: AnnotatedString.Builder) {
+  override fun MarkdownRendererScope.render(text: AnnotatedString.Builder, startOffset: Int) {
+    val textRange = TextRange.span(startOffset, totalLength).overlayed(editOverlay) ?: return
+    val openingMarkerRange = TextRange
+      .span(startOffset, openingMarkerLength)
+      .overlayed(editOverlay) ?: return
+
     val fontSizeMultiplier = with(theme.headingFontSizes) {
       when (level) {
         1 -> h1
@@ -373,52 +306,68 @@ class HeadingNode(
         else -> error("invalid level: $level")
       }
     }
+
     text.addStyle(
       style = SpanStyle(
         fontSize = 1.em * fontSizeMultiplier,
         fontWeight = FontWeight.Bold,
         color = theme.headingColor,
       ),
-      range = range,
+      range = textRange,
     )
     text.addStyle(
       style = SpanStyle(color = theme.markerColor),
-      range = openingMarker,
-    )
-  }
-
-  override fun rebased(changes: ChangeListSnapshot): HeadingNode? {
-    if (changes.touches(openingMarker)) return null
-    return HeadingNode(
-      range = range.rebased(changes) ?: return null,
-      openingMarker = openingMarker.rebased(changes) ?: return null,
-      level = level,
+      range = openingMarkerRange,
     )
   }
 }
 
 @Poko
 class ThematicBreakNode(
-  override val range: TextRange,
+  override val offsetInParent: Int,
+  override val totalLength: Int,
 ) : MarkdownNode {
 
-  override fun MarkdownRendererScope.render(text: AnnotatedString.Builder) {
+  override fun MarkdownRendererScope.render(text: AnnotatedString.Builder, startOffset: Int) {
+    val textRange = TextRange.span(startOffset, totalLength).overlayed(editOverlay) ?: return
     text.addStringAnnotation(
       tag = "thematic_break",
       annotation = "ignored",
-      start = range.start,
-      end = range.end,
+      start = textRange.start,
+      end = textRange.end,
     )
     text.addStyle(
-      style = SpanStyle(color = theme.markerColor),
-      range = range,
+      SpanStyle(color = theme.markerColor),
+      textRange,
     )
   }
+}
 
-  override fun rebased(changes: ChangeListSnapshot): ThematicBreakNode? {
-    if (changes.touches(range)) return null
-    return ThematicBreakNode(
-      range = range.rebased(changes) ?: return null,
-    )
+/**
+ * Creates a root-relative range starting at [startOffset] and spanning [length] code units.
+ *
+ * FYI the second parameter is a length, not an end offset.
+ */
+@PublishedApi
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun TextRange.Companion.span(startOffset: Int, length: Int): TextRange {
+  return TextRange(startOffset, startOffset + length)
+}
+
+@PublishedApi
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun TextRange.translated(offset: Int): TextRange {
+  return TextRange(start + offset, end + offset)
+}
+
+context(rendererScope: MarkdownRendererScope)
+private fun List<MarkdownNode>.renderEach(
+  text: AnnotatedString.Builder,
+  parentStartOffset: Int,
+) {
+  fastForEach { child ->
+    with(child) {
+      rendererScope.render(text, startOffset = parentStartOffset + child.offsetInParent)
+    }
   }
 }

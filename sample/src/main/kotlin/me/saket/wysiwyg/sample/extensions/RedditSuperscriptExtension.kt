@@ -12,11 +12,8 @@ import com.vladsch.flexmark.util.ast.Document
 import com.vladsch.flexmark.util.ast.Node
 import com.vladsch.flexmark.util.ast.NodeTracker
 import com.vladsch.flexmark.util.sequence.BasedSequence
-import me.saket.wysiwyg.highlight.ChangeListSnapshot
 import me.saket.wysiwyg.highlight.MarkdownNode
 import me.saket.wysiwyg.highlight.flexmark.FlexmarkMarkdownHighlighterExtension
-import me.saket.wysiwyg.highlight.rebased
-import me.saket.wysiwyg.highlight.touches
 import me.saket.wysiwyg.internal.MarkdownRendererScope
 
 class RedditSuperscriptExtension : FlexmarkMarkdownHighlighterExtension {
@@ -38,7 +35,8 @@ class RedditSuperscriptExtension : FlexmarkMarkdownHighlighterExtension {
     if (this is RedditSuperscriptNode) {
       buffer.add(
         SuperscriptNode(
-          range = TextRange(openingMarker.startOffset, endOffset),
+          offsetInParent = openingMarker.startOffset,
+          totalLength = endOffset - openingMarker.startOffset,
           bodyRange = TextRange(openingMarker.endOffset, endOffset),
           openingMarkerRange = TextRange(openingMarker.startOffset, openingMarker.endOffset),
           closingMarkerRange = closingMarker?.let {
@@ -117,13 +115,15 @@ private data class RedditSuperscriptNode(
 }
 
 data class SuperscriptNode(
-  override val range: TextRange,
+  override val offsetInParent: Int,
+  override val totalLength: Int,
   val bodyRange: TextRange,
   val openingMarkerRange: TextRange,
   val closingMarkerRange: TextRange?,
   val isMultiWord: Boolean,
 ) : MarkdownNode {
-  override fun MarkdownRendererScope.render(text: AnnotatedString.Builder) {
+
+  override fun MarkdownRendererScope.render(text: AnnotatedString.Builder, startOffset: Int) {
     text.addStyle(
       style = SpanStyle(color = theme.markerColor),
       range = openingMarkerRange,
@@ -137,19 +137,6 @@ data class SuperscriptNode(
     text.addStyle(
       style = SpanStyle(baselineShift = BaselineShift.Superscript),
       range = bodyRange,
-    )
-  }
-
-  override fun rebased(changes: ChangeListSnapshot): MarkdownNode? {
-    if (changes.touches(openingMarkerRange)) return null
-    if (closingMarkerRange != null && changes.touches(closingMarkerRange)) return null
-
-    return SuperscriptNode(
-      range = range.rebased(changes) ?: return null,
-      bodyRange = bodyRange.rebased(changes) ?: return null,
-      openingMarkerRange = openingMarkerRange.rebased(changes) ?: return null,
-      closingMarkerRange = closingMarkerRange?.rebased(changes),
-      isMultiWord = isMultiWord,
     )
   }
 }

@@ -7,6 +7,7 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.sp
 import me.saket.wysiwyg.WysiwygTheme
+import me.saket.wysiwyg.highlight.MarkdownEditOverlay
 import me.saket.wysiwyg.highlight.MarkdownDocument
 
 @JvmInline
@@ -17,12 +18,15 @@ internal value class MarkdownRenderer(
     val scope = object : MarkdownRendererScope {
       override val theme: WysiwygTheme get() = this@MarkdownRenderer.theme
       override val unstyledText: AnnotatedString get() = text
+      override val editOverlay: MarkdownEditOverlay get() = document.overlay
     }
     return buildAnnotatedString {
       // Discard any previous styles that may have gotten restored after a config change.
       // This is slightly unfortunate because any spans added by user will also be discarded.
       append(text.text)
-      with(document) { scope.render(text = this@buildAnnotatedString) }
+      with(document) {
+        scope.render(text = this@buildAnnotatedString, startOffset = 0)
+      }
     }
   }
 }
@@ -31,6 +35,7 @@ internal value class MarkdownRenderer(
 interface MarkdownRendererScope {
   val theme: WysiwygTheme
   val unstyledText: AnnotatedString
+  val editOverlay: MarkdownEditOverlay
 
   fun AnnotatedString.Builder.addStyle(style: SpanStyle, range: TextRange) {
     addStyle(

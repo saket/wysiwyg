@@ -2,6 +2,7 @@ package me.saket.wysiwyg.highlight
 
 import androidx.compose.ui.util.fastSumBy
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flow
 
 /**
@@ -15,15 +16,15 @@ internal class IncrementalMarkdownParser(
 
   fun parse(text: String, changes: ChangeListSnapshot): Flow<MarkdownDocument> {
     return flow {
-      val shifted = previousDocument?.rebasedOn(text, changes)
-      if (shifted != null) {
-        emit(shifted)
+      val overlayed = previousDocument?.overlayedOn(text, changes)
+      if (overlayed != null) {
+        emit(overlayed)
       }
 
       val document = delegate.parse(text, changes)
       previousDocument = MarkdownDocumentSnapshot(oldTextLength = text.length, document = document)
       emit(document)
-    }
+    }.distinctUntilChanged()
   }
 }
 
@@ -31,7 +32,7 @@ private data class MarkdownDocumentSnapshot(
   val oldTextLength: Int,
   val document: MarkdownDocument,
 ) {
-  fun rebasedOn(newText: String, changes: ChangeListSnapshot): MarkdownDocument? {
+  fun overlayedOn(newText: String, changes: ChangeListSnapshot): MarkdownDocument? {
     if (changes.changes.isEmpty()) {
       return null
     }
@@ -45,7 +46,6 @@ private data class MarkdownDocumentSnapshot(
       // Rebasing by this partial change list would produce wrong offsets.
       return null
     }
-
-    return document.rebased(changes)
+    return document.copy(overlay = MarkdownEditOverlay(changes))
   }
 }

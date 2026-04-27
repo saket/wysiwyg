@@ -170,6 +170,22 @@ class WysiwygTest {
       )
     }
   }
+
+  @Test fun urls() {
+    paparazzi.snapshot {
+      WysiwygEditor(
+        """
+        |[Project docs](https://example.com/docs)
+        |
+        |[Quarterly report](<docs/quarterly report.pdf>)
+        |
+        |[Team homepage](https://example.com "Open the team website")
+        |
+        |[Release notes](<docs/release notes.md> "Read offline")
+        |""".trimMargin()
+      )
+    }
+  }
 }
 
 @Composable

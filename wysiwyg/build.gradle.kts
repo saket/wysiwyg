@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 
 plugins {
   alias(libs.plugins.android.library)
@@ -26,8 +27,10 @@ android {
   }
 
   kotlin {
+    @OptIn(ExperimentalKotlinGradlePluginApi::class)
     compilerOptions {
       jvmTarget.set(JvmTarget.JVM_17)
+      freeCompilerArgs.add("-Xcontext-parameters")
     }
   }
 
