@@ -11,7 +11,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -220,8 +219,6 @@ private fun wysiwygTheme(): WysiwygTheme {
     linkTextColor = MaterialTheme.colorScheme.primary,
     linkUrlColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
     struckThroughTextColor = LocalContentColor.current.copy(alpha = 0.5f),
-    spoilersBackground = Color.Transparent,
-    spoilersTextColor = MaterialTheme.colorScheme.error,
     codeBackground = LocalContentColor.current.copy(alpha = 0.1f),
     codeBlockLeadingPadding = 16.sp,
     blockQuoteText = LocalContentColor.current.copy(alpha = 0.9f),

@@ -20,7 +20,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.WindowInsetsRulers
 import androidx.compose.ui.unit.dp
@@ -92,8 +91,6 @@ private fun wysiwygTheme(): WysiwygTheme {
     linkTextColor = MaterialTheme.colorScheme.primary,
     linkUrlColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
     struckThroughTextColor = LocalContentColor.current.copy(alpha = 0.5f),
-    spoilersBackground = Color.Transparent,
-    spoilersTextColor = MaterialTheme.colorScheme.error,
     codeBackground = LocalContentColor.current.copy(alpha = 0.1f),
     codeBlockLeadingPadding = 16.sp,
     blockQuoteText = LocalContentColor.current.copy(alpha = 0.9f),
