@@ -1,3 +1,4 @@
+// todo: change package back to parser
 package me.saket.wysiwyg.highlight
 
 fun interface MarkdownParser {
@@ -11,5 +12,5 @@ fun interface MarkdownParser {
    * @param changes Describes what changed since the previous call. This can be used by
    * parsers that support incremental invalidation of their markdown ASTs.
    */
-  suspend fun parse(text: String, changes: ChangeListSnapshot): MarkdownDocument
+  suspend fun parse(text: String, changes: TextChangeListSnapshot): MarkdownDocument
 }

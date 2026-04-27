@@ -18,23 +18,27 @@ internal fun MarkdownDocument.renderHtml(source: String): String {
 }
 
 private fun collectTags(
-  children: List<MarkdownNode>,
+  children: List<MarkdownChildNode>,
   overlay: MarkdownEditOverlay,
   parentOldStart: Int = 0,
 ): List<HtmlTag> {
   return buildList {
     for (child in children) {
       val oldStart = parentOldStart + child.offsetInParent
-      val newRange = TextRange.span(oldStart, child.totalLength).overlayed(overlay) ?: continue
-      child.htmlTag()?.let { tag ->
+      val newRange = TextRange.span(oldStart, child.node.totalLength).overlayed(overlay) ?: continue
+      child.node.htmlTag()?.let { tag ->
         add(HtmlTag(newRange.start, "<$tag>"))
         add(HtmlTag(newRange.end, "</$tag>"))
       }
       addAll(
-        collectTags(child.contents(), overlay, oldStart)
+        collectTags(child.node.contents(), overlay, oldStart)
       )
     }
   }
+}
+
+private fun TextRange.Companion.span(startOffset: Int, length: Int): TextRange {
+  return TextRange(startOffset, startOffset + length)
 }
 
 private fun MarkdownNode.htmlTag(): String? {
@@ -48,7 +52,7 @@ private fun MarkdownNode.htmlTag(): String? {
   }
 }
 
-private fun MarkdownNode.contents(): List<MarkdownNode> {
+private fun MarkdownNode.contents(): List<MarkdownChildNode> {
   return when (this) {
     is ListBlockNode -> children
     is ListItemNode -> children

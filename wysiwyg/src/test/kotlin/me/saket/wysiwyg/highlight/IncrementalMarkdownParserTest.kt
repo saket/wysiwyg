@@ -105,7 +105,7 @@ class IncrementalMarkdownParserTest {
 
       // Re-highlight the same text: zero changes → the flow emits only the delegate's fresh
       // result, not a shifted approximation.
-      sendInput(text, ChangeListSnapshot.Empty)
+      sendInput(text, TextChangeListSnapshot.Empty)
       assertThat(awaitItem()).isEqualTo(expected)
       expectNoEvents()
       cancelAndIgnoreRemainingEvents()
@@ -316,10 +316,10 @@ private class ParserTester(
 
   private var lastInput: String? = null
 
-  fun sendInput(text: String, changes: ChangeListSnapshot? = null) {
+  fun sendInput(text: String, changes: TextChangeListSnapshot? = null) {
     val changes = changes
       ?: lastInput?.let { changeListSnapshot(it, text) }
-      ?: ChangeListSnapshot.Empty
+      ?: TextChangeListSnapshot.Empty
     lastInput = text
 
     inputs.tryEmit(
@@ -329,13 +329,13 @@ private class ParserTester(
 
   class Input(
     val text: String,
-    val changes: ChangeListSnapshot,
+    val changes: TextChangeListSnapshot,
   )
 }
 
-/** Derives a single-edit [ChangeListSnapshot] from the common prefix/suffix of the two texts. */
-private fun changeListSnapshot(before: String, after: String): ChangeListSnapshot {
-  if (before == after) return ChangeListSnapshot.Empty
+/** Derives a single-edit [TextChangeListSnapshot] from the common prefix/suffix of the two texts. */
+private fun changeListSnapshot(before: String, after: String): TextChangeListSnapshot {
+  if (before == after) return TextChangeListSnapshot.Empty
 
   var prefix = 0
   while (prefix < before.length && prefix < after.length && before[prefix] == after[prefix]) {
@@ -351,9 +351,9 @@ private fun changeListSnapshot(before: String, after: String): ChangeListSnapsho
     suffix++
   }
 
-  return ChangeListSnapshot(
+  return TextChangeListSnapshot(
     changes = listOf(
-      ChangeListSnapshot.Change(
+      TextChangeListSnapshot.Change(
         range = TextRange(prefix, after.length - suffix),
         originalRange = TextRange(prefix, before.length - suffix),
       ),

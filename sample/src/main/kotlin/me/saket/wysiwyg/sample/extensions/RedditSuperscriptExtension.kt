@@ -14,7 +14,7 @@ import com.vladsch.flexmark.util.ast.NodeTracker
 import com.vladsch.flexmark.util.sequence.BasedSequence
 import me.saket.wysiwyg.highlight.MarkdownNode
 import me.saket.wysiwyg.highlight.flexmark.FlexmarkMarkdownHighlighterExtension
-import me.saket.wysiwyg.internal.MarkdownRendererScope
+import me.saket.wysiwyg.internal.MarkdownNodeRenderScope
 
 class RedditSuperscriptExtension : FlexmarkMarkdownHighlighterExtension {
   override fun buildParser(builder: Parser.Builder) {
@@ -123,7 +123,7 @@ data class SuperscriptNode(
   val isMultiWord: Boolean,
 ) : MarkdownNode {
 
-  override fun MarkdownRendererScope.render(text: AnnotatedString.Builder, startOffset: Int) {
+  override fun MarkdownNodeRenderScope.render(text: AnnotatedString.Builder, startOffset: Int) {
     text.addStyle(
       style = SpanStyle(color = theme.markerColor),
       range = openingMarkerRange,

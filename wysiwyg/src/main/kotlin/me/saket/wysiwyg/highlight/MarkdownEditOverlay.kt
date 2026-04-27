@@ -3,14 +3,14 @@ package me.saket.wysiwyg.highlight
 import androidx.compose.ui.text.TextRange
 @JvmInline
 value class MarkdownEditOverlay(
-  val changes: ChangeListSnapshot,
+  val changes: TextChangeListSnapshot,
 ) {
   fun renderedRange(originalRange: TextRange): TextRange? {
     return originalRange.rebased(changes)
   }
 
   companion object {
-    val Empty = MarkdownEditOverlay(ChangeListSnapshot.Empty)
+    val Empty = MarkdownEditOverlay(TextChangeListSnapshot.Empty)
 
     // todo: dont love this indirection.
     inline fun TextRange.overlayed(overlay: MarkdownEditOverlay): TextRange? {

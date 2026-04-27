@@ -14,7 +14,7 @@ internal class IncrementalMarkdownParser(
 ) {
   private var previousDocument: MarkdownDocumentSnapshot? = null
 
-  fun parse(text: String, changes: ChangeListSnapshot): Flow<MarkdownDocument> {
+  fun parse(text: String, changes: TextChangeListSnapshot): Flow<MarkdownDocument> {
     return flow {
       val overlayed = previousDocument?.overlayedOn(text, changes)
       if (overlayed != null) {
@@ -32,7 +32,7 @@ private data class MarkdownDocumentSnapshot(
   val oldTextLength: Int,
   val document: MarkdownDocument,
 ) {
-  fun overlayedOn(newText: String, changes: ChangeListSnapshot): MarkdownDocument? {
+  fun overlayedOn(newText: String, changes: TextChangeListSnapshot): MarkdownDocument? {
     if (changes.changes.isEmpty()) {
       return null
     }

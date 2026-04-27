@@ -7,35 +7,64 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.sp
 import me.saket.wysiwyg.WysiwygTheme
-import me.saket.wysiwyg.highlight.MarkdownEditOverlay
+import me.saket.wysiwyg.highlight.LocalTextRange
+import me.saket.wysiwyg.highlight.MarkdownChildNode
 import me.saket.wysiwyg.highlight.MarkdownDocument
+import me.saket.wysiwyg.highlight.MarkdownEditOverlay
+import me.saket.wysiwyg.highlight.MarkdownEditOverlay.Companion.overlayed
 
 @JvmInline
 internal value class MarkdownRenderer(
   private val theme: WysiwygTheme,
 ) {
   fun buildAnnotatedString(text: AnnotatedString, document: MarkdownDocument): AnnotatedString {
-    val scope = object : MarkdownRendererScope {
-      override val theme: WysiwygTheme get() = this@MarkdownRenderer.theme
-      override val unstyledText: AnnotatedString get() = text
-      override val editOverlay: MarkdownEditOverlay get() = document.overlay
-    }
+    val scope = RealMarkdownNodeRenderScope(
+      theme = theme,
+      unstyledText = text,
+      editOverlay = document.overlay,
+      offsetInRoot = 0,
+    )
     return buildAnnotatedString {
       // Discard any previous styles that may have gotten restored after a config change.
       // This is slightly unfortunate because any spans added by user will also be discarded.
       append(text.text)
       with(document) {
-        scope.render(text = this@buildAnnotatedString, startOffset = 0)
+        scope.render(text = this@buildAnnotatedString)
       }
     }
   }
 }
 
-// todo: rename to MarkdownRenderScope.
-interface MarkdownRendererScope {
+// todo: kdoc
+interface MarkdownNodeRenderScope {
   val theme: WysiwygTheme
   val unstyledText: AnnotatedString
+
+  // todo: kdoc
   val editOverlay: MarkdownEditOverlay
+
+  // todo: kdoc
+  val offsetInRoot: Int
+
+  // todo: kdoc
+  fun childScope(child: MarkdownChildNode): MarkdownNodeRenderScope
+
+  // todo: kdoc
+  fun LocalTextRange.resolve(): TextRange? {
+    val rangeInRoot = TextRange(
+      start = textRange.start + offsetInRoot,
+      end = textRange.end + offsetInRoot,
+    )
+    return rangeInRoot.overlayed(editOverlay)
+  }
+
+  // todo: kdoc
+  fun MarkdownChildNode.render(text: AnnotatedString.Builder) {
+    val childScope = childScope(this)
+    with(node) {
+      childScope.render(text)
+    }
+  }
 
   fun AnnotatedString.Builder.addStyle(style: SpanStyle, range: TextRange) {
     addStyle(
@@ -64,5 +93,22 @@ interface MarkdownRendererScope {
         end = range.end + 1,
       )
     }
+  }
+}
+
+private data class RealMarkdownNodeRenderScope(
+  override val theme: WysiwygTheme,
+  override val unstyledText: AnnotatedString,
+  override val editOverlay: MarkdownEditOverlay,
+  override val offsetInRoot: Int,
+) : MarkdownNodeRenderScope {
+
+  override fun childScope(child: MarkdownChildNode): MarkdownNodeRenderScope {
+    return RealMarkdownNodeRenderScope(
+      theme = theme,
+      unstyledText = unstyledText,
+      editOverlay = editOverlay,
+      offsetInRoot = offsetInRoot + child.offsetInParent,
+    )
   }
 }

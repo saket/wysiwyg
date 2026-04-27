@@ -18,7 +18,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import me.saket.wysiwyg.highlight.BlockQuoteNode
 import me.saket.wysiwyg.highlight.BoldNode
-import me.saket.wysiwyg.highlight.ChangeListSnapshot
 import me.saket.wysiwyg.highlight.FencedCodeBlockNode
 import me.saket.wysiwyg.highlight.HeadingNode
 import me.saket.wysiwyg.highlight.InlineCodeNode
@@ -26,13 +25,16 @@ import me.saket.wysiwyg.highlight.ItalicNode
 import me.saket.wysiwyg.highlight.LinkNode
 import me.saket.wysiwyg.highlight.ListBlockNode
 import me.saket.wysiwyg.highlight.ListItemNode
+import me.saket.wysiwyg.highlight.LocalTextRange
+import me.saket.wysiwyg.highlight.MarkdownChildNode
 import me.saket.wysiwyg.highlight.MarkdownDocument
+import me.saket.wysiwyg.highlight.MarkdownNode
 import me.saket.wysiwyg.highlight.MarkdownParser
 import me.saket.wysiwyg.highlight.StrikeThroughNode
+import me.saket.wysiwyg.highlight.TextChangeListSnapshot
 import me.saket.wysiwyg.highlight.ThematicBreakNode
 import com.vladsch.flexmark.parser.Parser as FlexmarkParser
 import com.vladsch.flexmark.util.ast.Node as FlexmarkNode
-import me.saket.wysiwyg.highlight.MarkdownNode as WysiwygMarkdownNode
 
 // todo: restore extensions.
 /**
@@ -57,76 +59,103 @@ class FlexmarkMarkdownParser(
     .extensions(listOf(StrikethroughExtension.create()))
     .build()
 
-  override suspend fun parse(text: String, changes: ChangeListSnapshot): MarkdownDocument {
+  override suspend fun parse(text: String, changes: TextChangeListSnapshot): MarkdownDocument {
     return withContext(dispatcher) {
       MarkdownDocument(
         totalLength = text.length,
         children = parser.parse(text).walkSubtree {
-          it.toWysiwygMarkdownNode(parentStartOffset = 0)
+          it.toWysiwygMarkdownNode()
         },
       )
     }
   }
 
-  private fun FlexmarkNode.toWysiwygMarkdownNode(parentStartOffset: Int): WysiwygMarkdownNode? {
-    val offsetInParent = startOffset - parentStartOffset
+  private fun FlexmarkNode.toWysiwygMarkdownNode(): MarkdownNode? {
     return when (this) {
       is Emphasis -> {
+        val totalLength = chars.length
         ItalicNode(
-          offsetInParent = offsetInParent,
-          totalLength = chars.length,
-          openingMarkerLength = openingMarker.length,
-          closingMarkerLength = closingMarker.length,
+          totalLength = totalLength,
+          textRange = LocalTextRange.span(0, totalLength),
+          openingMarkerRange = LocalTextRange.span(0, openingMarker.length),
+          closingMarkerRange = LocalTextRange(totalLength - closingMarker.length, totalLength),
         )
       }
       is StrongEmphasis -> {
+        val totalLength = chars.length
         BoldNode(
-          offsetInParent = offsetInParent,
-          totalLength = chars.length,
-          openingMarkerLength = openingMarker.length,
-          closingMarkerLength = closingMarker.length,
+          totalLength = totalLength,
+          textRange = LocalTextRange.span(0, totalLength),
+          openingMarkerRange = LocalTextRange.span(0, openingMarker.length),
+          closingMarkerRange = LocalTextRange(totalLength - closingMarker.length, totalLength),
         )
       }
       is Strikethrough -> {
         StrikeThroughNode(
-          offsetInParent = offsetInParent,
           totalLength = chars.length,
+          textRange = LocalTextRange.span(0, chars.length),
         )
       }
       is Link -> {
+        val textOpeningMarkerRange = LocalTextRange.span(
+          startOffset = 0,
+          length = textOpeningMarker.length,
+        )
+        val textRange = LocalTextRange.span(
+          startOffset = textOpeningMarkerRange.end,
+          length = text.length,
+        )
+        val textClosingMarkerRange = LocalTextRange.span(
+          startOffset = textRange.end,
+          length = textClosingMarker.length,
+        )
+        val linkOpeningMarkerRange = LocalTextRange.span(
+          startOffset = textClosingMarkerRange.end,
+          length = linkOpeningMarker.length,
+        )
+        val urlRange = LocalTextRange.span(
+          startOffset = linkOpeningMarkerRange.end,
+          length = linkClosingMarker.startOffset - linkOpeningMarker.endOffset,
+        )
+        val urlClosingMarkerRange = LocalTextRange(
+          startOffset = urlRange.end,
+          endOffset = chars.length,
+        )
+
         LinkNode(
-          offsetInParent = offsetInParent,
           totalLength = chars.length,
-          textLength = text.length,
-          textOpeningMarkerLength = textOpeningMarker.length,
-          textClosingMarkerLength = textClosingMarker.length,
-          urlLength = linkClosingMarker.startOffset - linkOpeningMarker.endOffset,
-          linkOpeningMarkerLength = linkOpeningMarker.length,
+          textRange = textRange,
+          textOpeningMarkerRange = textOpeningMarkerRange,
+          textClosingMarkerRange = textClosingMarkerRange,
+          urlRange = urlRange,
+          urlOpeningMarkerRange = linkOpeningMarkerRange,
+          urlClosingMarkerRange = urlClosingMarkerRange,
         )
       }
       is Code -> {
         InlineCodeNode(
-          offsetInParent = offsetInParent,
-          totalLength = textLength,
-          openingMarkerLength = openingMarker.length,
-          closingMarkerLength = closingMarker.length,
+          totalLength = chars.length,
+          textRange = LocalTextRange.span(0, chars.length),
+          openingMarkerRange = LocalTextRange.span(0, openingMarker.length),
+          closingMarkerRange = LocalTextRange(chars.length - closingMarker.length, chars.length),
         )
       }
       is FencedCodeBlock -> {
         if (openingMarker.contains('`') && !closingMarker.isEmpty()) {
           FencedCodeBlockNode(
-            offsetInParent = offsetInParent,
             totalLength = chars.length,
-            openingMarkerLength = openingMarker.length,
-            closingMarkerLength = closingMarker.length,
+            textRange = LocalTextRange.span(0, chars.length),
+            openingMarkerRange = LocalTextRange.span(0, openingMarker.length),
+            closingMarkerRange = LocalTextRange(textLength - closingMarker.length, textLength),
           )
         } else return null
       }
       is BlockQuote -> {
+        val totalLength = chars.length - chars.countTrailing(CharPredicate.anyOf('\n'))
         BlockQuoteNode(
-          offsetInParent = offsetInParent,
-          totalLength = chars.length - chars.countTrailing(CharPredicate.anyOf('\n')),
-          markerLength = openingMarker.length,
+          totalLength = totalLength,
+          textRange = LocalTextRange.span(0, totalLength),
+          markerRange = LocalTextRange.span(0, openingMarker.length),
         )
       }
       is ListBlock -> {
@@ -139,29 +168,28 @@ class FlexmarkMarkdownParser(
           0
         }
         ListBlockNode(
-          offsetInParent = offsetInParent,
           totalLength = chars.length + ignoredTrailingSpaces,
+          paragraphRange = LocalTextRange.span(0, chars.length + ignoredTrailingSpaces),
           children = this.walkSubtree {
-            it.toWysiwygMarkdownNode(parentStartOffset = startOffset)
+            it.toWysiwygMarkdownNode()
           }
         )
       }
       is ListItem -> {
         ListItemNode(
-          offsetInParent = offsetInParent,
           totalLength = chars.length,
-          markerLength = openingMarker.length,
+          markerRange = LocalTextRange.span(0, openingMarker.length),
           children = this.walkSubtree {
-            it.toWysiwygMarkdownNode(parentStartOffset = startOffset)
+            it.toWysiwygMarkdownNode()
           },
         )
       }
       is Heading -> {
         if (isAtxHeading && text.isNotBlank) {
           HeadingNode(
-            offsetInParent = offsetInParent,
             totalLength = chars.length,
-            openingMarkerLength = openingMarker.length,
+            textRange = LocalTextRange.span(0, chars.length),
+            openingMarkerRange = LocalTextRange.span(0, openingMarker.length),
             level = level,
           )
         } else {
@@ -177,8 +205,8 @@ class FlexmarkMarkdownParser(
       }
       is ThematicBreak -> {
         ThematicBreakNode(
-          offsetInParent = offsetInParent,
           totalLength = chars.length,
+          textRange = LocalTextRange.span(0, chars.length),
         )
       }
       else -> null
@@ -192,10 +220,11 @@ class FlexmarkMarkdownParser(
  *
  * @param map A non-null result claims that subtree, so descendants won't be visited separately.
  */
-private inline fun <R> FlexmarkNode.walkSubtree(map: (FlexmarkNode) -> R?): List<R> {
-  val out = mutableListOf<R>()
-  val root = this
-  var current: FlexmarkNode = firstChild ?: return out
+private inline fun FlexmarkNode.walkSubtree(
+  map: (FlexmarkNode) -> MarkdownNode?,
+): List<MarkdownChildNode> {
+  var current: FlexmarkNode = firstChild ?: return emptyList()
+  val out = mutableListOf<MarkdownChildNode>()
   while (true) {
     // Wysiwyg keeps it simple and avoids some nested markdown blocks.
     // For example, nested bold/italic styling inside code blocks feels overkill.
@@ -209,7 +238,10 @@ private inline fun <R> FlexmarkNode.walkSubtree(map: (FlexmarkNode) -> R?): List
     if (!isNestedSyntax) {
       val mapped = map(current)
       if (mapped != null) {
-        out += mapped
+        out += MarkdownChildNode(
+          offsetInParent = current.startOffset - this.startOffset,
+          node = mapped,
+        )
       } else {
         next = current.firstChild
       }
@@ -220,7 +252,9 @@ private inline fun <R> FlexmarkNode.walkSubtree(map: (FlexmarkNode) -> R?): List
       next = current.next
       while (next == null) {
         val parent = current.parent
-        if (parent == null || parent === root) return out
+        if (parent == null || parent === this) {
+          return out
+        }
         current = parent
         next = current.next
       }

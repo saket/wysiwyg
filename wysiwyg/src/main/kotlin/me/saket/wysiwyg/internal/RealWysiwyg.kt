@@ -18,10 +18,11 @@ import me.saket.wysiwyg.BuildConfig
 import me.saket.wysiwyg.Wysiwyg
 import me.saket.wysiwyg.WysiwygTheme
 import me.saket.wysiwyg.format.OnEnterMarkdownFormatters
-import me.saket.wysiwyg.highlight.ChangeListSnapshot
+import me.saket.wysiwyg.highlight.TextChangeListSnapshot
 import me.saket.wysiwyg.highlight.IncrementalMarkdownParser
 import me.saket.wysiwyg.highlight.MarkdownDocument
 import me.saket.wysiwyg.highlight.MarkdownParser
+import me.saket.wysiwyg.highlight.snapshot
 
 @Stable
 internal class RealWysiwyg internal constructor(
@@ -35,11 +36,11 @@ internal class RealWysiwyg internal constructor(
   // Holds the ChangeList from the most recent InputTransformation invocation, awaiting consumption.
   // FWIW, this value isn't updated for non-user edits made directly using TextFieldState#edit().
   // In those cases, the highlighter will do a full re-scan even if it supported incremental highlighting.
-  private var pendingChangeList: ChangeListSnapshot? = null
+  private var pendingChangeList: TextChangeListSnapshot? = null
 
   @OptIn(ExperimentalFoundationApi::class)
   private val captureChangeList = InputTransformation {
-    pendingChangeList = ChangeListSnapshot.from(changes)
+    pendingChangeList = changes.snapshot()
   }
 
   override var outputTransformation by mutableStateOf(OutputTransformation {})
@@ -52,7 +53,7 @@ internal class RealWysiwyg internal constructor(
     snapshotFlow { textState.text }.collectLatest { text ->
       try {
         val changes = this.pendingChangeList.also { this.pendingChangeList = null }
-          ?: ChangeListSnapshot.Empty
+          ?: TextChangeListSnapshot.Empty
 
         parser.parse(text.toString(), changes).collect { document ->
           outputTransformation = StyledOutputTransformation(
