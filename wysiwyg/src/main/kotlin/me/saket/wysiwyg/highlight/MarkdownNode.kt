@@ -15,8 +15,7 @@ import dev.drewhamilton.poko.Poko
 import me.saket.wysiwyg.internal.MarkdownNodeRenderScope
 
 interface MarkdownNode {
-  val offsetInParent: Int
-  val totalLength: Int
+  val range: LocalTextRange
 
   fun MarkdownNodeRenderScope.render(text: AnnotatedString.Builder)
 }
@@ -49,7 +48,7 @@ class MarkdownChildNode(
 
 @Poko
 class MarkdownDocument(
-  override val totalLength: Int,
+  override val range: LocalTextRange,
   val children: List<MarkdownChildNode>,
   val changes: TextChangeListSnapshot = TextChangeListSnapshot.Empty,
 ) : MarkdownNode {
@@ -62,7 +61,7 @@ class MarkdownDocument(
 
   fun copy(changes: TextChangeListSnapshot): MarkdownDocument {
     return MarkdownDocument(
-      totalLength = this.totalLength,
+      range = this.range,
       children = this.children,
       changes = changes,
     )
@@ -70,7 +69,6 @@ class MarkdownDocument(
 }
 
 interface DelimitedMarkdownNode : MarkdownNode {
-  val textRange: LocalTextRange
   val openingMarkerRange: LocalTextRange
   val closingMarkerRange: LocalTextRange
 
@@ -79,7 +77,7 @@ interface DelimitedMarkdownNode : MarkdownNode {
   override fun MarkdownNodeRenderScope.render(text: AnnotatedString.Builder) {
     // Note to self: resolve the ranges before adding any style/span objects to avoid
     // allocating objects that aren't needed, and more importantly to avoid adding partial styles.
-    val textRange = textRange.resolve() ?: return
+    val textRange = range.resolve() ?: return
     val openingMarkerRange = openingMarkerRange.resolve() ?: return
     val closingMarkerRange = closingMarkerRange.resolve() ?: return
 
@@ -92,8 +90,7 @@ interface DelimitedMarkdownNode : MarkdownNode {
 
 @Poko
 class BoldNode(
-  override val totalLength: Int,
-  override val textRange: LocalTextRange,
+  override val range: LocalTextRange,
   override val openingMarkerRange: LocalTextRange,
   override val closingMarkerRange: LocalTextRange,
 ) : DelimitedMarkdownNode {
@@ -105,8 +102,7 @@ class BoldNode(
 
 @Poko
 class ItalicNode(
-  override val totalLength: Int,
-  override val textRange: LocalTextRange,
+  override val range: LocalTextRange,
   override val openingMarkerRange: LocalTextRange,
   override val closingMarkerRange: LocalTextRange,
 ) : DelimitedMarkdownNode {
@@ -118,8 +114,7 @@ class ItalicNode(
 
 @Poko
 class InlineCodeNode(
-  override val totalLength: Int,
-  override val textRange: LocalTextRange,
+  override val range: LocalTextRange,
   override val openingMarkerRange: LocalTextRange,
   override val closingMarkerRange: LocalTextRange,
 ) : DelimitedMarkdownNode {
@@ -134,8 +129,7 @@ class InlineCodeNode(
 
 @Poko
 class FencedCodeBlockNode(
-  override val totalLength: Int,
-  override val textRange: LocalTextRange,
+  override val range: LocalTextRange,
   override val openingMarkerRange: LocalTextRange,
   override val closingMarkerRange: LocalTextRange,
 ) : DelimitedMarkdownNode {
@@ -158,23 +152,22 @@ class FencedCodeBlockNode(
 
 @Poko
 class StrikeThroughNode(
-  override val totalLength: Int,
-  val textRange: LocalTextRange,
+  override val range: LocalTextRange,
 ) : MarkdownNode {
 
   override fun MarkdownNodeRenderScope.render(text: AnnotatedString.Builder) {
-    val textRange = textRange.resolve() ?: return
+    val range = range.resolve() ?: return
     val style = SpanStyle(
       color = theme.struckThroughTextColor,
       textDecoration = TextDecoration.LineThrough,
     )
-    text.addStyle(style, textRange)
+    text.addStyle(style, range)
   }
 }
 
 @Poko
 class LinkNode(
-  override val totalLength: Int,
+  override val range: LocalTextRange,
   val textRange: LocalTextRange,
   val textOpeningMarkerRange: LocalTextRange,
   val textClosingMarkerRange: LocalTextRange,
@@ -205,13 +198,12 @@ class LinkNode(
 
 @Poko
 class BlockQuoteNode(
-  override val totalLength: Int,
-  val textRange: LocalTextRange,
+  override val range: LocalTextRange,
   val markerRange: LocalTextRange,
 ) : MarkdownNode {
 
   override fun MarkdownNodeRenderScope.render(text: AnnotatedString.Builder) {
-    val textRange = textRange.resolve() ?: return
+    val range = range.resolve() ?: return
     val markerRange = markerRange.resolve() ?: return
 
     val textStyle = SpanStyle(color = theme.blockQuoteText)
@@ -222,35 +214,34 @@ class BlockQuoteNode(
       )
     )
     text.addStyle(SpanStyle(color = theme.markerColor), markerRange)
-    text.addStyle(textStyle, textRange)
-    text.addStyle(paragraphStyle, textRange)
+    text.addStyle(textStyle, range)
+    text.addStyle(paragraphStyle, range)
 
     text.addStringAnnotation(
       tag = "blockquote",
       annotation = "ignored",
-      start = textRange.start,
-      end = textRange.end,
+      start = range.start,
+      end = range.end,
     )
   }
 }
 
 @Poko
 class ListBlockNode(
-  override val totalLength: Int,
-  val paragraphRange: LocalTextRange,
+  override val range: LocalTextRange,
   val children: List<MarkdownChildNode>,
 ) : MarkdownNode {
 
   override fun MarkdownNodeRenderScope.render(text: AnnotatedString.Builder) {
-    val paragraphRange = paragraphRange.resolve()
-    if (paragraphRange != null) {
+    val range = range.resolve()
+    if (range != null) {
       val paragraphStyle = ParagraphStyle(
         textIndent = TextIndent(
           firstLine = theme.listBlockLeadingPadding,
           restLine = theme.listBlockLeadingPadding,
         )
       )
-      text.addStyle(paragraphStyle, paragraphRange)
+      text.addStyle(paragraphStyle, range)
     }
     children.fastForEach { child ->
       child.render(text)
@@ -260,7 +251,7 @@ class ListBlockNode(
 
 @Poko
 class ListItemNode(
-  override val totalLength: Int,
+  override val range: LocalTextRange,
   val markerRange: LocalTextRange,
   val children: List<MarkdownChildNode>,
 ) : MarkdownNode {
@@ -277,14 +268,13 @@ class ListItemNode(
 
 @Poko
 class HeadingNode(
-  override val totalLength: Int,
-  val textRange: LocalTextRange,
+  override val range: LocalTextRange,
   val openingMarkerRange: LocalTextRange,
   val level: Int,
 ) : MarkdownNode {
 
   override fun MarkdownNodeRenderScope.render(text: AnnotatedString.Builder) {
-    val textRange = textRange.resolve() ?: return
+    val range = range.resolve() ?: return
     val openingMarkerRange = openingMarkerRange.resolve() ?: return
 
     val fontSizeMultiplier = with(theme.headingFontSizes) {
@@ -305,7 +295,7 @@ class HeadingNode(
         fontWeight = FontWeight.Bold,
         color = theme.headingColor,
       ),
-      range = textRange,
+      range = range,
     )
     text.addStyle(
       style = SpanStyle(color = theme.markerColor),
@@ -316,21 +306,20 @@ class HeadingNode(
 
 @Poko
 class ThematicBreakNode(
-  override val totalLength: Int,
-  val textRange: LocalTextRange,
+  override val range: LocalTextRange,
 ) : MarkdownNode {
 
   override fun MarkdownNodeRenderScope.render(text: AnnotatedString.Builder) {
-    val textRange = textRange.resolve() ?: return
+    val range = range.resolve() ?: return
     text.addStringAnnotation(
       tag = "thematic_break",
       annotation = "ignored",
-      start = textRange.start,
-      end = textRange.end,
+      start = range.start,
+      end = range.end,
     )
     text.addStyle(
       SpanStyle(color = theme.markerColor),
-      textRange,
+      range,
     )
   }
 }

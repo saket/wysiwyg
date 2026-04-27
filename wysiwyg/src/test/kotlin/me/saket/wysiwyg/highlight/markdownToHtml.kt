@@ -1,7 +1,6 @@
 package me.saket.wysiwyg.highlight
 
 import androidx.compose.ui.text.TextRange
-import me.saket.wysiwyg.highlight.rebased
 
 internal fun MarkdownDocument.renderHtml(source: String): String {
   val tags = collectTags(children, changes).sortedBy { it.offsetInRoot }
@@ -25,7 +24,12 @@ private fun collectTags(
   return buildList {
     for (child in children) {
       val oldStart = parentOldStart + child.offsetInParent
-      val newRange = TextRange.span(oldStart, child.node.totalLength).rebased(changes) ?: continue
+      val oldRange = child.node.range.textRange
+      val newRange = TextRange(
+        start = oldRange.start + oldStart,
+        end = oldRange.end + oldStart,
+      ).rebased(changes) ?: continue
+
       child.node.htmlTag()?.let { tag ->
         add(HtmlTag(newRange.start, "<$tag>"))
         add(HtmlTag(newRange.end, "</$tag>"))
@@ -35,10 +39,6 @@ private fun collectTags(
       )
     }
   }
-}
-
-private fun TextRange.Companion.span(startOffset: Int, length: Int): TextRange {
-  return TextRange(startOffset, startOffset + length)
 }
 
 private fun MarkdownNode.htmlTag(): String? {
@@ -54,6 +54,7 @@ private fun MarkdownNode.htmlTag(): String? {
 
 private fun MarkdownNode.contents(): List<MarkdownChildNode> {
   return when (this) {
+    is MarkdownDocument -> children
     is ListBlockNode -> children
     is ListItemNode -> children
     else -> emptyList()

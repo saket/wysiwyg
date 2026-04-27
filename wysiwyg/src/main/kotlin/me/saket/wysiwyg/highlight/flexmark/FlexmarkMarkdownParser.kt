@@ -62,7 +62,7 @@ class FlexmarkMarkdownParser(
   override suspend fun parse(text: String, changes: TextChangeListSnapshot): MarkdownDocument {
     return withContext(dispatcher) {
       MarkdownDocument(
-        totalLength = text.length,
+        range = LocalTextRange.span(0, text.length),
         children = parser.parse(text).walkSubtree {
           it.toWysiwygMarkdownNode()
         },
@@ -73,27 +73,22 @@ class FlexmarkMarkdownParser(
   private fun FlexmarkNode.toWysiwygMarkdownNode(): MarkdownNode? {
     return when (this) {
       is Emphasis -> {
-        val totalLength = chars.length
         ItalicNode(
-          totalLength = totalLength,
-          textRange = LocalTextRange.span(0, totalLength),
+          range = LocalTextRange.span(0, chars.length),
           openingMarkerRange = LocalTextRange.span(0, openingMarker.length),
-          closingMarkerRange = LocalTextRange(totalLength - closingMarker.length, totalLength),
+          closingMarkerRange = LocalTextRange(chars.length - closingMarker.length, chars.length),
         )
       }
       is StrongEmphasis -> {
-        val totalLength = chars.length
         BoldNode(
-          totalLength = totalLength,
-          textRange = LocalTextRange.span(0, totalLength),
+          range = LocalTextRange.span(0, chars.length),
           openingMarkerRange = LocalTextRange.span(0, openingMarker.length),
-          closingMarkerRange = LocalTextRange(totalLength - closingMarker.length, totalLength),
+          closingMarkerRange = LocalTextRange(chars.length - closingMarker.length, chars.length),
         )
       }
       is Strikethrough -> {
         StrikeThroughNode(
-          totalLength = chars.length,
-          textRange = LocalTextRange.span(0, chars.length),
+          range = LocalTextRange.span(0, chars.length),
         )
       }
       is Link -> {
@@ -123,7 +118,7 @@ class FlexmarkMarkdownParser(
         )
 
         LinkNode(
-          totalLength = chars.length,
+          range = LocalTextRange(0, chars.length),
           textRange = textRange,
           textOpeningMarkerRange = textOpeningMarkerRange,
           textClosingMarkerRange = textClosingMarkerRange,
@@ -134,8 +129,7 @@ class FlexmarkMarkdownParser(
       }
       is Code -> {
         InlineCodeNode(
-          totalLength = chars.length,
-          textRange = LocalTextRange.span(0, chars.length),
+          range = LocalTextRange.span(0, chars.length),
           openingMarkerRange = LocalTextRange.span(0, openingMarker.length),
           closingMarkerRange = LocalTextRange(chars.length - closingMarker.length, chars.length),
         )
@@ -143,8 +137,7 @@ class FlexmarkMarkdownParser(
       is FencedCodeBlock -> {
         if (openingMarker.contains('`') && !closingMarker.isEmpty()) {
           FencedCodeBlockNode(
-            totalLength = chars.length,
-            textRange = LocalTextRange.span(0, chars.length),
+            range = LocalTextRange.span(0, chars.length),
             openingMarkerRange = LocalTextRange.span(0, openingMarker.length),
             closingMarkerRange = LocalTextRange(textLength - closingMarker.length, textLength),
           )
@@ -153,8 +146,7 @@ class FlexmarkMarkdownParser(
       is BlockQuote -> {
         val totalLength = chars.length - chars.countTrailing(CharPredicate.anyOf('\n'))
         BlockQuoteNode(
-          totalLength = totalLength,
-          textRange = LocalTextRange.span(0, totalLength),
+          range = LocalTextRange.span(0, totalLength),
           markerRange = LocalTextRange.span(0, openingMarker.length),
         )
       }
@@ -168,8 +160,7 @@ class FlexmarkMarkdownParser(
           0
         }
         ListBlockNode(
-          totalLength = chars.length + ignoredTrailingSpaces,
-          paragraphRange = LocalTextRange.span(0, chars.length + ignoredTrailingSpaces),
+          range = LocalTextRange.span(0, chars.length + ignoredTrailingSpaces),
           children = this.walkSubtree {
             it.toWysiwygMarkdownNode()
           }
@@ -177,7 +168,7 @@ class FlexmarkMarkdownParser(
       }
       is ListItem -> {
         ListItemNode(
-          totalLength = chars.length,
+          range = LocalTextRange.span(0, chars.length),
           markerRange = LocalTextRange.span(0, openingMarker.length),
           children = this.walkSubtree {
             it.toWysiwygMarkdownNode()
@@ -187,8 +178,7 @@ class FlexmarkMarkdownParser(
       is Heading -> {
         if (isAtxHeading && text.isNotBlank) {
           HeadingNode(
-            totalLength = chars.length,
-            textRange = LocalTextRange.span(0, chars.length),
+            range = LocalTextRange.span(0, chars.length),
             openingMarkerRange = LocalTextRange.span(0, openingMarker.length),
             level = level,
           )
@@ -205,8 +195,7 @@ class FlexmarkMarkdownParser(
       }
       is ThematicBreak -> {
         ThematicBreakNode(
-          totalLength = chars.length,
-          textRange = LocalTextRange.span(0, chars.length),
+          range = LocalTextRange.span(0, chars.length),
         )
       }
       else -> null
