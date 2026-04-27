@@ -43,9 +43,9 @@ private data class MarkdownDocumentSnapshot(
       // [changes] does not fully describe the path from the cached text to [text]. This can
       // happen if a prior parse was cancelled before updating the cache, or if a programmatic
       // textState.edit {} slipped in between user edits (which bypasses InputTransformation).
-      // Rebasing by this partial change list would produce wrong offsets.
+      // Overlaying by this partial change list would produce wrong offsets.
       return null
     }
-    return document.copy(overlay = MarkdownEditOverlay(changes))
+    return document.copy(changes = changes)
   }
 }

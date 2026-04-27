@@ -10,8 +10,8 @@ import me.saket.wysiwyg.WysiwygTheme
 import me.saket.wysiwyg.highlight.LocalTextRange
 import me.saket.wysiwyg.highlight.MarkdownChildNode
 import me.saket.wysiwyg.highlight.MarkdownDocument
-import me.saket.wysiwyg.highlight.MarkdownEditOverlay
-import me.saket.wysiwyg.highlight.MarkdownEditOverlay.Companion.overlayed
+import me.saket.wysiwyg.highlight.TextChangeListSnapshot
+import me.saket.wysiwyg.highlight.rebased
 
 @JvmInline
 internal value class MarkdownRenderer(
@@ -21,7 +21,7 @@ internal value class MarkdownRenderer(
     val scope = RealMarkdownNodeRenderScope(
       theme = theme,
       unstyledText = text,
-      editOverlay = document.overlay,
+      changes = document.changes,
       offsetInRoot = 0,
     )
     return buildAnnotatedString {
@@ -41,7 +41,7 @@ interface MarkdownNodeRenderScope {
   val unstyledText: AnnotatedString
 
   // todo: kdoc
-  val editOverlay: MarkdownEditOverlay
+  val changes: TextChangeListSnapshot
 
   // todo: kdoc
   val offsetInRoot: Int
@@ -55,7 +55,7 @@ interface MarkdownNodeRenderScope {
       start = textRange.start + offsetInRoot,
       end = textRange.end + offsetInRoot,
     )
-    return rangeInRoot.overlayed(editOverlay)
+    return rangeInRoot.rebased(changes)
   }
 
   // todo: kdoc
@@ -99,7 +99,7 @@ interface MarkdownNodeRenderScope {
 private data class RealMarkdownNodeRenderScope(
   override val theme: WysiwygTheme,
   override val unstyledText: AnnotatedString,
-  override val editOverlay: MarkdownEditOverlay,
+  override val changes: TextChangeListSnapshot,
   override val offsetInRoot: Int,
 ) : MarkdownNodeRenderScope {
 
@@ -107,7 +107,7 @@ private data class RealMarkdownNodeRenderScope(
     return RealMarkdownNodeRenderScope(
       theme = theme,
       unstyledText = unstyledText,
-      editOverlay = editOverlay,
+      changes = changes,
       offsetInRoot = offsetInRoot + child.offsetInParent,
     )
   }

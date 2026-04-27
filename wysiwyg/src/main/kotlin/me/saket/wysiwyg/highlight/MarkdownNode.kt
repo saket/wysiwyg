@@ -51,7 +51,7 @@ class MarkdownChildNode(
 class MarkdownDocument(
   override val totalLength: Int,
   val children: List<MarkdownChildNode>,
-  val overlay: MarkdownEditOverlay = MarkdownEditOverlay.Empty,
+  val changes: TextChangeListSnapshot = TextChangeListSnapshot.Empty,
 ) : MarkdownNode {
 
   override fun MarkdownNodeRenderScope.render(text: AnnotatedString.Builder) {
@@ -60,11 +60,11 @@ class MarkdownDocument(
     }
   }
 
-  fun copy(overlay: MarkdownEditOverlay): MarkdownDocument {
+  fun copy(changes: TextChangeListSnapshot): MarkdownDocument {
     return MarkdownDocument(
       totalLength = this.totalLength,
       children = this.children,
-      overlay = overlay,
+      changes = changes,
     )
   }
 }

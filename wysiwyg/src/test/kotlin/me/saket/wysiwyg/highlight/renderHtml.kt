@@ -1,10 +1,10 @@
 package me.saket.wysiwyg.highlight
 
 import androidx.compose.ui.text.TextRange
-import me.saket.wysiwyg.highlight.MarkdownEditOverlay.Companion.overlayed
+import me.saket.wysiwyg.highlight.rebased
 
 internal fun MarkdownDocument.renderHtml(source: String): String {
-  val tags = collectTags(children, overlay).sortedBy { it.offsetInRoot }
+  val tags = collectTags(children, changes).sortedBy { it.offsetInRoot }
 
   return buildString {
     var cursor = 0
@@ -19,19 +19,19 @@ internal fun MarkdownDocument.renderHtml(source: String): String {
 
 private fun collectTags(
   children: List<MarkdownChildNode>,
-  overlay: MarkdownEditOverlay,
+  changes: TextChangeListSnapshot,
   parentOldStart: Int = 0,
 ): List<HtmlTag> {
   return buildList {
     for (child in children) {
       val oldStart = parentOldStart + child.offsetInParent
-      val newRange = TextRange.span(oldStart, child.node.totalLength).overlayed(overlay) ?: continue
+      val newRange = TextRange.span(oldStart, child.node.totalLength).rebased(changes) ?: continue
       child.node.htmlTag()?.let { tag ->
         add(HtmlTag(newRange.start, "<$tag>"))
         add(HtmlTag(newRange.end, "</$tag>"))
       }
       addAll(
-        collectTags(child.node.contents(), overlay, oldStart)
+        collectTags(child.node.contents(), changes, oldStart)
       )
     }
   }
