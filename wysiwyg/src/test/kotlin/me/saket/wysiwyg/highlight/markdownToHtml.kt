@@ -18,7 +18,7 @@ internal fun MarkdownDocument.renderHtml(source: String): String {
 
 private fun collectTags(
   children: List<MarkdownChildNode>,
-  changes: TextChangeListSnapshot,
+  changes: List<TextChangeListSnapshot>,
   parentOldStart: Int = 0,
 ): List<HtmlTag> {
   return buildList {

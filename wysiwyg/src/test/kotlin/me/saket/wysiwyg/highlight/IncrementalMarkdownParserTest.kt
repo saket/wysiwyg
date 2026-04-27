@@ -4,12 +4,15 @@ import androidx.compose.ui.text.TextRange
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.transform
+import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.test.runTest
 import me.saket.wysiwyg.highlight.flexmark.FlexmarkMarkdownParser
 import org.junit.Test
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class IncrementalMarkdownParserTest {
 
   private fun parser(): IncrementalMarkdownParser =
@@ -295,11 +298,39 @@ class IncrementalMarkdownParserTest {
       cancelAndIgnoreRemainingEvents()
     }
   }
+
+  @Test fun `overlay extends across cancelled reparses while user is typing fast`() = runTest {
+    val parser = IncrementalMarkdownParser(
+      OneShotMarkdownParser(
+        FlexmarkMarkdownParser()
+      )
+    )
+    parser.test {
+      // Seed parse: the delegate's first call goes through and populates the cache.
+      sendInput("**bold** tail")
+      assertThat(awaitItem()).isEqualTo("<b>**bold**</b> tail")
+
+      // Edit 1: the parser emits an overlay synchronously, then suspends inside
+      // delegate.parse (subsequent calls block forever).
+      sendInput("**bold** tail!")
+      assertThat(awaitItem()).isEqualTo("<b>**bold**</b> tail!")
+
+      // Edit 2 arrives before edit 1's reparse completes; transformLatest cancels
+      // edit 1's flow while delegate.parse was still suspended. The overlay must
+      // extend across edit 1 + edit 2 — without that, the cache's recorded text
+      // length is stale and the length-invariant guard would suppress this emission.
+      sendInput("**bold** tail!?")
+      assertThat(awaitItem()).isEqualTo("<b>**bold**</b> tail!?")
+
+      cancelAndIgnoreRemainingEvents()
+    }
+  }
 }
 
+@OptIn(ExperimentalCoroutinesApi::class)
 private suspend fun IncrementalMarkdownParser.test(test: suspend ParserTester.() -> Unit) {
   val inputs = MutableSharedFlow<ParserTester.Input>(replay = 1, extraBufferCapacity = 1)
-  val highlights = inputs.transform { input ->
+  val highlights = inputs.transformLatest { input ->
     parse(input.text, input.changes).collect { document ->
       emit(document.renderHtml(input.text))
     }
@@ -331,6 +362,21 @@ private class ParserTester(
     val text: String,
     val changes: TextChangeListSnapshot,
   )
+}
+
+/** Lets the first [parse] call go through to [delegate]; every subsequent call suspends forever. */
+private class OneShotMarkdownParser(
+  private val delegate: MarkdownParser,
+) : MarkdownParser {
+  private var seeded = false
+
+  override suspend fun parse(text: String, changes: TextChangeListSnapshot): MarkdownDocument {
+    if (!seeded) {
+      seeded = true
+      return delegate.parse(text, changes)
+    }
+    awaitCancellation()
+  }
 }
 
 /** Derives a single-edit [TextChangeListSnapshot] from the common prefix/suffix of the two texts. */

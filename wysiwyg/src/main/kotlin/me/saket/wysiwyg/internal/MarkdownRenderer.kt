@@ -41,7 +41,7 @@ interface MarkdownNodeRenderScope {
   val unstyledText: AnnotatedString
 
   // todo: kdoc
-  val changes: TextChangeListSnapshot
+  val changes: List<TextChangeListSnapshot>
 
   // todo: kdoc
   val offsetInRoot: Int
@@ -99,7 +99,7 @@ interface MarkdownNodeRenderScope {
 private data class RealMarkdownNodeRenderScope(
   override val theme: WysiwygTheme,
   override val unstyledText: AnnotatedString,
-  override val changes: TextChangeListSnapshot,
+  override val changes: List<TextChangeListSnapshot>,
   override val offsetInRoot: Int,
 ) : MarkdownNodeRenderScope {
 

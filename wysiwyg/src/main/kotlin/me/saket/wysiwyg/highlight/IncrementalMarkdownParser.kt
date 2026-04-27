@@ -18,6 +18,7 @@ internal class IncrementalMarkdownParser(
     return flow {
       val overlayed = previousDocument?.overlayedOn(text, changes)
       if (overlayed != null) {
+        previousDocument = MarkdownDocumentSnapshot(oldTextLength = text.length, document = overlayed)
         emit(overlayed)
       }
 
@@ -46,6 +47,6 @@ private data class MarkdownDocumentSnapshot(
       // Overlaying by this partial change list would produce wrong offsets.
       return null
     }
-    return document.copy(changes = changes)
+    return document.copy(changes = document.changes + changes)
   }
 }

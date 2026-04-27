@@ -50,7 +50,7 @@ class MarkdownChildNode(
 class MarkdownDocument(
   override val range: LocalTextRange,
   val children: List<MarkdownChildNode>,
-  val changes: TextChangeListSnapshot = TextChangeListSnapshot.Empty,
+  val changes: List<TextChangeListSnapshot> = emptyList(),
 ) : MarkdownNode {
 
   override fun MarkdownNodeRenderScope.render(text: AnnotatedString.Builder) {
@@ -59,7 +59,7 @@ class MarkdownDocument(
     }
   }
 
-  fun copy(changes: TextChangeListSnapshot): MarkdownDocument {
+  fun copy(changes: List<TextChangeListSnapshot>): MarkdownDocument {
     return MarkdownDocument(
       range = this.range,
       children = this.children,
