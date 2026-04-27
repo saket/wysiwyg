@@ -9,10 +9,6 @@ value class MarkdownEditOverlay(
     return originalRange.rebased(changes)
   }
 
-  fun touches(range: TextRange): Boolean {
-    return changes.touches(range)
-  }
-
   companion object {
     val Empty = MarkdownEditOverlay(ChangeListSnapshot.Empty)
 
