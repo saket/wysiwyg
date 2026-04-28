@@ -33,6 +33,7 @@ internal class RealWysiwyg internal constructor(
   onEnterFormatters: OnEnterMarkdownFormatters,
 ) : Wysiwyg {
   private val parser = IncrementalMarkdownParser(parser)
+  private val markdownRenderer = MarkdownRenderer(theme)
 
   // Holds the ChangeList from the most recent InputTransformation invocation, awaiting consumption.
   // FWIW, this value isn't updated for non-user edits made directly using TextFieldState#edit().
@@ -57,10 +58,7 @@ internal class RealWysiwyg internal constructor(
           .also { this.pendingChangeList = TextChangeListSnapshot.Empty }
 
         parser.parse(text.toString(), changes).collect { document ->
-          outputTransformation = StyledOutputTransformation(
-            document = document,
-            renderer = MarkdownRenderer(theme),
-          )
+          outputTransformation = StyledOutputTransformation(document, markdownRenderer)
         }
       } catch (e: Throwable) {
         if (BuildConfig.DEBUG) {
