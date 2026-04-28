@@ -31,9 +31,18 @@ internal fun MarkdownMarkerInserter.assertOnInsert(
   expect: String?,
 ) {
   val snapshot = decodeTextSelection(input)
-  val output = insertInto(snapshot.text, snapshot.selection)
+  val replacement = insertInto(snapshot.text, snapshot.selection)
+  val state = TextFieldState(
+    initialText = snapshot.text,
+    initialSelection = snapshot.selection,
+  )
+  state.edit {
+    with(replacement) { replace() }
+  }
+
   val expected = expect?.let(::decodeTextSelection)
-  if (output.text.toString() != expected?.text || output.newSelection != expected.selection) {
+  val actualText = state.text.toString()
+  if (actualText != expected?.text || state.selection != expected.selection) {
     error(
       buildString {
         this.appendLine("--------------------------------------")
@@ -46,7 +55,7 @@ internal fun MarkdownMarkerInserter.assertOnInsert(
           this.appendLine("Expected: \nnull")
         }
         this.appendLine(
-          "\nActual: \n\"\"\"\n${encodeTextSelection(output.text, output.newSelection)}\n\"\"\""
+          "\nActual: \n\"\"\"\n${encodeTextSelection(actualText, state.selection)}\n\"\"\""
         )
       },
     )

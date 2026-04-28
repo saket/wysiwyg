@@ -4,14 +4,13 @@ import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.ui.text.TextRange
 
 internal fun interface MarkdownMarkerInserter {
-  fun insertInto(text: CharSequence, selection: TextRange): TextReplacement
+  fun insertInto(text: CharSequence, selection: TextRange): TextReplacement2
 }
 
 internal fun TextFieldState.insertMarker(inserter: MarkdownMarkerInserter) {
   val replacement = inserter.insertInto(text = text, selection = selection)
   edit {
-    replace(0, length, replacement.text)
-    selection = replacement.newSelection
+    with(replacement) { replace() }
   }
 }
 
@@ -64,28 +63,22 @@ internal class SymmetricMarkdownMarkerInserter(
   private val marker: String,
   private val placeholder: String,
 ) : MarkdownMarkerInserter {
-  override fun insertInto(text: CharSequence, selection: TextRange): TextReplacement {
-    val textUnderSelection = if (selection.collapsed) null else text.substring(selection.min, selection.max)
-
+  override fun insertInto(text: CharSequence, selection: TextRange): TextReplacement2 {
+    val start = selection.min
+    val end = selection.max
+    val textUnderSelection = if (selection.collapsed) null else text.substring(start, end)
     val newSelection = if (textUnderSelection == null) {
       TextRange(
-        start = selection.min + marker.length,
-        end = selection.min + marker.length + placeholder.length,
+        start = start + marker.length,
+        end = start + marker.length + placeholder.length,
       )
     } else {
-      TextRange(
-        index = selection.min + (marker.length * 2) + textUnderSelection.length,
-      )
+      TextRange(start + (marker.length * 2) + textUnderSelection.length)
     }
-
-    return TextReplacement(
-      text = text.replaceRange(
-        startIndex = selection.min,
-        endIndex = selection.max,
-        replacement = "$marker${textUnderSelection ?: placeholder}$marker",
-      ),
-      newSelection = newSelection,
-    )
+    return TextReplacement2 {
+      replace(start, end, "$marker${textUnderSelection ?: placeholder}$marker")
+      this.selection = newSelection
+    }
   }
 }
 
@@ -93,16 +86,20 @@ internal object FencedCodeBlockMarkerInserter : MarkdownMarkerInserter {
   private const val leftMarker = "```\n"
   private const val rightMarker = "\n```"
 
-  override fun insertInto(text: CharSequence, selection: TextRange): TextReplacement {
+  override fun insertInto(text: CharSequence, selection: TextRange): TextReplacement2 {
     val currentParagraph = TextParagraph.findUnderCursor(text, selection)
-    return TextReplacement(
-      text = text.replaceRange(
-        startIndex = currentParagraph.startIndex,
-        endIndex = currentParagraph.endIndexExclusive,
-        replacement = "$leftMarker${currentParagraph.text}$rightMarker",
-      ),
-      newSelection = selection.offsetBy(leftMarker.length),
+    val newSelection = TextRange(
+      start = selection.start + leftMarker.length,
+      end = selection.end + leftMarker.length,
     )
+    return TextReplacement2 {
+      replace(
+        start = currentParagraph.startIndex,
+        end = currentParagraph.endIndexExclusive,
+        text = "$leftMarker${currentParagraph.text}$rightMarker",
+      )
+      this.selection = newSelection
+    }
   }
 }
 
@@ -111,7 +108,7 @@ internal class CompoundableParagraphMarkerInserter(
   private val addSurroundingLineBreaks: Boolean,
 ) : MarkdownMarkerInserter {
 
-  override fun insertInto(text: CharSequence, selection: TextRange): TextReplacement {
+  override fun insertInto(text: CharSequence, selection: TextRange): TextReplacement2 {
     val currentParagraph = TextParagraph.findUnderCursor(text, selection)
 
     val willCompound = currentParagraph.text.getOrNull(0) == leftMarker
@@ -122,32 +119,36 @@ internal class CompoundableParagraphMarkerInserter(
     }
 
     val needsLeadingNewLine = addSurroundingLineBreaks
-      && currentParagraph.startIndex >= 2
-      && text[currentParagraph.startIndex - 2] != '\n'
+        && currentParagraph.startIndex >= 2
+        && text[currentParagraph.startIndex - 2] != '\n'
 
     val hasFollowingNewLine = text.getOrNull(currentParagraph.endIndexExclusive + 1) == '\n'
     val needsFollowingNewLine = !hasFollowingNewLine
-      && addSurroundingLineBreaks
-      && currentParagraph.endIndexExclusive != text.length
+        && addSurroundingLineBreaks
+        && currentParagraph.endIndexExclusive != text.length
 
     val leadingNewLine = if (needsLeadingNewLine) "\n" else ""
-    return TextReplacement(
-      text = text.replaceRange(
-        startIndex = currentParagraph.startIndex,
-        endIndex = currentParagraph.endIndexExclusive,
-        replacement = buildString {
-          append(leadingNewLine)
-          append(leftMarkerWithSpace)
-          append(currentParagraph.text)
-          if (needsFollowingNewLine) {
-            append("\n")
-          }
-        },
-      ),
-      newSelection = selection.offsetBy(
-        leadingNewLine.length + leftMarkerWithSpace.length,
-      ),
+    val replacement = buildString {
+      append(leadingNewLine)
+      append(leftMarkerWithSpace)
+      append(currentParagraph.text)
+      if (needsFollowingNewLine) {
+        append("\n")
+      }
+    }
+    val cursorOffset = leadingNewLine.length + leftMarkerWithSpace.length
+    val newSelection = TextRange(
+      start = selection.start + cursorOffset,
+      end = selection.end + cursorOffset,
     )
+    return TextReplacement2 {
+      replace(
+        start = currentParagraph.startIndex,
+        end = currentParagraph.endIndexExclusive,
+        text = replacement,
+      )
+      this.selection = newSelection
+    }
   }
 
   companion object {
@@ -161,8 +162,4 @@ internal class CompoundableParagraphMarkerInserter(
       addSurroundingLineBreaks = false,
     )
   }
-}
-
-private fun TextRange.offsetBy(by: Int): TextRange {
-  return TextRange(start = start + by, end = end + by)
 }
