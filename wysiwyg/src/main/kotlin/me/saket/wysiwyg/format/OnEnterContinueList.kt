@@ -14,12 +14,19 @@ class OnEnterContinueList : OnEnterMarkdownFormatter {
     paragraph: TextParagraph,
     cursorPositionBeforeEnter: Int,
   ): TextReplacement2? {
-    val paragraphString = paragraph.text.toString()
-    val paragraphText = paragraphString.trimStart()
-    fun paragraphMargin() = paragraphString.takeWhile { it.isWhitespace() }
+    val paragraphText = paragraph.text
+    val paragraphLength = paragraphText.length
 
-    if (paragraphText.length >= 2 && paragraphText[0] in itemMarkers && paragraphText[1].isWhitespace()) {
-      val isItemEmpty = paragraphText.length == 2
+    val contentStart = paragraphText.indexOfFirst { !it.isWhitespace() }
+    if (contentStart == -1) {
+      return null
+    }
+
+    if (paragraphText[contentStart] in itemMarkers
+      && contentStart + 1 < paragraphLength
+      && paragraphText[contentStart + 1].isWhitespace()
+    ) {
+      val isItemEmpty = paragraphLength == contentStart + 2
       return if (isItemEmpty) {
         endListSyntax(
           lastItem = paragraph,
@@ -28,17 +35,17 @@ class OnEnterContinueList : OnEnterMarkdownFormatter {
       } else {
         continueListSyntax(
           cursorPositionBeforeEnter = cursorPositionBeforeEnter,
-          paragraphLeadingMargin = paragraphMargin(),
-          syntax = "${paragraphText[0]} ",
+          paragraphLeadingMargin = paragraphText.substring(0, contentStart),
+          syntax = "${paragraphText[contentStart]} ",
         )
       }
     }
 
-    if (paragraphText[0].isDigit()) {
-      val matchResult = orderedItemRegex.find(paragraphText)
+    if (paragraphText[contentStart].isDigit()) {
+      val matchResult = orderedItemRegex.find(paragraphText, startIndex = contentStart)
       if (matchResult != null) {
         val (syntax, number) = matchResult.groupValues
-        val isItemEmpty = paragraphText.length == syntax.length
+        val isItemEmpty = paragraphLength - contentStart == syntax.length
 
         return if (isItemEmpty) {
           endListSyntax(
@@ -49,7 +56,7 @@ class OnEnterContinueList : OnEnterMarkdownFormatter {
           val nextNumber = number.toInt() + 1
           continueListSyntax(
             cursorPositionBeforeEnter = cursorPositionBeforeEnter,
-            paragraphLeadingMargin = paragraphMargin(),
+            paragraphLeadingMargin = paragraphText.substring(0, contentStart),
             syntax = "$nextNumber. ",
           )
         }
@@ -70,8 +77,8 @@ class OnEnterContinueList : OnEnterMarkdownFormatter {
         start = lastItem.startIndex,
         end = cursorPositionBeforeEnter + 1,  // +1 for new line.
         text = "\n",
-    )
-  }
+      )
+    }
   }
 
   private fun continueListSyntax(
