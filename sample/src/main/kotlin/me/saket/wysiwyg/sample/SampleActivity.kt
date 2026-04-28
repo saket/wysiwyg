@@ -32,7 +32,7 @@ class SampleActivity : AppCompatActivity() {
 }
 
 @Composable
-private fun AppTheme(content: @Composable () -> Unit) {
+internal fun AppTheme(content: @Composable () -> Unit) {
   val colorScheme = if (isSystemInDarkTheme()) {
     dynamicDarkColorScheme(LocalContext.current)
   } else {

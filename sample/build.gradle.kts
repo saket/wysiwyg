@@ -22,6 +22,7 @@ android {
 
   signingConfigs {
     create("release") {
+      // FYI this must be kept in sync with :benchmarks
       keyAlias = "sample"
       keyPassword = "frappe-snivel-possible-downward"
       storeFile = file("release_keystore.jks")
@@ -32,7 +33,7 @@ android {
     getByName("release") {
       isMinifyEnabled = true
       isDebuggable = false
-      signingConfig = signingConfigs.getByName("debug")
+      signingConfig = signingConfigs.getByName("release")
       testProguardFiles("test-proguard-rules.pro")
     }
   }

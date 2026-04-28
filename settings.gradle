@@ -6,4 +6,4 @@ pluginManagement {
   }
 }
 
-include ':sample', ':wysiwyg'
+include ':sample', ':wysiwyg', ':benchmarks'

@@ -13,6 +13,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.util.fastForEach
+import androidx.tracing.trace
 import kotlinx.coroutines.flow.collectLatest
 import me.saket.wysiwyg.BuildConfig
 import me.saket.wysiwyg.Wysiwyg
@@ -79,7 +80,9 @@ private data class StyledOutputTransformation(
 ) : OutputTransformation {
 
   override fun TextFieldBuffer.transformOutput() {
-    applyMarkdownStyles()
+    trace("Wysiwyg:transformOutput") {
+      applyMarkdownStyles()
+    }
   }
 
   private fun TextFieldBuffer.applyMarkdownStyles() {
@@ -87,15 +90,19 @@ private data class StyledOutputTransformation(
       return
     }
 
-    val styled = renderer.buildAnnotatedString(
-      text = AnnotatedString(toString()),
-      document = document,
-    )
-    styled.spanStyles.fastForEach { range ->
-      addStyle(range.item, range.start, range.end)
+    val styled = trace("Wysiwyg:buildAnnotatedString") {
+      renderer.buildAnnotatedString(
+        text = AnnotatedString(toString()),
+        document = document,
+      )
     }
-    styled.paragraphStyles.fastForEach { range ->
-      addStyle(range.item, range.start, range.end)
+    trace("Wysiwyg:applySpans") {
+      styled.spanStyles.fastForEach { range ->
+        addStyle(range.item, range.start, range.end)
+      }
+      styled.paragraphStyles.fastForEach { range ->
+        addStyle(range.item, range.start, range.end)
+      }
     }
   }
 }

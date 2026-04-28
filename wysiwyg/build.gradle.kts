@@ -51,6 +51,7 @@ dependencies {
 
   implementation(libs.androidx.compose.ui)
   implementation(libs.androidx.compose.foundation)
+  implementation(libs.androidx.tracing.ktx)
   implementation(libs.poko.annotations)
 
   lintChecks(libs.composeLintChecks)

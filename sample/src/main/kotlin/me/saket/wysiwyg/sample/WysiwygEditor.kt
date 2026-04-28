@@ -84,7 +84,7 @@ fun WysiwygEditor(
 }
 
 @Composable
-private fun wysiwygTheme(): WysiwygTheme {
+internal fun wysiwygTheme(): WysiwygTheme {
   return WysiwygTheme(
     markerColor = MaterialTheme.colorScheme.tertiary,
     headingColor = MaterialTheme.colorScheme.primary,

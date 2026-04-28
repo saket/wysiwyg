@@ -43,6 +43,34 @@ TODO
 
 TODO
 
+### Performance
+Last measured: 2026-04-28.
+
+Numbers below were taken on a Pixel 10 Pro (Android 16), Compose UI 1.11.0-rc01, against the first 50,000 characters of the CommonMark spec.
+The scenario is: launch the editor, jump the cursor to end-of-doc, type 26 characters with no inter-char delay.
+
+**Frame timing during the typing burst** (lower is better; 8.3 ms is the 120 Hz frame budget):
+
+|                   | Plain `BasicTextField` | `WsyiwygTextField` | Ratio |
+|-------------------|------------------------|--------------------|-------|
+| P50 frame CPU     | 4.2 ms                 | 4.5 ms             | 1.1×  |
+| P90 frame CPU     | 20.5 ms                | 50.3 ms            | 2.5×  |
+| P95 frame CPU     | 27.6 ms                | 65.7 ms            | 2.4×  |
+| P99 frame CPU     | 49.5 ms                | 91.6 ms            | 1.9×  |
+| P99 frame overrun | 56.6 ms                | 107.7 ms           | 1.9×  |
+
+**Per-iteration trace section sums** (wysiwyg only):
+
+| Section                        | Median   | Calls / iter |
+|--------------------------------|----------|--------------|
+| `Wysiwyg:parse`                | 152.6 ms | 3            |
+| `Wysiwyg:transformOutput`      | 20.6 ms  | 17           |
+| `Wysiwyg:buildAnnotatedString` | 18.8 ms  | 17           |
+| `Wysiwyg:applySpans`           | 1.6 ms   | 17           |
+| `Wysiwyg:edited` (overlay)     | < 0.1 ms | 3            |
+
+`Wysiwyg:parse` runs on `Dispatchers.Default`, so it doesn't block frames directly — but the buffered work that lands on the main thread (`transformOutput` → `buildAnnotatedString` + `applySpans`) does, and explains most of the gap above plain `BasicTextField`.
+
 ### License
 
 ```

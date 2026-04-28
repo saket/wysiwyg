@@ -23,6 +23,7 @@ internal value class MarkdownRenderer(
       unstyledText = text,
       changes = document.changes,
       offsetInRoot = 0,
+      addTestTags = addTestTags,
     )
     return buildAnnotatedString {
       // Discard any previous styles that may have gotten restored after a config change.

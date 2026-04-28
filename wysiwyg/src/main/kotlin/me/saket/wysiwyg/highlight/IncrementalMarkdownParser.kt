@@ -1,6 +1,7 @@
 package me.saket.wysiwyg.highlight
 
 import androidx.compose.ui.util.fastSumBy
+import androidx.tracing.trace
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flow
@@ -16,14 +17,18 @@ internal class IncrementalMarkdownParser(
 
   fun parse(text: String, changes: TextChangeListSnapshot): Flow<MarkdownDocument> {
     return flow {
-      val overlayed = previousDocument?.overlayedOn(text, changes)
+      val overlayed = trace("Wysiwyg:edited") {
+        previousDocument?.overlayedOn(text, changes)
+      }
       if (overlayed != null) {
-        previousDocument = MarkdownDocumentSnapshot(oldTextLength = text.length, document = overlayed)
+        previousDocument = MarkdownDocumentSnapshot(text.length, overlayed)
         emit(overlayed)
       }
 
-      val document = delegate.parse(text, changes)
-      previousDocument = MarkdownDocumentSnapshot(oldTextLength = text.length, document = document)
+      val document = trace("Wysiwyg:parse") {
+        delegate.parse(text, changes)
+      }
+      previousDocument = MarkdownDocumentSnapshot(text.length, document)
       emit(document)
     }.distinctUntilChanged()
   }
