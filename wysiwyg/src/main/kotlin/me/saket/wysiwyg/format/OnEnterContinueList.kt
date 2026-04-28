@@ -13,7 +13,7 @@ class OnEnterContinueList : OnEnterMarkdownFormatter {
     text: CharSequence,
     paragraph: TextParagraph,
     cursorPositionBeforeEnter: Int,
-  ): TextReplacement? {
+  ): TextReplacement2? {
     val paragraphString = paragraph.text.toString()
     val paragraphText = paragraphString.trimStart()
     fun paragraphMargin() = paragraphString.takeWhile { it.isWhitespace() }
@@ -22,13 +22,11 @@ class OnEnterContinueList : OnEnterMarkdownFormatter {
       val isItemEmpty = paragraphText.length == 2
       return if (isItemEmpty) {
         endListSyntax(
-          text = text,
           lastItem = paragraph,
           cursorPositionBeforeEnter = cursorPositionBeforeEnter,
         )
       } else {
         continueListSyntax(
-          text = text,
           cursorPositionBeforeEnter = cursorPositionBeforeEnter,
           paragraphLeadingMargin = paragraphMargin(),
           syntax = "${paragraphText[0]} ",
@@ -44,14 +42,12 @@ class OnEnterContinueList : OnEnterMarkdownFormatter {
 
         return if (isItemEmpty) {
           endListSyntax(
-            text = text,
             cursorPositionBeforeEnter = cursorPositionBeforeEnter,
             lastItem = paragraph,
           )
         } else {
           val nextNumber = number.toInt() + 1
           continueListSyntax(
-            text = text,
             cursorPositionBeforeEnter = cursorPositionBeforeEnter,
             paragraphLeadingMargin = paragraphMargin(),
             syntax = "$nextNumber. ",
@@ -64,35 +60,30 @@ class OnEnterContinueList : OnEnterMarkdownFormatter {
   }
 
   private fun endListSyntax(
-    text: CharSequence,
     cursorPositionBeforeEnter: Int,
     lastItem: TextParagraph,
-  ): TextReplacement {
-    return TextReplacement(
-      text = text.replaceRange(
-        startIndex = lastItem.startIndex,
-        endIndex = lastItem.endIndexExclusive,
-        replacement = "\n",
-      ),
-      newCursorPosition = cursorPositionBeforeEnter - lastItem.text.length + 1,  // +1 for new line.
+  ): TextReplacement2 {
+    // Eat the empty list marker and the user's just-typed newline; leave a
+    // single newline so the cursor lands on a blank line below the list.
+    return TextReplacement2 {
+      replace(
+        start = lastItem.startIndex,
+        end = cursorPositionBeforeEnter + 1,  // +1 for new line.
+        text = "\n",
     )
+  }
   }
 
   private fun continueListSyntax(
-    text: CharSequence,
     cursorPositionBeforeEnter: Int,
     paragraphLeadingMargin: String,
     syntax: String,
-  ): TextReplacement {
-    val syntaxWithLineBreak = "\n$paragraphLeadingMargin$syntax"
-    return TextReplacement(
-      text = text.replaceRange(
-        startIndex = cursorPositionBeforeEnter,
-        endIndex = cursorPositionBeforeEnter,
-        replacement = syntaxWithLineBreak,
-      ),
-      newCursorPosition = cursorPositionBeforeEnter + syntaxWithLineBreak.length,
-    )
+  ): TextReplacement2 {
+    // Insert the next list item's prefix right after the user's typed newline.
+    val insertAt = cursorPositionBeforeEnter + 1
+    return TextReplacement2 {
+      replace(insertAt, insertAt, "$paragraphLeadingMargin$syntax")
+    }
   }
 
   companion object {

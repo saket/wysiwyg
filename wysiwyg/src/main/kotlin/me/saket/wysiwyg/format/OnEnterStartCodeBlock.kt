@@ -1,5 +1,6 @@
 package me.saket.wysiwyg.format
 
+import androidx.compose.ui.text.TextRange
 import kotlin.LazyThreadSafetyMode.NONE
 
 /** Starts a code block when enter key is pressed after 3 backticks. */
@@ -10,7 +11,7 @@ object OnEnterStartCodeBlock : OnEnterMarkdownFormatter {
     text: CharSequence,
     paragraph: TextParagraph,
     cursorPositionBeforeEnter: Int,
-  ): TextReplacement? {
+  ): TextReplacement2? {
     if (!paragraph.text.startsWith("```")) {
       return null
     }
@@ -29,13 +30,11 @@ object OnEnterStartCodeBlock : OnEnterMarkdownFormatter {
       }
     }
 
-    return TextReplacement(
-      text = text.replaceRange(
-        startIndex = cursorPositionBeforeEnter,
-        endIndex = cursorPositionBeforeEnter,
-        replacement = "\n\n```",
-      ),
-      newCursorPosition = cursorPositionBeforeEnter + 1,
-    )
+    // Insert the closing fence after the user's just-typed newline.
+    val insertAt = cursorPositionBeforeEnter + 1
+    return TextReplacement2 {
+      replace(insertAt, insertAt, "\n```")
+      selection = TextRange(insertAt)
+    }
   }
 }

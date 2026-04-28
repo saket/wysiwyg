@@ -1,5 +1,6 @@
 package me.saket.wysiwyg.format
 
+import androidx.compose.ui.text.TextRange
 import org.junit.Test
 
 class OnEnterMarkdownFormattersTest {
@@ -9,7 +10,12 @@ class OnEnterMarkdownFormattersTest {
         text: CharSequence,
         paragraph: TextParagraph,
         cursorPositionBeforeEnter: Int,
-      ) = TextReplacement("enter detected", newCursorPosition = 0)
+      ): TextReplacement2 {
+        return TextReplacement2 {
+          replace(0, length, "enter detected")
+          selection = TextRange(0)
+        }
+      }
     }
     val transformation = OnEnterMarkdownFormatters(listOf(formatter)).asInputTransformation()
 
