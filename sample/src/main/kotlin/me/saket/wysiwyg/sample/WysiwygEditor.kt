@@ -65,8 +65,7 @@ fun WysiwygEditor(
         .weight(1f)
         .fitInside(WindowInsetsRulers.SystemBars.current)
         .fitInside(WindowInsetsRulers.Ime.current)
-        .verticalScroll(rememberScrollState())
-        .padding(16.dp),
+        .padding(horizontal = 16.dp),
     ) {
       WsyiwygTextField(
         modifier = Modifier.focusRequester(focusRequester),

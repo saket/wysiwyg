@@ -129,11 +129,12 @@ private class ExtendedSpansForTextField(private val painters: List<ExtendedSpanP
   private var instructions = mutableStateOf(emptyList<SpanDrawInstructions>())
 
   fun drawBehind(scope: DrawScope) {
-    instructions.value.fastForEach { instruction ->
-      with(instruction) {
-        scope.draw()
-      }
-    }
+    // todo: account for the text field's scroll state.
+    //instructions.value.fastForEach { instruction ->
+    //  with(instruction) {
+    //    scope.draw()
+    //  }
+    //}
   }
 
   fun onTextLayout(result: TextLayoutResult) {
