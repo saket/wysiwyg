@@ -10,8 +10,8 @@ class OnEnterMarkdownFormattersTest {
         text: CharSequence,
         paragraph: TextParagraph,
         cursorPositionBeforeEnter: Int,
-      ): TextReplacement2 {
-        return TextReplacement2 {
+      ): TextReplacement {
+        return TextReplacement {
           replace(0, length, "enter detected")
           selection = TextRange(0)
         }

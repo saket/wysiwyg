@@ -13,7 +13,7 @@ class OnEnterContinueList : OnEnterMarkdownFormatter {
     text: CharSequence,
     paragraph: TextParagraph,
     cursorPositionBeforeEnter: Int,
-  ): TextReplacement2? {
+  ): TextReplacement? {
     val paragraphText = paragraph.text
     val paragraphLength = paragraphText.length
 
@@ -69,10 +69,10 @@ class OnEnterContinueList : OnEnterMarkdownFormatter {
   private fun endListSyntax(
     cursorPositionBeforeEnter: Int,
     lastItem: TextParagraph,
-  ): TextReplacement2 {
+  ): TextReplacement {
     // Eat the empty list marker and the user's just-typed newline; leave a
     // single newline so the cursor lands on a blank line below the list.
-    return TextReplacement2 {
+    return TextReplacement {
       replace(
         start = lastItem.startIndex,
         end = cursorPositionBeforeEnter + 1,  // +1 for new line.
@@ -85,10 +85,10 @@ class OnEnterContinueList : OnEnterMarkdownFormatter {
     cursorPositionBeforeEnter: Int,
     paragraphLeadingMargin: String,
     syntax: String,
-  ): TextReplacement2 {
+  ): TextReplacement {
     // Insert the next list item's prefix right after the user's typed newline.
     val insertAt = cursorPositionBeforeEnter + 1
-    return TextReplacement2 {
+    return TextReplacement {
       replace(insertAt, insertAt, "$paragraphLeadingMargin$syntax")
     }
   }

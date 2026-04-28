@@ -11,7 +11,7 @@ object OnEnterStartCodeBlock : OnEnterMarkdownFormatter {
     text: CharSequence,
     paragraph: TextParagraph,
     cursorPositionBeforeEnter: Int,
-  ): TextReplacement2? {
+  ): TextReplacement? {
     if (!paragraph.text.startsWith("```")) {
       return null
     }
@@ -32,7 +32,7 @@ object OnEnterStartCodeBlock : OnEnterMarkdownFormatter {
 
     // Insert the closing fence after the user's just-typed newline.
     val insertAt = cursorPositionBeforeEnter + 1
-    return TextReplacement2 {
+    return TextReplacement {
       replace(insertAt, insertAt, "\n```")
       selection = TextRange(insertAt)
     }

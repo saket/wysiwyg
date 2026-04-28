@@ -4,7 +4,7 @@ import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.ui.text.TextRange
 
 internal fun interface MarkdownMarkerInserter {
-  fun insertInto(text: CharSequence, selection: TextRange): TextReplacement2
+  fun insertInto(text: CharSequence, selection: TextRange): TextReplacement
 }
 
 internal fun TextFieldState.insertMarker(inserter: MarkdownMarkerInserter) {
@@ -63,7 +63,7 @@ internal class SymmetricMarkdownMarkerInserter(
   private val marker: String,
   private val placeholder: String,
 ) : MarkdownMarkerInserter {
-  override fun insertInto(text: CharSequence, selection: TextRange): TextReplacement2 {
+  override fun insertInto(text: CharSequence, selection: TextRange): TextReplacement {
     val start = selection.min
     val end = selection.max
     val textUnderSelection = if (selection.collapsed) null else text.substring(start, end)
@@ -75,7 +75,7 @@ internal class SymmetricMarkdownMarkerInserter(
     } else {
       TextRange(start + (marker.length * 2) + textUnderSelection.length)
     }
-    return TextReplacement2 {
+    return TextReplacement {
       replace(start, end, "$marker${textUnderSelection ?: placeholder}$marker")
       this.selection = newSelection
     }
@@ -86,13 +86,13 @@ internal object FencedCodeBlockMarkerInserter : MarkdownMarkerInserter {
   private const val leftMarker = "```\n"
   private const val rightMarker = "\n```"
 
-  override fun insertInto(text: CharSequence, selection: TextRange): TextReplacement2 {
+  override fun insertInto(text: CharSequence, selection: TextRange): TextReplacement {
     val currentParagraph = TextParagraph.findUnderCursor(text, selection)
     val newSelection = TextRange(
       start = selection.start + leftMarker.length,
       end = selection.end + leftMarker.length,
     )
-    return TextReplacement2 {
+    return TextReplacement {
       replace(
         start = currentParagraph.startIndex,
         end = currentParagraph.endIndexExclusive,
@@ -108,7 +108,7 @@ internal class CompoundableParagraphMarkerInserter(
   private val addSurroundingLineBreaks: Boolean,
 ) : MarkdownMarkerInserter {
 
-  override fun insertInto(text: CharSequence, selection: TextRange): TextReplacement2 {
+  override fun insertInto(text: CharSequence, selection: TextRange): TextReplacement {
     val currentParagraph = TextParagraph.findUnderCursor(text, selection)
 
     val willCompound = currentParagraph.text.getOrNull(0) == leftMarker
@@ -141,7 +141,7 @@ internal class CompoundableParagraphMarkerInserter(
       start = selection.start + cursorOffset,
       end = selection.end + cursorOffset,
     )
-    return TextReplacement2 {
+    return TextReplacement {
       replace(
         start = currentParagraph.startIndex,
         end = currentParagraph.endIndexExclusive,
