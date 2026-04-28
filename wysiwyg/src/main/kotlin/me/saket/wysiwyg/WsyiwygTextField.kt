@@ -21,6 +21,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.clipRect
+import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Density
@@ -70,7 +72,7 @@ fun WsyiwygTextField(
 
   BasicTextField(
     state = wysiwyg.textState,
-    modifier = modifier.drawBehind { extendedSpans.drawBehind(this) },
+    modifier = modifier.drawBehind { extendedSpans.drawBehind(scrollState) },
     enabled = enabled,
     readOnly = readOnly,
     textStyle = textStyle,
@@ -128,13 +130,19 @@ private object WsyiwygTextFieldDefaults {
 private class ExtendedSpansForTextField(private val painters: List<ExtendedSpanPainter>) {
   private var instructions = mutableStateOf(emptyList<SpanDrawInstructions>())
 
-  fun drawBehind(scope: DrawScope) {
-    // todo: account for the text field's scroll state.
-    //instructions.value.fastForEach { instruction ->
-    //  with(instruction) {
-    //    scope.draw()
-    //  }
-    //}
+  context(scope: DrawScope)
+  fun drawBehind(scrollState: ScrollState) {
+    // todo (future improvement): avoid drawing spans that aren't in the visible viewport
+    scope.clipRect {
+      translate(top = -scrollState.value.toFloat()) {
+        val translatedScope = this
+        instructions.value.fastForEach { instruction ->
+          with(instruction) {
+            translatedScope.draw()
+          }
+        }
+      }
+    }
   }
 
   fun onTextLayout(result: TextLayoutResult) {

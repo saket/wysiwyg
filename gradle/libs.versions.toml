@@ -26,6 +26,7 @@ mavenPublish = "0.36.0"
 composeLintChecks = "1.4.2" # https://github.com/slackhq/compose-lints/releases
 errorprone = "2.41.0"
 poko = "0.20.2"
+touchrobot = "0.1.0" # https://github.com/saket/touch-robot/releases
 
 [libraries]
 androidx-compose-ui = { module = "androidx.compose.ui:ui", version.ref = "androidx-compose-ui" }
@@ -58,6 +59,7 @@ androidx-compose-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4
 androidx-compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest", version.ref = "androidx-compose-ui" }
 errorprone-annotations = { module = "com.google.errorprone:error_prone_annotations", version.ref = "errorprone" }
 poko-annotations = { module = "dev.drewhamilton.poko:poko-annotations", version.ref = "poko" }
+touchrobot = { module = "me.saket.touchrobot:touchrobot-paparazzi", version.ref = "touchrobot" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
