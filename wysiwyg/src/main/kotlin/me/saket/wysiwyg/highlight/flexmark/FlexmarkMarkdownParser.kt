@@ -179,7 +179,7 @@ class FlexmarkMarkdownParser(
         if (isAtxHeading && text.isNotBlank) {
           HeadingNode(
             range = LocalTextRange.span(0, chars.length),
-            openingMarkerRange = LocalTextRange.span(0, openingMarker.length),
+            openingMarkerRange = LocalTextRange.span(0, text.startOffset - chars.startOffset),
             level = level,
           )
         } else {

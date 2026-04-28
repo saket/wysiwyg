@@ -86,6 +86,52 @@ class IncrementalMarkdownParserTest {
     }
   }
 
+  @Test fun `adding or removing hashes in a heading marker keeps it styled`() = runTest {
+    // Adding a `#` (h1 to h2). The marker shape stays `#+\s`, so the cached heading
+    // stays styled in the overlay. Level stays h1 until the reparse upgrades it.
+    parser().test {
+      sendInput("# heading")
+      assertThat(awaitItem()).isEqualTo("<h1># heading</h1>")
+      sendInput("## heading")
+      assertThat(awaitItem()).isEqualTo("<h1>## heading</h1>")
+      cancelAndIgnoreRemainingEvents()
+    }
+    // Removing a `#` (h2 to h1). Same idea in the other direction.
+    parser().test {
+      sendInput("## heading")
+      assertThat(awaitItem()).isEqualTo("<h2>## heading</h2>")
+      sendInput("# heading")
+      assertThat(awaitItem()).isEqualTo("<h2># heading</h2>")
+      cancelAndIgnoreRemainingEvents()
+    }
+  }
+
+  @Test fun `replacing a hash with a non-hash drops the heading`() = runTest {
+    parser().test {
+      sendInput("## heading")
+      assertThat(awaitItem()).isEqualTo("<h2>## heading</h2>")
+
+      // Replace the first `#` with `!`. The marker is no longer all `#`s, so the cached
+      // heading should drop until the reparse arrives.
+      sendInput("!# heading")
+      assertThat(awaitItem()).isEqualTo("!# heading")
+      cancelAndIgnoreRemainingEvents()
+    }
+  }
+
+  @Test fun `deleting one closing tilde of a strikethrough drops the styling`() = runTest {
+    parser().test {
+      sendInput("~~foo~~")
+      assertThat(awaitItem()).isEqualTo("<s>~~foo~~</s>")
+
+      // Delete one trailing `~`. The closing marker is no longer `~~`, so the cached
+      // strikethrough should drop in the overlay until the reparse arrives.
+      sendInput("~~foo~")
+      assertThat(awaitItem()).isEqualTo("~~foo~")
+      cancelAndIgnoreRemainingEvents()
+    }
+  }
+
   @Test fun `edit inside a heading extends the heading span`() = runTest {
     parser().test {
       sendInput("# First heading\n\n# Second heading")

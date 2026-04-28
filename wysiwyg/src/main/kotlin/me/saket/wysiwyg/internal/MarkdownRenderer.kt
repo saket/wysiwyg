@@ -11,11 +11,12 @@ import me.saket.wysiwyg.highlight.LocalTextRange
 import me.saket.wysiwyg.highlight.MarkdownChildNode
 import me.saket.wysiwyg.highlight.MarkdownDocument
 import me.saket.wysiwyg.highlight.TextChangeListSnapshot
+import me.saket.wysiwyg.highlight.editsOverlap
 import me.saket.wysiwyg.highlight.rebased
 
-@JvmInline
-internal value class MarkdownRenderer(
+internal class MarkdownRenderer(
   private val theme: WysiwygTheme,
+  private val useTestTags: Boolean = false,
 ) {
   fun buildAnnotatedString(text: AnnotatedString, document: MarkdownDocument): AnnotatedString {
     val scope = RealMarkdownNodeRenderScope(
@@ -23,7 +24,7 @@ internal value class MarkdownRenderer(
       unstyledText = text,
       changes = document.changes,
       offsetInRoot = 0,
-      addTestTags = addTestTags,
+      useTestTags = useTestTags,
     )
     return buildAnnotatedString {
       // Discard any previous styles that may have gotten restored after a config change.
@@ -47,16 +48,31 @@ interface MarkdownNodeRenderScope {
   // todo: kdoc
   val offsetInRoot: Int
 
+  /** Whether [addTestTag] should record annotations. Tests opt in; production leaves this off. */
+  val useTestTags: Boolean
+
   // todo: kdoc
   fun childScope(child: MarkdownChildNode): MarkdownNodeRenderScope
 
-  // todo: kdoc
-  fun LocalTextRange.resolve(): TextRange? {
+  /**
+   * Resolves this local range to its absolute position in the rendered text.
+   *
+   * When [dropOnEdit] is true, returns `null` if any edit overlaps this range. The caller's
+   * `?: return` then drops the node's styling for one frame until the reparse arrives. Use
+   * it for fixed-shape markers (emphasis's `**`, a link's `]`, a list item's `-`, a
+   * blockquote's `>`) where any edit invalidates the syntax. Skip it for repeatable markers
+   * like a heading's `#`s.
+   */
+  fun LocalTextRange.resolve(dropOnEdit: Boolean = false): TextRange? {
     val rangeInRoot = TextRange(
       start = textRange.start + offsetInRoot,
       end = textRange.end + offsetInRoot,
     )
-    return rangeInRoot.rebased(changes)
+    return if (dropOnEdit && changes.editsOverlap(rangeInRoot)) {
+      null
+    } else {
+      rangeInRoot.rebased(changes)
+    }
   }
 
   // todo: kdoc
@@ -73,6 +89,18 @@ interface MarkdownNodeRenderScope {
       start = range.start.coerceAtMost(unstyledText.lastIndex),
       end = range.end.coerceAtMost(length),
     )
+  }
+
+  /** Stores a test tag that is only used by tests. */
+  fun AnnotatedString.Builder.addTestTag(tag: String, range: TextRange) {
+    if (useTestTags) {
+      addStringAnnotation(
+        tag = "test-tag",
+        annotation = tag,
+        start = range.start,
+        end = range.end,
+      )
+    }
   }
 
   fun AnnotatedString.Builder.addStyle(style: ParagraphStyle, range: TextRange) {
@@ -102,13 +130,11 @@ private data class RealMarkdownNodeRenderScope(
   override val unstyledText: AnnotatedString,
   override val changes: List<TextChangeListSnapshot>,
   override val offsetInRoot: Int,
+  override val useTestTags: Boolean,
 ) : MarkdownNodeRenderScope {
 
   override fun childScope(child: MarkdownChildNode): MarkdownNodeRenderScope {
-    return RealMarkdownNodeRenderScope(
-      theme = theme,
-      unstyledText = unstyledText,
-      changes = changes,
+    return copy(
       offsetInRoot = offsetInRoot + child.offsetInParent,
     )
   }

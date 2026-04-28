@@ -24,8 +24,8 @@ interface DelimitedMarkdownNode : MarkdownNode {
     // Note to self: resolve the ranges before adding any style/span objects to avoid
     // allocating objects that aren't needed, and more importantly to avoid adding partial styles.
     val textRange = range.resolve() ?: return
-    val openingMarkerRange = openingMarkerRange.resolve() ?: return
-    val closingMarkerRange = closingMarkerRange.resolve() ?: return
+    val openingMarkerRange = openingMarkerRange.resolve(dropOnEdit = true) ?: return
+    val closingMarkerRange = closingMarkerRange.resolve(dropOnEdit = true) ?: return
 
     val markerSpan = SpanStyle(theme.markerColor)
     text.addStyle(markerSpan, openingMarkerRange)
@@ -43,6 +43,7 @@ class BoldNode(
 
   override fun MarkdownNodeRenderScope.renderText(text: AnnotatedString.Builder, range: TextRange) {
     text.addStyle(SpanStyle(fontWeight = FontWeight.Bold), range)
+    text.addTestTag("b", range)
   }
 }
 
@@ -108,6 +109,7 @@ class StrikeThroughNode(
       textDecoration = TextDecoration.LineThrough,
     )
     text.addStyle(style, range)
+    text.addTestTag("s", range)
   }
 }
 
@@ -123,13 +125,14 @@ class LinkNode(
 ) : MarkdownNode {
 
   override fun MarkdownNodeRenderScope.render(text: AnnotatedString.Builder) {
+    val range = range.resolve() ?: return
     val textRange = textRange.resolve() ?: return
-    val textOpeningMarkerRange = textOpeningMarkerRange.resolve() ?: return
-    val textClosingMarkerRange = textClosingMarkerRange.resolve() ?: return
+    val textOpeningMarkerRange = textOpeningMarkerRange.resolve(dropOnEdit = true) ?: return
+    val textClosingMarkerRange = textClosingMarkerRange.resolve(dropOnEdit = true) ?: return
 
     val urlRange = urlRange.resolve() ?: return
-    val urlOpeningMarkerRange = urlOpeningMarkerRange.resolve() ?: return
-    val urlClosingMarkerRange = urlClosingMarkerRange.resolve() ?: return
+    val urlOpeningMarkerRange = urlOpeningMarkerRange.resolve(dropOnEdit = true) ?: return
+    val urlClosingMarkerRange = urlClosingMarkerRange.resolve(dropOnEdit = true) ?: return
 
     text.addStyle(SpanStyle(theme.linkTextColor), textRange)
     text.addStyle(SpanStyle(theme.linkUrlColor), urlRange)
@@ -139,6 +142,8 @@ class LinkNode(
     text.addStyle(markerStyle, textClosingMarkerRange)
     text.addStyle(markerStyle, urlOpeningMarkerRange)
     text.addStyle(markerStyle, urlClosingMarkerRange)
+
+    text.addTestTag("link", range)
   }
 }
 
@@ -150,7 +155,7 @@ class BlockQuoteNode(
 
   override fun MarkdownNodeRenderScope.render(text: AnnotatedString.Builder) {
     val range = range.resolve() ?: return
-    val markerRange = markerRange.resolve() ?: return
+    val markerRange = markerRange.resolve(dropOnEdit = true) ?: return
 
     val textStyle = SpanStyle(color = theme.blockQuoteText)
     val paragraphStyle = ParagraphStyle(
@@ -169,6 +174,7 @@ class BlockQuoteNode(
       start = range.start,
       end = range.end,
     )
+    text.addTestTag("blockquote", range)
   }
 }
 
@@ -188,6 +194,7 @@ class ListBlockNode(
         )
       )
       text.addStyle(paragraphStyle, range)
+      text.addTestTag("list", range)
     }
     children.fastForEach { child ->
       child.render(text)
@@ -203,7 +210,7 @@ class ListItemNode(
 ) : MarkdownNode {
 
   override fun MarkdownNodeRenderScope.render(text: AnnotatedString.Builder) {
-    val markerRange = markerRange.resolve() ?: return
+    val markerRange = markerRange.resolve(dropOnEdit = true) ?: return
     text.addStyle(SpanStyle(theme.markerColor), markerRange)
 
     children.fastForEach { child ->
@@ -222,6 +229,16 @@ class HeadingNode(
   override fun MarkdownNodeRenderScope.render(text: AnnotatedString.Builder) {
     val range = range.resolve() ?: return
     val openingMarkerRange = openingMarkerRange.resolve() ?: return
+
+    // The `#`s are repeatable, so adding or removing them moves between heading levels
+    // (h1 to h2) without breaking syntax. But replacing one with a non-`#` or deleting
+    // the separator does break it, so the cached node must drop in those cases.
+    //
+    // Other nodes use `resolve(dropOnEdit = true)` because their markers are fixed-shape:
+    // any edit overlapping `**`, `[`, `> `, or `- ` invalidates the syntax. Heading markers
+    // aren't fixed-shape, their `#`s are repeatable, so adding or removing them moves
+    // between heading levels (h1 to h2) without breaking syntax.
+    if (!unstyledText.isAtxHeadingMarker(openingMarkerRange)) return
 
     val fontSizeMultiplier = with(theme.headingFontSizes) {
       when (level) {
@@ -247,6 +264,7 @@ class HeadingNode(
       style = SpanStyle(color = theme.markerColor),
       range = openingMarkerRange,
     )
+    text.addTestTag("h$level", range)
   }
 }
 
@@ -268,4 +286,10 @@ class ThematicBreakNode(
       range,
     )
   }
+}
+
+private fun CharSequence.isAtxHeadingMarker(range: TextRange): Boolean {
+  return range.length >= 2 &&
+      this[range.end - 1].isWhitespace() &&
+      (range.start..<range.end - 1).all { this[it] == '#' }
 }

@@ -1,6 +1,7 @@
 package me.saket.wysiwyg.highlight
 
 import androidx.compose.foundation.text.input.TextFieldBuffer
+import androidx.compose.foundation.text.input.forEachChange
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.util.fastFold
 
@@ -47,6 +48,24 @@ fun TextRange.rebased(changes: List<TextChangeListSnapshot>): TextRange? {
   return changes.fastFold(this) { acc, changes ->
     acc.rebased(changes) ?: return null
   }
+}
+
+/**
+ * Whether any edit in the changes disturbs [range] enough to invalidate it as a structural
+ * marker (e.g. a heading's `# `, a link's `]`, a list item's `-`). Used by render scopes
+ * to drop cached nodes whose syntax has been broken by the edit.
+ *
+ * Only the first snapshot is consulted: subsequent snapshots are expressed in coordinates
+ * shifted by earlier ones, and the overlay self-corrects on the next reparse anyway.
+ */
+internal fun List<TextChangeListSnapshot>.editsOverlap(range: TextRange): Boolean {
+  if (isEmpty()) return false
+  for (change in first().changes) {
+    if (change.originalRange.start < range.end && change.originalRange.end > range.start) {
+      return true
+    }
+  }
+  return false
 }
 
 private fun TextRange.rebased(changes: TextChangeListSnapshot): TextRange? {
