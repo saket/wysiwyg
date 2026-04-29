@@ -10,9 +10,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextIndent
 import androidx.compose.ui.unit.em
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastForEach
 import dev.drewhamilton.poko.Poko
 import me.saket.wysiwyg.extendedspans.BlockQuoteSpanPainter
+import me.saket.wysiwyg.extendedspans.RoundedCornerSpanPainter
+import me.saket.wysiwyg.extendedspans.RoundedCornerSpanPainter.TextPaddingValues
 import me.saket.wysiwyg.extendedspans.ThematicBreakSpanPainter
 import me.saket.wysiwyg.internal.MarkdownNodeRenderScope
 
@@ -73,6 +76,16 @@ class InlineCodeNode(
       SpanStyle(fontFamily = FontFamily.Monospace),
       range,
     )
+    addSpanPainter(
+      RoundedCornerSpanPainter(
+        range = range,
+        backgroundColor = theme.codeBackground,
+        cornerRadius = 4.sp,
+        padding = TextPaddingValues(horizontal = 2.sp, vertical = 2.sp),
+        topMargin = 2.sp,
+        bottomMargin = 2.sp,
+      )
+    )
   }
 }
 
@@ -84,10 +97,7 @@ class FencedCodeBlockNode(
 ) : DelimitedMarkdownNode {
 
   override fun MarkdownNodeRenderScope.renderText(text: AnnotatedString.Builder, range: TextRange) {
-    val textStyle = SpanStyle(
-      background = theme.codeBackground,
-      fontFamily = FontFamily.Monospace,
-    )
+    val textStyle = SpanStyle(fontFamily = FontFamily.Monospace)
     val paragraphStyle = ParagraphStyle(
       textIndent = TextIndent(
         firstLine = theme.codeBlockLeadingPadding,
@@ -96,6 +106,16 @@ class FencedCodeBlockNode(
     )
     text.addStyle(textStyle, range)
     text.addStyle(paragraphStyle, range, trimVerticalPadding = true)
+    addSpanPainter(
+      RoundedCornerSpanPainter(
+        range = range,
+        backgroundColor = theme.codeBackground,
+        cornerRadius = 8.sp,
+        padding = TextPaddingValues(horizontal = 0.sp, vertical = 2.sp),
+        topMargin = 2.sp,
+        bottomMargin = 2.sp,
+      )
+    )
   }
 }
 

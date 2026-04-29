@@ -2,6 +2,9 @@ package me.saket.wysiwyg
 
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
@@ -28,6 +31,7 @@ import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
 
 // todo: doc.
@@ -48,14 +52,17 @@ fun WsyiwygTextField(
   outputTransformation: OutputTransformation? = null,
   decorator: TextFieldDecorator? = null,
   scrollState: ScrollState = rememberScrollState(),
+  contentPadding: PaddingValues = PaddingValues(0.dp),
 ) {
   val spanPainters = remember(wysiwyg) {
-    MarkdownSpanPaintersForTextField(wysiwyg)
+    MarkdownSpanPainters(wysiwyg)
   }
 
   BasicTextField(
     state = wysiwyg.textState,
-    modifier = modifier.drawBehind { spanPainters.drawBehind(scrollState) },
+    modifier = modifier
+      .drawBehind { spanPainters.drawBehind(scrollState, contentPadding) }
+      .padding(contentPadding),
     enabled = enabled,
     readOnly = readOnly,
     textStyle = textStyle,
@@ -110,17 +117,20 @@ private object WsyiwygTextFieldDefaults {
 }
 
 @Stable
-private class MarkdownSpanPaintersForTextField(val wysiwyg: Wysiwyg) {
+private class MarkdownSpanPainters(val wysiwyg: Wysiwyg) {
   private var lastLayoutResult: TextLayoutResult? by mutableStateOf(null)
 
+  // todo (future improvement): skip painters whose ranges are outside the visible viewport.
   context(scope: DrawScope)
-  fun drawBehind(scrollState: ScrollState) {
+  fun drawBehind(scrollState: ScrollState, contentPadding: PaddingValues) {
     val layoutResult = lastLayoutResult ?: return
     val painters = wysiwyg.outputTransformation.lastRenderResult?.extraSpanPainters.orEmpty()
 
-    // todo (future improvement): avoid drawing spans that aren't in the visible viewport
+    val startPadding = with(scope) { contentPadding.calculateStartPadding(layoutDirection).toPx() }
+    val topPadding = with(scope) { contentPadding.calculateTopPadding().toPx() }
+
     scope.clipRect {
-      translate(top = -scrollState.value.toFloat()) {
+      translate(left = startPadding, top = topPadding - scrollState.value.toFloat()) {
         val translatedScope = this
         painters.fastForEach { painter ->
           with(painter) {

@@ -15,6 +15,7 @@ import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.VerticalDivider
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -391,9 +392,8 @@ class WysiwygTest {
     contentPadding: PaddingValues = PaddingValues(16.dp),
   ) {
     WsyiwygTextField(
-      modifier = modifier
-        .padding(contentPadding)
-        .testTag("editor"),
+      modifier = modifier.testTag("editor"),
+      contentPadding = contentPadding,
       wysiwyg = rememberWysiwyg(
         textState = rememberTextFieldState(markdown),
         theme = wysiwygTheme(),
@@ -415,7 +415,7 @@ private fun wysiwygTheme(): WysiwygTheme {
     linkTextColor = MaterialTheme.colorScheme.primary,
     linkUrlColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
     struckThroughTextColor = LocalContentColor.current.copy(alpha = 0.5f),
-    codeBackground = LocalContentColor.current.copy(alpha = 0.1f),
+    codeBackground = MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp),
     codeBlockLeadingPadding = 16.sp,
     blockQuoteText = LocalContentColor.current.copy(alpha = 0.9f),
     blockQuoteLeadingPadding = 16.sp,
