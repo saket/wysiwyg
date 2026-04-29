@@ -195,8 +195,8 @@ class IncrementalMarkdownParserTest {
       assertThat(awaitItem()).isEqualTo(
         """
         |<list>- first
-        |- second
-        |</list>""".trimMargin()
+        |- second</list>
+        |""".trimMargin()
       )
 
       sendInput(
@@ -208,8 +208,8 @@ class IncrementalMarkdownParserTest {
       assertThat(awaitItem()).isEqualTo(
         """
         |<list> first
-        |- second
-        |</list>""".trimMargin()
+        |- second</list>
+        |""".trimMargin()
       )
       cancelAndIgnoreRemainingEvents()
     }
@@ -228,8 +228,8 @@ class IncrementalMarkdownParserTest {
       assertThat(awaitItem()).isEqualTo(
         """
         |<list>- first
-        |- second
-        |</list>
+        |- second</list>
+        |
         |tail
         |""".trimMargin()
       )
@@ -245,8 +245,8 @@ class IncrementalMarkdownParserTest {
       assertThat(awaitItem()).isEqualTo(
         """
         |<list>- first
-        | second
-        |</list>
+        | second</list>
+        |
         |tail
         |""".trimMargin()
       )
@@ -267,8 +267,8 @@ class IncrementalMarkdownParserTest {
         """
           |<list>- parent
           |  - child
-          |- sibling
-          |</list>""".trimMargin()
+          |- sibling</list>
+          |""".trimMargin()
       )
 
       sendInput(
@@ -282,8 +282,8 @@ class IncrementalMarkdownParserTest {
         """
           |<list>- parent
           |  - ch!ild
-          |- sibling
-          |</list>""".trimMargin()
+          |- sibling</list>
+          |""".trimMargin()
       )
       cancelAndIgnoreRemainingEvents()
     }
@@ -404,8 +404,8 @@ class IncrementalMarkdownParserTest {
       assertThat(awaitItem()).isEqualTo(
         """
           |<list>- first
-          |- second
-          |</list>
+          |- second</list>
+          |
           |tail
           |""".trimMargin()
       )
@@ -421,8 +421,8 @@ class IncrementalMarkdownParserTest {
       assertThat(awaitItem()).isEqualTo(
         """
           |<list>- fir!st
-          |- second
-          |</list>
+          |- second</list>
+          |
           |tail
           |""".trimMargin()
       )

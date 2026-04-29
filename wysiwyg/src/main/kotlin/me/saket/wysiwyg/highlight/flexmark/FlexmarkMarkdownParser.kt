@@ -159,8 +159,9 @@ class FlexmarkMarkdownParser(
         } else {
           0
         }
+        val trailingNewlines = chars.countTrailing(CharPredicate.anyOf('\n'))
         ListBlockNode(
-          range = LocalTextRange.span(0, chars.length + ignoredTrailingSpaces),
+          range = LocalTextRange.span(0, chars.length + ignoredTrailingSpaces - trailingNewlines),
           children = this.walkSubtree {
             it.toWysiwygMarkdownNode()
           }

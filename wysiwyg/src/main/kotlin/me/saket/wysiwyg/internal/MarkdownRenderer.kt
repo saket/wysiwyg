@@ -5,6 +5,7 @@ import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.unit.sp
 import me.saket.wysiwyg.WysiwygTheme
 import me.saket.wysiwyg.highlight.LocalTextRange
@@ -91,6 +92,26 @@ interface MarkdownNodeRenderScope {
     )
   }
 
+  fun AnnotatedString.Builder.addStyle(style: ParagraphStyle, range: TextRange) {
+    addStyle(
+      style = style,
+      start = range.start.coerceAtMost(unstyledText.lastIndex),
+      end = range.end.coerceAtMost(length),
+    )
+    // Compose adds one extra empty line at every ParagraphStyle slice boundary on top of
+    // whatever the source markdown already produces. Shrink the boundary newline's own
+    // line height to nearly zero so the styled block sits flush against its neighbour,
+    // matching what a plain TextField would render. Author-intended blank-line separators
+    // are preserved because they contribute a *second* `\n` that we don't touch.
+    // https://issuetracker.google.com/u/1/issues/241426911
+    if (unstyledText.getOrNull(range.start - 1) == '\n') {
+      addStyle(TinyParagraphStyle, start = range.start - 1, end = range.start)
+    }
+    if (unstyledText.getOrNull(range.end) == '\n') {
+      addStyle(TinyParagraphStyle, start = range.end, end = range.end + 1)
+    }
+  }
+
   /** Stores a test tag that is only used by tests. */
   fun AnnotatedString.Builder.addTestTag(tag: String, range: TextRange) {
     if (useTestTags) {
@@ -103,25 +124,15 @@ interface MarkdownNodeRenderScope {
     }
   }
 
-  fun AnnotatedString.Builder.addStyle(style: ParagraphStyle, range: TextRange) {
-    addStyle(
-      style = style,
-      start = range.start.coerceAtMost(unstyledText.lastIndex),
-      end = range.end.coerceAtMost(length),
+  companion object {
+    private val TinyParagraphStyle = ParagraphStyle(
+      lineHeight = 0.sp,
+      lineHeightStyle = LineHeightStyle(
+        alignment = LineHeightStyle.Alignment.Center,
+        trim = LineHeightStyle.Trim.Both,
+        mode = LineHeightStyle.Mode.Tight,
+      ),
     )
-    // Compose UI adds a lot of vertical paddings around paragraphs.
-    // Reduce the font size of line breaks to make them smaller.
-    // https://issuetracker.google.com/u/1/issues/241426911
-    if (unstyledText.getOrNull(range.start - 1) == '\n') {
-      addStyle(SpanStyle(fontSize = 1.sp), start = range.start - 1, end = range.start)
-    }
-    if (unstyledText.getOrNull(range.end) == '\n') {
-      addStyle(
-        SpanStyle(fontSize = 1.sp),
-        start = range.end - 1,
-        end = range.end + 1,
-      )
-    }
   }
 }
 

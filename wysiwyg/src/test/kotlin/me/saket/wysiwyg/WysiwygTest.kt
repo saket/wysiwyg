@@ -1,15 +1,20 @@
 package me.saket.wysiwyg
 
 import android.view.ViewGroup.LayoutParams
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -40,8 +45,9 @@ class WysiwygTest {
 
   @Test fun canary() {
     paparazzi.snapshot {
-      WysiwygEditor(
-        markdown = """
+      Scaffold {
+        WysiwygEditor(
+          markdown = """
           |# Wysiwyg
           |
           |Markdown is a **lightweight** and easy-to-use `syntax` for styling all forms of ~~web~~ writing.
@@ -49,14 +55,16 @@ class WysiwygTest {
           |---
           |Markdown was originally developed by [John Gruber](daringfireball.net/markdown).
           """.trimMargin(),
-      )
+        )
+      }
     }
   }
 
   @Test fun `unicode text`() {
     paparazzi.snapshot {
-      WysiwygEditor(
-        markdown = """
+      Scaffold {
+        WysiwygEditor(
+          markdown = """
           |# Héllo café
           |
           |Markdown with **bold café** and `résumé` and ~~émoji~~.
@@ -64,14 +72,92 @@ class WysiwygTest {
           |---
           |By [André](example.com).
           """.trimMargin(),
-      )
+        )
+      }
+    }
+  }
+
+  @Test fun `line and paragraph spacings`() {
+    paparazzi.snapshot {
+      Scaffold {
+        WysiwygEditor(
+          markdown = """
+          |First line that's so long it wraps to multiple lines in the editor.
+          |Second line that's on a new visual line, but still in the same paragraph.
+          |
+          |Third line that's separated by a blank line, so it's in its own paragraph.
+          """.trimMargin(),
+        )
+      }
+    }
+  }
+
+  @Test fun `paragraph spacings of list blocks`() {
+    paparazzi.snapshot {
+      Scaffold {
+        Row(Modifier.height(IntrinsicSize.Max)) {
+          val markdown = """
+            |List block that isn't separated by a blank line:
+            |1. Milk
+            |2. Mangoes
+            |3. Peaches
+            |
+            |List block separated by a new line:
+            |
+            |1. Milk
+            |2. Mangoes
+            |3. Peaches
+            """.trimMargin()
+
+          val contentPadding = PaddingValues(16.dp)
+
+          WysiwygEditor(
+            modifier = Modifier.weight(1f),
+            markdown = markdown,
+            contentPadding = contentPadding,
+          )
+
+          VerticalDivider()
+
+          BasicTextField(
+            modifier = Modifier
+              .weight(1f)
+              .padding(contentPadding),
+            state = rememberTextFieldState(markdown),
+            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+            textStyle = LocalTextStyle.current.copy(color = LocalContentColor.current),
+          )
+        }
+      }
+    }
+  }
+
+  @Test fun `edge cases with paragraph spacings of blocks`() {
+    paparazzi.snapshot {
+      Scaffold {
+        WysiwygEditor(
+          markdown = """
+            |1. List at the very start of the document
+            |2. so there's no preceding paragraph
+            |
+            |# Heading
+            |1. List immediately after a heading
+            |2. without a blank line in between
+            |
+            |> Block quote
+            |1. List immediately after a block quote
+            |2. without a blank line in between
+            """.trimMargin(),
+        )
+      }
     }
   }
 
   @Test fun `list items without leading space`() {
     paparazzi.snapshot {
-      WysiwygEditor(
-        markdown = """
+      Scaffold {
+        WysiwygEditor(
+          markdown = """
           |1.
           |*
           |+
@@ -79,40 +165,46 @@ class WysiwygTest {
           |
           |None of the above should render as list items since each marker is missing the space that separates it from its content.
           """.trimMargin(),
-      )
+        )
+      }
     }
   }
 
   @Test fun `blank list item`() {
     paparazzi.snapshot {
-      WysiwygEditor(
-        markdown = """
+      Scaffold {
+        WysiwygEditor(
+          markdown = """
           |1.${"    "}
           |
           |Although the list item above is blank, its indentation should not extend into this paragraph.
           """.trimMargin(),
-      )
+        )
+      }
     }
   }
 
   @Test fun `list items`() {
     paparazzi.snapshot {
-      WysiwygEditor(
-        markdown = """
+      Scaffold {
+        WysiwygEditor(
+          markdown = """
           |1.    Milk
           |2. Mangoes
           |3. Notebooks
           |
           |Unrelated text.
           """.trimMargin(),
-      )
+        )
+      }
     }
   }
 
   @Test fun `invalid headings`() {
     paparazzi.snapshot {
-      WysiwygEditor(
-        """
+      Scaffold {
+        WysiwygEditor(
+          """
           |#Heading
           |
           |^ Headings should always have a space after their opening marker (`#`).
@@ -121,14 +213,16 @@ class WysiwygTest {
           |
           |^ A bare `#` isn't followed by content, so it shouldn't render as a heading.
           |""".trimMargin()
-      )
+        )
+      }
     }
   }
 
   @Test fun `invalid block quotes`() {
     paparazzi.snapshot {
-      WysiwygEditor(
-        """
+      Scaffold {
+        WysiwygEditor(
+          """
           |Empty marker:
           |
           |>${""}
@@ -144,26 +238,30 @@ class WysiwygTest {
           |
           |^ A bare `#` isn't followed by content, so it shouldn't render as a heading.
           |""".trimMargin()
-      )
+        )
+      }
     }
   }
 
   @Test fun `valid block quotes`() {
     paparazzi.snapshot {
-      WysiwygEditor(
-        """
+      Scaffold {
+        WysiwygEditor(
+          """
           |>Quote without leading whitespaces.
           |
           |> Quote with a leading whitespace.
           |""".trimMargin()
-      )
+        )
+      }
     }
   }
 
   @Test fun `valid headings`() {
     paparazzi.snapshot {
-      WysiwygEditor(
-        """
+      Scaffold {
+        WysiwygEditor(
+          """
         |# H1
         |
         |## H2
@@ -176,14 +274,16 @@ class WysiwygTest {
         |
         |###### H6
         |""".trimMargin()
-      )
+        )
+      }
     }
   }
 
   @Test fun urls() {
     paparazzi.snapshot {
-      WysiwygEditor(
-        """
+      Scaffold {
+        WysiwygEditor(
+          """
         |[Project docs](https://example.com/docs)
         |
         |[Quarterly report](<docs/quarterly report.pdf>)
@@ -192,15 +292,17 @@ class WysiwygTest {
         |
         |[Release notes](<docs/release notes.md> "Read offline")
         |""".trimMargin()
-      )
+        )
+      }
     }
   }
 
   @Test fun `extended spans are synced with scroll position`() {
     paparazzi.gif(end = 1500) {
-      WysiwygEditor(
-        modifier = Modifier.height(400.dp),
-        markdown = """
+      Scaffold {
+        WysiwygEditor(
+          modifier = Modifier.height(400.dp),
+          markdown = """
           |# Scrollable document
           |
           |Intro paragraph with **bold** and `inline code` for testing.
@@ -221,7 +323,8 @@ class WysiwygTest {
           |
           |Final paragraph with [a link](example.com) and `final code`.
           |""".trimMargin(),
-      )
+        )
+      }
 
       val touchRobot = rememberTouchRobot()
       LaunchedEffect(Unit) {
@@ -241,34 +344,42 @@ class WysiwygTest {
       }
     }
   }
-}
 
-@Composable
-private fun WysiwygEditor(
-  markdown: String,
-  modifier: Modifier = Modifier,
-) {
-  MaterialTheme {
-    Surface(
-      modifier
-        .fillMaxWidth()
-        .heightIn(min = 300.dp)
-    ) {
-      WsyiwygTextField(
-        modifier = Modifier
-          .padding(16.dp)
-          .testTag("editor"),
-        wysiwyg = rememberWysiwyg(
-          textState = rememberTextFieldState(markdown),
-          theme = wysiwygTheme(),
-          parser = remember {
-            FlexmarkMarkdownParser(dispatcher = Dispatchers.Unconfined)
-          },
-        ),
-        cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-        textStyle = LocalTextStyle.current.copy(color = LocalContentColor.current),
-      )
+  @Composable
+  private fun Scaffold(
+    content: @Composable () -> Unit,
+  ) {
+    MaterialTheme {
+      Surface(
+        Modifier
+          .fillMaxWidth()
+          .heightIn(min = 300.dp)
+      ) {
+        content()
+      }
     }
+  }
+
+  @Composable
+  private fun WysiwygEditor(
+    markdown: String,
+    modifier: Modifier = Modifier,
+    contentPadding: PaddingValues = PaddingValues(16.dp),
+  ) {
+    WsyiwygTextField(
+      modifier = modifier
+        .padding(contentPadding)
+        .testTag("editor"),
+      wysiwyg = rememberWysiwyg(
+        textState = rememberTextFieldState(markdown),
+        theme = wysiwygTheme(),
+        parser = remember {
+          FlexmarkMarkdownParser(dispatcher = Dispatchers.Unconfined)
+        },
+      ),
+      cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+      textStyle = LocalTextStyle.current.copy(color = LocalContentColor.current),
+    )
   }
 }
 
