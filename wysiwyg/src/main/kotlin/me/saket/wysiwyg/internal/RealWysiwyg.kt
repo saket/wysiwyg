@@ -19,11 +19,11 @@ import me.saket.wysiwyg.BuildConfig
 import me.saket.wysiwyg.Wysiwyg
 import me.saket.wysiwyg.WysiwygTheme
 import me.saket.wysiwyg.format.OnEnterMarkdownFormatters
-import me.saket.wysiwyg.highlight.IncrementalMarkdownParser
-import me.saket.wysiwyg.highlight.MarkdownDocument
-import me.saket.wysiwyg.highlight.MarkdownParser
-import me.saket.wysiwyg.highlight.TextChangeListSnapshot
-import me.saket.wysiwyg.highlight.snapshot
+import me.saket.wysiwyg.parser.IncrementalMarkdownParser
+import me.saket.wysiwyg.parser.MarkdownDocument
+import me.saket.wysiwyg.parser.MarkdownParser
+import me.saket.wysiwyg.parser.TextChangeListSnapshot
+import me.saket.wysiwyg.parser.snapshot
 
 @Stable
 internal class RealWysiwyg internal constructor(

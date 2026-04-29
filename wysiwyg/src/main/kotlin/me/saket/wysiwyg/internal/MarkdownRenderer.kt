@@ -8,12 +8,12 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.unit.sp
 import me.saket.wysiwyg.WysiwygTheme
-import me.saket.wysiwyg.highlight.LocalTextRange
-import me.saket.wysiwyg.highlight.MarkdownChildNode
-import me.saket.wysiwyg.highlight.MarkdownDocument
-import me.saket.wysiwyg.highlight.TextChangeListSnapshot
-import me.saket.wysiwyg.highlight.editsOverlap
-import me.saket.wysiwyg.highlight.rebased
+import me.saket.wysiwyg.parser.LocalTextRange
+import me.saket.wysiwyg.parser.MarkdownChildNode
+import me.saket.wysiwyg.parser.MarkdownDocument
+import me.saket.wysiwyg.parser.TextChangeListSnapshot
+import me.saket.wysiwyg.parser.editsOverlap
+import me.saket.wysiwyg.parser.rebased
 
 internal class MarkdownRenderer(
   private val theme: WysiwygTheme,

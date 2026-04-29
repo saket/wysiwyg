@@ -1,4 +1,4 @@
-package me.saket.wysiwyg.highlight
+package me.saket.wysiwyg.parser
 
 import androidx.compose.ui.text.TextRange
 import app.cash.turbine.ReceiveTurbine
@@ -9,7 +9,7 @@ import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.test.runTest
-import me.saket.wysiwyg.highlight.flexmark.FlexmarkMarkdownParser
+import me.saket.wysiwyg.parser.flexmark.FlexmarkMarkdownParser
 import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)

@@ -1,4 +1,4 @@
-package me.saket.wysiwyg.highlight
+package me.saket.wysiwyg.parser
 
 import androidx.compose.ui.util.fastSumBy
 import androidx.tracing.trace

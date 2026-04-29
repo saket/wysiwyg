@@ -26,7 +26,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.unit.dp
 import me.saket.wysiwyg.WsyiwygTextField
-import me.saket.wysiwyg.highlight.flexmark.FlexmarkMarkdownParser
+import me.saket.wysiwyg.parser.flexmark.FlexmarkMarkdownParser
 import me.saket.wysiwyg.rememberWysiwyg
 
 /** Driven by `:benchmarks` via UiAutomator. */

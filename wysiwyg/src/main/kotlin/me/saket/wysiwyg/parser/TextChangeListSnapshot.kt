@@ -1,7 +1,6 @@
-package me.saket.wysiwyg.highlight
+package me.saket.wysiwyg.parser
 
 import androidx.compose.foundation.text.input.TextFieldBuffer
-import androidx.compose.foundation.text.input.forEachChange
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.util.fastFold
 

@@ -1,5 +1,5 @@
 // todo: change package back to parser
-package me.saket.wysiwyg.highlight
+package me.saket.wysiwyg.parser
 
 fun interface MarkdownParser {
   /**

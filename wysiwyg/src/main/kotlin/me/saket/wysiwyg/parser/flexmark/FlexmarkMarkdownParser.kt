@@ -1,4 +1,4 @@
-package me.saket.wysiwyg.highlight.flexmark
+package me.saket.wysiwyg.parser.flexmark
 
 import com.vladsch.flexmark.ast.BlockQuote
 import com.vladsch.flexmark.ast.Code
@@ -16,23 +16,23 @@ import com.vladsch.flexmark.util.misc.CharPredicate
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import me.saket.wysiwyg.highlight.BlockQuoteNode
-import me.saket.wysiwyg.highlight.BoldNode
-import me.saket.wysiwyg.highlight.FencedCodeBlockNode
-import me.saket.wysiwyg.highlight.HeadingNode
-import me.saket.wysiwyg.highlight.InlineCodeNode
-import me.saket.wysiwyg.highlight.ItalicNode
-import me.saket.wysiwyg.highlight.LinkNode
-import me.saket.wysiwyg.highlight.ListBlockNode
-import me.saket.wysiwyg.highlight.ListItemNode
-import me.saket.wysiwyg.highlight.LocalTextRange
-import me.saket.wysiwyg.highlight.MarkdownChildNode
-import me.saket.wysiwyg.highlight.MarkdownDocument
-import me.saket.wysiwyg.highlight.MarkdownNode
-import me.saket.wysiwyg.highlight.MarkdownParser
-import me.saket.wysiwyg.highlight.StrikeThroughNode
-import me.saket.wysiwyg.highlight.TextChangeListSnapshot
-import me.saket.wysiwyg.highlight.ThematicBreakNode
+import me.saket.wysiwyg.parser.BlockQuoteNode
+import me.saket.wysiwyg.parser.BoldNode
+import me.saket.wysiwyg.parser.FencedCodeBlockNode
+import me.saket.wysiwyg.parser.HeadingNode
+import me.saket.wysiwyg.parser.InlineCodeNode
+import me.saket.wysiwyg.parser.ItalicNode
+import me.saket.wysiwyg.parser.LinkNode
+import me.saket.wysiwyg.parser.ListBlockNode
+import me.saket.wysiwyg.parser.ListItemNode
+import me.saket.wysiwyg.parser.LocalTextRange
+import me.saket.wysiwyg.parser.MarkdownChildNode
+import me.saket.wysiwyg.parser.MarkdownDocument
+import me.saket.wysiwyg.parser.MarkdownNode
+import me.saket.wysiwyg.parser.MarkdownParser
+import me.saket.wysiwyg.parser.StrikeThroughNode
+import me.saket.wysiwyg.parser.TextChangeListSnapshot
+import me.saket.wysiwyg.parser.ThematicBreakNode
 import com.vladsch.flexmark.parser.Parser as FlexmarkParser
 import com.vladsch.flexmark.util.ast.Node as FlexmarkNode
 

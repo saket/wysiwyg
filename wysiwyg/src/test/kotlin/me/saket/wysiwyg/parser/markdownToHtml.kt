@@ -1,4 +1,4 @@
-package me.saket.wysiwyg.highlight
+package me.saket.wysiwyg.parser
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString

@@ -32,7 +32,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import me.saket.touchrobot.onNode
 import me.saket.touchrobot.rememberTouchRobot
-import me.saket.wysiwyg.highlight.flexmark.FlexmarkMarkdownParser
+import me.saket.wysiwyg.parser.flexmark.FlexmarkMarkdownParser
 import org.junit.Rule
 import org.junit.Test
 import kotlin.time.Duration.Companion.milliseconds
