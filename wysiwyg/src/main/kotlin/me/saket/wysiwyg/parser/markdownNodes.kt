@@ -12,6 +12,8 @@ import androidx.compose.ui.text.style.TextIndent
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.util.fastForEach
 import dev.drewhamilton.poko.Poko
+import me.saket.wysiwyg.extendedspans.BlockQuoteSpanPainter
+import me.saket.wysiwyg.extendedspans.ThematicBreakSpanPainter
 import me.saket.wysiwyg.internal.MarkdownNodeRenderScope
 
 interface DelimitedMarkdownNode : MarkdownNode {
@@ -68,7 +70,7 @@ class InlineCodeNode(
 
   override fun MarkdownNodeRenderScope.renderText(text: AnnotatedString.Builder, range: TextRange) {
     text.addStyle(
-      SpanStyle(background = theme.codeBackground, fontFamily = FontFamily.Monospace),
+      SpanStyle(fontFamily = FontFamily.Monospace),
       range,
     )
   }
@@ -168,12 +170,7 @@ class BlockQuoteNode(
     text.addStyle(textStyle, range)
     text.addStyle(paragraphStyle, range, trimVerticalPadding = true)
 
-    text.addStringAnnotation(
-      tag = "blockquote",
-      annotation = "ignored",
-      start = range.start,
-      end = range.end,
-    )
+    addSpanPainter(BlockQuoteSpanPainter(range = range, markerColor = theme.markerColor))
     text.addTestTag("blockquote", range)
   }
 }
@@ -275,15 +272,12 @@ class ThematicBreakNode(
 
   override fun MarkdownNodeRenderScope.render(text: AnnotatedString.Builder) {
     val range = range.resolve() ?: return
-    text.addStringAnnotation(
-      tag = "thematic_break",
-      annotation = "ignored",
-      start = range.start,
-      end = range.end,
-    )
     text.addStyle(
       SpanStyle(color = theme.markerColor),
       range,
+    )
+    addSpanPainter(
+      ThematicBreakSpanPainter(range = range, markerColor = theme.markerColor)
     )
   }
 }

@@ -13,8 +13,10 @@ import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.then
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
@@ -26,14 +28,7 @@ import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Density
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastForEach
-import androidx.compose.ui.util.fastMap
-import me.saket.extendedspans.ExtendedSpanPainter
-import me.saket.extendedspans.RoundedCornerSpanPainter
-import me.saket.extendedspans.SpanDrawInstructions
-import me.saket.wysiwyg.extendedspans.BlockQuoteSpanPainter
-import me.saket.wysiwyg.extendedspans.ThematicBreakSpanPainter
 
 // todo: doc.
 @Composable
@@ -54,25 +49,13 @@ fun WsyiwygTextField(
   decorator: TextFieldDecorator? = null,
   scrollState: ScrollState = rememberScrollState(),
 ) {
-  val extendedSpans = remember {
-    ExtendedSpansForTextField(
-      listOf(
-        RoundedCornerSpanPainter(
-          cornerRadius = 4.sp,
-          padding = RoundedCornerSpanPainter.TextPaddingValues(horizontal = 2.sp),
-          topMargin = 2.sp,
-          bottomMargin = 2.sp,
-          stroke = null,
-        ),
-        BlockQuoteSpanPainter(wysiwyg.theme.markerColor),
-        ThematicBreakSpanPainter(wysiwyg.theme.markerColor),
-      )
-    )
+  val spanPainters = remember(wysiwyg) {
+    MarkdownSpanPaintersForTextField(wysiwyg)
   }
 
   BasicTextField(
     state = wysiwyg.textState,
-    modifier = modifier.drawBehind { extendedSpans.drawBehind(scrollState) },
+    modifier = modifier.drawBehind { spanPainters.drawBehind(scrollState) },
     enabled = enabled,
     readOnly = readOnly,
     textStyle = textStyle,
@@ -93,7 +76,7 @@ fun WsyiwygTextField(
       // todo: find out why result is a lambda. do i need to evaluate it on every call?
       val result = result()
       if (result != null) {
-        extendedSpans.onTextLayout(result)
+        spanPainters.onTextLayout(result)
       }
     },
   )
@@ -127,18 +110,21 @@ private object WsyiwygTextFieldDefaults {
 }
 
 @Stable
-private class ExtendedSpansForTextField(private val painters: List<ExtendedSpanPainter>) {
-  private var instructions = mutableStateOf(emptyList<SpanDrawInstructions>())
+private class MarkdownSpanPaintersForTextField(val wysiwyg: Wysiwyg) {
+  private var lastLayoutResult: TextLayoutResult? by mutableStateOf(null)
 
   context(scope: DrawScope)
   fun drawBehind(scrollState: ScrollState) {
+    val layoutResult = lastLayoutResult ?: return
+    val painters = wysiwyg.outputTransformation.lastRenderResult?.extraSpanPainters.orEmpty()
+
     // todo (future improvement): avoid drawing spans that aren't in the visible viewport
     scope.clipRect {
       translate(top = -scrollState.value.toFloat()) {
         val translatedScope = this
-        instructions.value.fastForEach { instruction ->
-          with(instruction) {
-            translatedScope.draw()
+        painters.fastForEach { painter ->
+          with(painter) {
+            translatedScope.draw(layoutResult)
           }
         }
       }
@@ -146,6 +132,6 @@ private class ExtendedSpansForTextField(private val painters: List<ExtendedSpanP
   }
 
   fun onTextLayout(result: TextLayoutResult) {
-    instructions.value = painters.fastMap { it.drawInstructionsFor(result) }
+    lastLayoutResult = result
   }
 }

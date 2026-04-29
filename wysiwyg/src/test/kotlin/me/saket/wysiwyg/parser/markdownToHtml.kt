@@ -11,7 +11,7 @@ internal fun MarkdownDocument.renderHtml(source: String): String {
   val annotated = markdownRenderer.buildAnnotatedString(
     text = AnnotatedString(source),
     document = this,
-  )
+  ).text
   val tags = annotated.getStringAnnotations("test-tag", 0, annotated.length)
     .flatMap { listOf(it.start to "<${it.item}>", it.end to "</${it.item}>") }
     .sortedBy { it.first }

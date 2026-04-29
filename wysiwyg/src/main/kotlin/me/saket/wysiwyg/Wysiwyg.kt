@@ -1,7 +1,6 @@
 package me.saket.wysiwyg
 
 import androidx.compose.foundation.text.input.InputTransformation
-import androidx.compose.foundation.text.input.OutputTransformation
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -41,5 +40,5 @@ interface Wysiwyg {
   val inputTransformation: InputTransformation
 
   // todo: this is incredibly slow for large text. typing experience is bad.
-  val outputTransformation: OutputTransformation
+  val outputTransformation: MarkdownOutputTransformation
 }

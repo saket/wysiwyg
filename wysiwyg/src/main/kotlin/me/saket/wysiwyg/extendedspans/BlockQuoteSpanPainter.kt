@@ -4,40 +4,25 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.util.fastForEach
-import me.saket.extendedspans.ExtendedSpanPainter
-import me.saket.extendedspans.SpanDrawInstructions
-import kotlin.contracts.ExperimentalContracts
-import kotlin.contracts.contract
+import me.saket.wysiwyg.MarkdownSpanPainter
 
-class BlockQuoteSpanPainter(private val markerColor: Color) : ExtendedSpanPainter() {
-  override fun decorate(
-    span: SpanStyle,
-    start: Int,
-    end: Int,
-    text: AnnotatedString,
-    builder: AnnotatedString.Builder
-  ): SpanStyle = span
+class BlockQuoteSpanPainter(
+  private val range: TextRange,
+  private val markerColor: Color,
+) : MarkdownSpanPainter {
 
-  override fun drawInstructionsFor(layoutResult: TextLayoutResult): SpanDrawInstructions {
-    val text = layoutResult.layoutInput.text
-    val blockQuotes = text.paragraphStyles.filter { it.item.textIndent != null }
-
-    return SpanDrawInstructions {
-      blockQuotes.fastForEach { annotation ->
-        val box = layoutResult.getParagraphBox(annotation.start, annotation.end)
-        drawRoundRect(
-          color = markerColor,
-          topLeft = box.topLeft,
-          size = Size(4f.dp.toPx(), box.height),
-          cornerRadius = CornerRadius(2.dp.toPx(), 2.dp.toPx())
-        )
-      }
-    }
+  override fun DrawScope.draw(layoutResult: TextLayoutResult) {
+    val box = layoutResult.getParagraphBox(range.start, range.end)
+    drawRoundRect(
+      color = markerColor,
+      topLeft = box.topLeft,
+      size = Size(4f.dp.toPx(), box.height),
+      cornerRadius = CornerRadius(2.dp.toPx(), 2.dp.toPx()),
+    )
   }
 }
 
@@ -48,6 +33,6 @@ internal fun TextLayoutResult.getParagraphBox(startOffset: Int, endOffset: Int):
     top = getLineTop(startLineNum),
     bottom = getLineBottom(endLineNum),
     left = 0f,
-    right = size.width.toFloat()
+    right = size.width.toFloat(),
   )
 }

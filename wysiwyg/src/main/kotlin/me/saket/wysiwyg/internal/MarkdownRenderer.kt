@@ -7,8 +7,10 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.unit.sp
+import me.saket.wysiwyg.MarkdownSpanPainter
 import me.saket.wysiwyg.WysiwygTheme
 import me.saket.wysiwyg.parser.LocalTextRange
+import me.saket.wysiwyg.parser.MarkdownAnnotatedString
 import me.saket.wysiwyg.parser.MarkdownChildNode
 import me.saket.wysiwyg.parser.MarkdownDocument
 import me.saket.wysiwyg.parser.TextChangeListSnapshot
@@ -19,22 +21,29 @@ internal class MarkdownRenderer(
   private val theme: WysiwygTheme,
   private val useTestTags: Boolean = false,
 ) {
-  fun buildAnnotatedString(text: AnnotatedString, document: MarkdownDocument): AnnotatedString {
+  fun buildAnnotatedString(
+    text: AnnotatedString,
+    document: MarkdownDocument
+  ): MarkdownAnnotatedString {
     val scope = RealMarkdownNodeRenderScope(
       theme = theme,
       unstyledText = text,
       changes = document.changes,
       offsetInRoot = 0,
       useTestTags = useTestTags,
+      spanPainters = mutableListOf(),
     )
-    return buildAnnotatedString {
-      // Discard any previous styles that may have gotten restored after a config change.
-      // This is slightly unfortunate because any spans added by user will also be discarded.
-      append(text.text)
-      with(document) {
-        scope.render(text = this@buildAnnotatedString)
-      }
-    }
+    return MarkdownAnnotatedString(
+      text = buildAnnotatedString {
+        // Discard any previous styles that may have gotten restored after a config change.
+        // This is slightly unfortunate because any spans added by user will also be discarded.
+        this.append(text.text)
+        with(document) {
+          scope.render(text = this@buildAnnotatedString)
+        }
+      },
+      extraSpanPainters = scope.spanPainters,
+    )
   }
 }
 
@@ -118,6 +127,9 @@ interface MarkdownNodeRenderScope {
     }
   }
 
+  // todo: kdoc.
+  fun addSpanPainter(painter: MarkdownSpanPainter)
+
   /** Stores a test tag that is only used by tests. */
   fun AnnotatedString.Builder.addTestTag(tag: String, range: TextRange) {
     if (useTestTags) {
@@ -148,11 +160,16 @@ private data class RealMarkdownNodeRenderScope(
   override val changes: List<TextChangeListSnapshot>,
   override val offsetInRoot: Int,
   override val useTestTags: Boolean,
+  val spanPainters: MutableList<MarkdownSpanPainter>,
 ) : MarkdownNodeRenderScope {
 
   override fun childScope(child: MarkdownChildNode): MarkdownNodeRenderScope {
     return copy(
       offsetInRoot = offsetInRoot + child.offsetInParent,
     )
+  }
+
+  override fun addSpanPainter(painter: MarkdownSpanPainter) {
+    spanPainters.add(painter)
   }
 }

@@ -46,9 +46,9 @@ android {
 dependencies {
   api(libs.flexmark.java)
   api(libs.flexmark.ext.gfm.strikethrough)
-  api(libs.extendedspans)
   api(libs.kotlinx.coroutines.core)
 
+  implementation(libs.extendedspans)
   implementation(libs.androidx.compose.ui)
   implementation(libs.androidx.compose.foundation)
   implementation(libs.androidx.tracing.ktx)
