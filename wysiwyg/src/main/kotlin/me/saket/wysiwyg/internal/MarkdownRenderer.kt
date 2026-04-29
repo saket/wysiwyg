@@ -92,7 +92,11 @@ interface MarkdownNodeRenderScope {
     )
   }
 
-  fun AnnotatedString.Builder.addStyle(style: ParagraphStyle, range: TextRange) {
+  fun AnnotatedString.Builder.addStyle(
+    style: ParagraphStyle,
+    range: TextRange,
+    trimVerticalPadding: Boolean,
+  ) {
     addStyle(
       style = style,
       start = range.start.coerceAtMost(unstyledText.lastIndex),
@@ -104,11 +108,13 @@ interface MarkdownNodeRenderScope {
     // matching what a plain TextField would render. Author-intended blank-line separators
     // are preserved because they contribute a *second* `\n` that we don't touch.
     // https://issuetracker.google.com/u/1/issues/241426911
-    if (unstyledText.getOrNull(range.start - 1) == '\n') {
-      addStyle(TinyParagraphStyle, start = range.start - 1, end = range.start)
-    }
-    if (unstyledText.getOrNull(range.end) == '\n') {
-      addStyle(TinyParagraphStyle, start = range.end, end = range.end + 1)
+    if (trimVerticalPadding) {
+      if (unstyledText.getOrNull(range.start - 1) == '\n') {
+        addStyle(TinyParagraphStyle, start = range.start - 1, end = range.start)
+      }
+      if (unstyledText.getOrNull(range.end) == '\n') {
+        addStyle(TinyParagraphStyle, start = range.end, end = range.end + 1)
+      }
     }
   }
 

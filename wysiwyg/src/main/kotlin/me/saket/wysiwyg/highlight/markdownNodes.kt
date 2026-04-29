@@ -93,7 +93,7 @@ class FencedCodeBlockNode(
       )
     )
     text.addStyle(textStyle, range)
-    text.addStyle(paragraphStyle, range)
+    text.addStyle(paragraphStyle, range, trimVerticalPadding = true)
   }
 }
 
@@ -166,7 +166,7 @@ class BlockQuoteNode(
     )
     text.addStyle(SpanStyle(color = theme.markerColor), markerRange)
     text.addStyle(textStyle, range)
-    text.addStyle(paragraphStyle, range)
+    text.addStyle(paragraphStyle, range, trimVerticalPadding = true)
 
     text.addStringAnnotation(
       tag = "blockquote",
@@ -193,7 +193,7 @@ class ListBlockNode(
           restLine = theme.listBlockLeadingPadding,
         )
       )
-      text.addStyle(paragraphStyle, range)
+      text.addStyle(paragraphStyle, range, trimVerticalPadding = true)
       text.addTestTag("list", range)
     }
     children.fastForEach { child ->
