@@ -132,6 +132,30 @@ class WysiwygTest {
     }
   }
 
+  @Test fun `fenced code blocks`() {
+    paparazzi.snapshot {
+      Scaffold {
+        WysiwygEditor(
+          markdown = """
+            |Fenced code block that isn't separated by a blank line:
+            |```
+            |fun greet(name: String) {
+            |  println("Hello, ${'$'}name!")
+            |}
+            |```
+            |Fenced code block separated by a new line:
+            |
+            |```
+            |fun greet(name: String) {
+            |  println("Hello, ${'$'}name!")
+            |}
+            |```
+            """.trimMargin(),
+        )
+      }
+    }
+  }
+
   @Test fun `edge cases with paragraph spacings of blocks`() {
     paparazzi.snapshot {
       Scaffold {
