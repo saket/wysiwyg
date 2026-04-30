@@ -4,9 +4,9 @@ package me.saket.wysiwyg.sample
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.fitInside
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalContentColor
@@ -62,11 +62,11 @@ fun WysiwygEditor(
         .fillMaxWidth()
         .weight(1f)
         .fitInside(WindowInsetsRulers.SystemBars.current)
-        .fitInside(WindowInsetsRulers.Ime.current)
-        .padding(horizontal = 16.dp),
+        .fitInside(WindowInsetsRulers.Ime.current),
     ) {
       WsyiwygTextField(
         modifier = Modifier.focusRequester(focusRequester),
+        contentPadding = PaddingValues(16.dp),
         wysiwyg = wysiwyg,
         cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
         textStyle = LocalTextStyle.current.copy(color = LocalContentColor.current),

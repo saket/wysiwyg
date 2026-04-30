@@ -6,6 +6,7 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
@@ -46,18 +47,19 @@ class BenchmarkActivity : AppCompatActivity() {
             .semantics { testTagsAsResourceId = true }
             .fillMaxSize()
             .systemBarsPadding()
-            .padding(16.dp)
             .testTag("editor")
+          val contentPadding = PaddingValues(16.dp)
 
           if (this.intent.getBooleanExtra(UseWysiwygTextEditor, false)) {
             WysiwygEditor(
               modifier = modifier,
               markdown = markdown,
+              contentPadding = contentPadding,
             )
           } else {
             BasicTextField(
               state = rememberTextFieldState(initialText = markdown),
-              modifier = modifier,
+              modifier = modifier.padding(contentPadding),
             )
           }
         }
@@ -69,6 +71,7 @@ class BenchmarkActivity : AppCompatActivity() {
   private fun WysiwygEditor(
     markdown: String,
     modifier: Modifier,
+    contentPadding: PaddingValues,
   ) {
     val wysiwyg = rememberWysiwyg(
       textState = rememberTextFieldState(initialText = markdown),
@@ -80,6 +83,7 @@ class BenchmarkActivity : AppCompatActivity() {
       wysiwyg = wysiwyg,
       cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
       textStyle = LocalTextStyle.current.copy(color = LocalContentColor.current),
+      contentPadding = contentPadding,
     )
   }
 
