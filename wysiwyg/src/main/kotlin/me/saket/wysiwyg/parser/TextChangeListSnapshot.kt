@@ -3,6 +3,7 @@ package me.saket.wysiwyg.parser
 import androidx.compose.foundation.text.input.TextFieldBuffer
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.util.fastFold
+import dev.drewhamilton.poko.Poko
 
 /**
  * An immutable version of Compose's [TextFieldBuffer.ChangeList].
@@ -13,7 +14,8 @@ value class TextChangeListSnapshot(val changes: List<Change>) {
    * A single edit region. [range] is the affected region in the new text; [originalRange] is
    * the region in the previous text that was replaced.
    */
-  data class Change(
+  @Poko
+  class Change(
     val range: TextRange,
     val originalRange: TextRange,
   )

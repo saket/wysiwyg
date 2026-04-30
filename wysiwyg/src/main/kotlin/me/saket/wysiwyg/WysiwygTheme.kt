@@ -2,8 +2,10 @@ package me.saket.wysiwyg
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.TextUnit
+import dev.drewhamilton.poko.Poko
 
-data class WysiwygTheme(
+@Poko
+class WysiwygTheme(
   val markerColor: Color,
   val linkTextColor: Color,
   val linkUrlColor: Color,
@@ -16,7 +18,8 @@ data class WysiwygTheme(
   val headingColor: Color,
   val headingFontSizes: HeadingFontSizeMultipliers = HeadingFontSizeMultipliers(),
 ) {
-  data class HeadingFontSizeMultipliers(
+  @Poko
+  class HeadingFontSizeMultipliers(
     val h1: Float = 1.4f,
     val h2: Float = 1.27f,
     val h3: Float = 1.13f,

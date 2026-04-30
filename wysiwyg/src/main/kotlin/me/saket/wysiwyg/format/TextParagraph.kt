@@ -1,6 +1,9 @@
 package me.saket.wysiwyg.format
 
-data class TextParagraph(
+import dev.drewhamilton.poko.Poko
+
+@Poko
+class TextParagraph(
   val text: CharSequence,
   val startIndex: Int,
   val endIndexExclusive: Int,

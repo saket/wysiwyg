@@ -11,6 +11,7 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastForEachIndexed
+import dev.drewhamilton.poko.Poko
 import me.saket.wysiwyg.MarkdownSpanPainter
 
 /**
@@ -61,7 +62,8 @@ class RoundedCornerSpanPainter(
     }
   }
 
-  data class TextPaddingValues(
+  @Poko
+  class TextPaddingValues(
     val horizontal: TextUnit = 0.sp,
     val vertical: TextUnit = 0.sp,
   ) {
