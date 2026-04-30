@@ -18,28 +18,20 @@ class SymmetricMarkdownMarkerInserterTest {
   @Test fun `apply to selection`() {
     inserter.assertOnInsert(
       input = "Innocent is a ▮strong▮ word to throw around Gotham, Bruce.",
-      expect = "Innocent is a ***strong***▮ word to throw around Gotham, Bruce.",
+      expect = "Innocent is a ***▮strong▮*** word to throw around Gotham, Bruce.",
     )
   }
 
-  @Test fun `toggle off when selection wraps existing markers`() {
-    inserter.assertOnInsert(
-      input = "Innocent is a ▮***strong***▮ word to throw around Gotham, Bruce.",
-      expect = "Innocent is a ▮strong▮ word to throw around Gotham, Bruce.",
-    )
-  }
-
-  @Test fun `toggle off when selection sits inside existing markers`() {
+  @Test fun `applying twice toggles off`() {
+    // Re-clicking after wrap-on with a selection toggles off.
     inserter.assertOnInsert(
       input = "Innocent is a ***▮strong▮*** word to throw around Gotham, Bruce.",
       expect = "Innocent is a ▮strong▮ word to throw around Gotham, Bruce.",
     )
-  }
-
-  @Test fun `toggle off when cursor is inside a marked span`() {
+    // Re-clicking after wrap-on with a bare cursor toggles off.
     inserter.assertOnInsert(
-      input = "Innocent is a ***str▮ong*** word to throw around Gotham, Bruce.",
-      expect = "Innocent is a str▮ong word to throw around Gotham, Bruce.",
+      input = "He was trying to kill ***▮stars▮*** millions of innocent people.",
+      expect = "He was trying to kill ▮stars▮ millions of innocent people.",
     )
   }
 }

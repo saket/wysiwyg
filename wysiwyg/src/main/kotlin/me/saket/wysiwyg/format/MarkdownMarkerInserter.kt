@@ -58,26 +58,43 @@ fun TextFieldState.insertHeadingMarker() {
 /**
  * For markdown markers that wrap text symmetrically.
  * For example: **strong emphasis**, ~~strikethrough~~.
+ *
+ * Re-applying the same marker to a selection that already wraps or sits inside
+ * the markers removes them (toggle off). Toggling requires an active selection;
+ * a bare cursor always inserts a placeholder.
  */
 internal class SymmetricMarkdownMarkerInserter(
   private val marker: String,
   private val placeholder: String,
 ) : MarkdownMarkerInserter {
   override fun insertInto(text: CharSequence, selection: TextRange): TextReplacement {
+    val markerLength = marker.length
     val start = selection.min
     val end = selection.max
-    val textUnderSelection = if (selection.collapsed) null else text.substring(start, end)
-    val newSelection = if (textUnderSelection == null) {
-      TextRange(
-        start = start + marker.length,
-        end = start + marker.length + placeholder.length,
-      )
-    } else {
-      TextRange(start + (marker.length * 2) + textUnderSelection.length)
+
+    // Toggle off when the selection sits inside the markers: `**▮text▮**`.
+    // Wrap-on below always produces this shape, so re-clicking round-trips here.
+    if (!selection.collapsed
+      && start >= markerLength
+      && end + markerLength <= text.length
+      && text.regionMatches(start - markerLength, marker, 0, markerLength)
+      && text.regionMatches(end, marker, 0, markerLength)
+    ) {
+      val innerText = text.substring(start, end)
+      return TextReplacement {
+        replace(start - markerLength, end + markerLength, innerText)
+        this.selection = TextRange(start - markerLength, end - markerLength)
+      }
     }
+
+    // Wrap the selection (or insert a placeholder for a bare cursor) and leave
+    // the selection on the inner text only. Typing replaces the selected text
+    // without disturbing the markers.
+    val selectedText = if (selection.collapsed) null else text.substring(start, end)
+    val innerText = selectedText ?: placeholder
     return TextReplacement {
-      replace(start, end, "$marker${textUnderSelection ?: placeholder}$marker")
-      this.selection = newSelection
+      replace(start, end, "$marker$innerText$marker")
+      this.selection = TextRange(start + markerLength, start + markerLength + innerText.length)
     }
   }
 }

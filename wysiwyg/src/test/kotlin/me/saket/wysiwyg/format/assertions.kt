@@ -60,6 +60,13 @@ internal fun MarkdownMarkerInserter.assertOnInsert(
       },
     )
   }
+
+  // The selection must not collapse to a cursor when the user started with one.
+  if (!snapshot.selection.collapsed) {
+    check(!state.selection.collapsed) {
+      "Selection collapsed unexpectedly.\n  Before: ${snapshot.selection}\n  After:  ${state.selection}"
+    }
+  }
 }
 
 /**
