@@ -1,21 +1,16 @@
 package me.saket.wysiwyg.extendedspans
 
 import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Fill
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastForEachIndexed
-import me.saket.extendedspans.ExtendedSpanPainter
-import me.saket.extendedspans.SpanDrawInstructions
 import me.saket.wysiwyg.MarkdownSpanPainter
 
 /**
@@ -78,40 +73,4 @@ class RoundedCornerSpanPainter(
     // on the UI thread, and each draw consumes the path before returning.
     private val path = Path()
   }
-}
-
-private fun TextLayoutResult.getBoundingBoxes(
-  startOffset: Int,
-  endOffset: Int,
-  flattenForFullParagraphs: Boolean,
-): List<Rect> {
-  return ExtendedSpanPainterBridge.boundingBoxesFor(
-    layoutResult = this,
-    startOffset = startOffset,
-    endOffset = endOffset,
-    flattenForFullParagraphs = flattenForFullParagraphs,
-  )
-}
-
-// Subclass to expose ExtendedSpanPainter#getBoundingBoxes(), which is `protected`.
-// Reusing it (rather than re-implementing) keeps RTL handling and full-paragraph
-// detection in lockstep with upstream.
-private object ExtendedSpanPainterBridge : ExtendedSpanPainter() {
-  override fun decorate(
-    span: SpanStyle,
-    start: Int,
-    end: Int,
-    text: AnnotatedString,
-    builder: AnnotatedString.Builder,
-  ): SpanStyle = error("unused")
-
-  override fun drawInstructionsFor(layoutResult: TextLayoutResult): SpanDrawInstructions =
-    error("unused")
-
-  fun boundingBoxesFor(
-    layoutResult: TextLayoutResult,
-    startOffset: Int,
-    endOffset: Int,
-    flattenForFullParagraphs: Boolean,
-  ): List<Rect> = layoutResult.getBoundingBoxes(startOffset, endOffset, flattenForFullParagraphs)
 }

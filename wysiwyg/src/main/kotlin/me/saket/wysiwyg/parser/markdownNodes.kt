@@ -81,9 +81,9 @@ class InlineCodeNode(
         range = range,
         backgroundColor = theme.codeBackground,
         cornerRadius = 4.sp,
-        padding = TextPaddingValues(horizontal = 2.sp, vertical = 2.sp),
-        topMargin = 2.sp,
-        bottomMargin = 2.sp,
+        padding = TextPaddingValues(2.sp),
+        topMargin = 0.sp,
+        bottomMargin = 0.sp,
       )
     )
   }
@@ -112,8 +112,8 @@ class FencedCodeBlockNode(
         backgroundColor = theme.codeBackground,
         cornerRadius = 8.sp,
         padding = TextPaddingValues(horizontal = 0.sp, vertical = 2.sp),
-        topMargin = 2.sp,
-        bottomMargin = 2.sp,
+        topMargin = 0.sp,
+        bottomMargin = 0.sp,
       )
     )
   }
