@@ -1,6 +1,5 @@
 package me.saket.wysiwyg.parser
 
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextRange
@@ -18,14 +17,15 @@ import me.saket.wysiwyg.extendedspans.RoundedCornerSpanPainter
 import me.saket.wysiwyg.extendedspans.RoundedCornerSpanPainter.TextPaddingValues
 import me.saket.wysiwyg.extendedspans.ThematicBreakSpanPainter
 import me.saket.wysiwyg.internal.MarkdownNodeRenderScope
+import me.saket.wysiwyg.internal.MarkdownStyleBuffer
 
 interface DelimitedMarkdownNode : MarkdownNode {
   val openingMarkerRange: LocalTextRange
   val closingMarkerRange: LocalTextRange
 
-  fun MarkdownNodeRenderScope.renderText(text: AnnotatedString.Builder, range: TextRange)
+  fun MarkdownNodeRenderScope.renderText(buffer: MarkdownStyleBuffer, range: TextRange)
 
-  override fun MarkdownNodeRenderScope.render(text: AnnotatedString.Builder) {
+  override fun MarkdownNodeRenderScope.render(buffer: MarkdownStyleBuffer) {
     // Note to self: resolve the ranges before adding any style/span objects to avoid
     // allocating objects that aren't needed, and more importantly to avoid adding partial styles.
     val textRange = range.resolve() ?: return
@@ -33,9 +33,9 @@ interface DelimitedMarkdownNode : MarkdownNode {
     val closingMarkerRange = closingMarkerRange.resolve(dropOnEdit = true) ?: return
 
     val markerSpan = SpanStyle(theme.markerColor)
-    text.addStyle(markerSpan, openingMarkerRange)
-    text.addStyle(markerSpan, closingMarkerRange)
-    renderText(text, textRange)
+    buffer.addStyle(markerSpan, openingMarkerRange)
+    buffer.addStyle(markerSpan, closingMarkerRange)
+    renderText(buffer, textRange)
   }
 }
 
@@ -46,9 +46,9 @@ class BoldNode(
   override val closingMarkerRange: LocalTextRange,
 ) : DelimitedMarkdownNode {
 
-  override fun MarkdownNodeRenderScope.renderText(text: AnnotatedString.Builder, range: TextRange) {
-    text.addStyle(SpanStyle(fontWeight = FontWeight.Bold), range)
-    text.addTestTag("b", range)
+  override fun MarkdownNodeRenderScope.renderText(buffer: MarkdownStyleBuffer, range: TextRange) {
+    buffer.addStyle(SpanStyle(fontWeight = FontWeight.Bold), range)
+    buffer.addTestTag("b", range)
   }
 }
 
@@ -59,8 +59,8 @@ class ItalicNode(
   override val closingMarkerRange: LocalTextRange,
 ) : DelimitedMarkdownNode {
 
-  override fun MarkdownNodeRenderScope.renderText(text: AnnotatedString.Builder, range: TextRange) {
-    text.addStyle(SpanStyle(fontStyle = FontStyle.Italic), range)
+  override fun MarkdownNodeRenderScope.renderText(buffer: MarkdownStyleBuffer, range: TextRange) {
+    buffer.addStyle(SpanStyle(fontStyle = FontStyle.Italic), range)
   }
 }
 
@@ -71,12 +71,12 @@ class InlineCodeNode(
   override val closingMarkerRange: LocalTextRange,
 ) : DelimitedMarkdownNode {
 
-  override fun MarkdownNodeRenderScope.renderText(text: AnnotatedString.Builder, range: TextRange) {
-    text.addStyle(
+  override fun MarkdownNodeRenderScope.renderText(buffer: MarkdownStyleBuffer, range: TextRange) {
+    buffer.addStyle(
       SpanStyle(fontFamily = FontFamily.Monospace),
       range,
     )
-    addSpanPainter(
+    buffer.addSpanPainter(
       RoundedCornerSpanPainter(
         range = range,
         backgroundColor = theme.codeBackground,
@@ -96,7 +96,7 @@ class FencedCodeBlockNode(
   override val closingMarkerRange: LocalTextRange,
 ) : DelimitedMarkdownNode {
 
-  override fun MarkdownNodeRenderScope.renderText(text: AnnotatedString.Builder, range: TextRange) {
+  override fun MarkdownNodeRenderScope.renderText(buffer: MarkdownStyleBuffer, range: TextRange) {
     val textStyle = SpanStyle(fontFamily = FontFamily.Monospace)
     val paragraphStyle = ParagraphStyle(
       textIndent = TextIndent(
@@ -104,9 +104,9 @@ class FencedCodeBlockNode(
         restLine = theme.codeBlockLeadingPadding,
       )
     )
-    text.addStyle(textStyle, range)
-    text.addStyle(paragraphStyle, range, trimVerticalPadding = true)
-    addSpanPainter(
+    buffer.addStyle(textStyle, range)
+    buffer.addStyle(paragraphStyle, range, trimVerticalPadding = true)
+    buffer.addSpanPainter(
       RoundedCornerSpanPainter(
         range = range,
         backgroundColor = theme.codeBackground,
@@ -124,14 +124,14 @@ class StrikeThroughNode(
   override val range: LocalTextRange,
 ) : MarkdownNode {
 
-  override fun MarkdownNodeRenderScope.render(text: AnnotatedString.Builder) {
+  override fun MarkdownNodeRenderScope.render(buffer: MarkdownStyleBuffer) {
     val range = range.resolve() ?: return
     val style = SpanStyle(
       color = theme.struckThroughTextColor,
       textDecoration = TextDecoration.LineThrough,
     )
-    text.addStyle(style, range)
-    text.addTestTag("s", range)
+    buffer.addStyle(style, range)
+    buffer.addTestTag("s", range)
   }
 }
 
@@ -146,7 +146,7 @@ class LinkNode(
   val urlClosingMarkerRange: LocalTextRange,
 ) : MarkdownNode {
 
-  override fun MarkdownNodeRenderScope.render(text: AnnotatedString.Builder) {
+  override fun MarkdownNodeRenderScope.render(buffer: MarkdownStyleBuffer) {
     val range = range.resolve() ?: return
     val textRange = textRange.resolve() ?: return
     val textOpeningMarkerRange = textOpeningMarkerRange.resolve(dropOnEdit = true) ?: return
@@ -156,16 +156,16 @@ class LinkNode(
     val urlOpeningMarkerRange = urlOpeningMarkerRange.resolve(dropOnEdit = true) ?: return
     val urlClosingMarkerRange = urlClosingMarkerRange.resolve(dropOnEdit = true) ?: return
 
-    text.addStyle(SpanStyle(theme.linkTextColor), textRange)
-    text.addStyle(SpanStyle(theme.linkUrlColor), urlRange)
+    buffer.addStyle(SpanStyle(theme.linkTextColor), textRange)
+    buffer.addStyle(SpanStyle(theme.linkUrlColor), urlRange)
 
     val markerStyle = SpanStyle(color = theme.markerColor)
-    text.addStyle(markerStyle, textOpeningMarkerRange)
-    text.addStyle(markerStyle, textClosingMarkerRange)
-    text.addStyle(markerStyle, urlOpeningMarkerRange)
-    text.addStyle(markerStyle, urlClosingMarkerRange)
+    buffer.addStyle(markerStyle, textOpeningMarkerRange)
+    buffer.addStyle(markerStyle, textClosingMarkerRange)
+    buffer.addStyle(markerStyle, urlOpeningMarkerRange)
+    buffer.addStyle(markerStyle, urlClosingMarkerRange)
 
-    text.addTestTag("link", range)
+    buffer.addTestTag("link", range)
   }
 }
 
@@ -175,7 +175,7 @@ class BlockQuoteNode(
   val markerRange: LocalTextRange,
 ) : MarkdownNode {
 
-  override fun MarkdownNodeRenderScope.render(text: AnnotatedString.Builder) {
+  override fun MarkdownNodeRenderScope.render(buffer: MarkdownStyleBuffer) {
     val range = range.resolve() ?: return
     val markerRange = markerRange.resolve(dropOnEdit = true) ?: return
 
@@ -186,12 +186,12 @@ class BlockQuoteNode(
         restLine = theme.blockQuoteLeadingPadding,
       )
     )
-    text.addStyle(SpanStyle(color = theme.markerColor), markerRange)
-    text.addStyle(textStyle, range)
-    text.addStyle(paragraphStyle, range, trimVerticalPadding = true)
+    buffer.addStyle(SpanStyle(color = theme.markerColor), markerRange)
+    buffer.addStyle(textStyle, range)
+    buffer.addStyle(paragraphStyle, range, trimVerticalPadding = true)
 
-    addSpanPainter(BlockQuoteSpanPainter(range = range, markerColor = theme.markerColor))
-    text.addTestTag("blockquote", range)
+    buffer.addSpanPainter(BlockQuoteSpanPainter(range = range, markerColor = theme.markerColor))
+    buffer.addTestTag("blockquote", range)
   }
 }
 
@@ -201,7 +201,7 @@ class ListBlockNode(
   val children: List<MarkdownChildNode>,
 ) : MarkdownNode {
 
-  override fun MarkdownNodeRenderScope.render(text: AnnotatedString.Builder) {
+  override fun MarkdownNodeRenderScope.render(buffer: MarkdownStyleBuffer) {
     val range = range.resolve()
     if (range != null) {
       val paragraphStyle = ParagraphStyle(
@@ -210,11 +210,11 @@ class ListBlockNode(
           restLine = theme.listBlockLeadingPadding,
         )
       )
-      text.addStyle(paragraphStyle, range, trimVerticalPadding = true)
-      text.addTestTag("list", range)
+      buffer.addStyle(paragraphStyle, range, trimVerticalPadding = true)
+      buffer.addTestTag("list", range)
     }
     children.fastForEach { child ->
-      child.render(text)
+      child.render(buffer)
     }
   }
 }
@@ -226,12 +226,12 @@ class ListItemNode(
   val children: List<MarkdownChildNode>,
 ) : MarkdownNode {
 
-  override fun MarkdownNodeRenderScope.render(text: AnnotatedString.Builder) {
+  override fun MarkdownNodeRenderScope.render(buffer: MarkdownStyleBuffer) {
     val markerRange = markerRange.resolve(dropOnEdit = true) ?: return
-    text.addStyle(SpanStyle(theme.markerColor), markerRange)
+    buffer.addStyle(SpanStyle(theme.markerColor), markerRange)
 
     children.fastForEach { child ->
-      child.render(text)
+      child.render(buffer)
     }
   }
 }
@@ -243,7 +243,7 @@ class HeadingNode(
   val level: Int,
 ) : MarkdownNode {
 
-  override fun MarkdownNodeRenderScope.render(text: AnnotatedString.Builder) {
+  override fun MarkdownNodeRenderScope.render(buffer: MarkdownStyleBuffer) {
     val range = range.resolve() ?: return
     val openingMarkerRange = openingMarkerRange.resolve() ?: return
 
@@ -255,7 +255,7 @@ class HeadingNode(
     // any edit overlapping `**`, `[`, `> `, or `- ` invalidates the syntax. Heading markers
     // aren't fixed-shape, their `#`s are repeatable, so adding or removing them moves
     // between heading levels (h1 to h2) without breaking syntax.
-    if (!unstyledText.isAtxHeadingMarker(openingMarkerRange)) return
+    if (!buffer.unstyledText.isAtxHeadingMarker(openingMarkerRange)) return
 
     val fontSizeMultiplier = with(theme.headingFontSizes) {
       when (level) {
@@ -269,7 +269,7 @@ class HeadingNode(
       }
     }
 
-    text.addStyle(
+    buffer.addStyle(
       style = SpanStyle(
         fontSize = 1.em * fontSizeMultiplier,
         fontWeight = FontWeight.Bold,
@@ -277,11 +277,11 @@ class HeadingNode(
       ),
       range = range,
     )
-    text.addStyle(
+    buffer.addStyle(
       style = SpanStyle(color = theme.markerColor),
       range = openingMarkerRange,
     )
-    text.addTestTag("h$level", range)
+    buffer.addTestTag("h$level", range)
   }
 }
 
@@ -290,13 +290,13 @@ class ThematicBreakNode(
   override val range: LocalTextRange,
 ) : MarkdownNode {
 
-  override fun MarkdownNodeRenderScope.render(text: AnnotatedString.Builder) {
+  override fun MarkdownNodeRenderScope.render(buffer: MarkdownStyleBuffer) {
     val range = range.resolve() ?: return
-    text.addStyle(
+    buffer.addStyle(
       SpanStyle(color = theme.markerColor),
       range,
     )
-    addSpanPainter(
+    buffer.addSpanPainter(
       ThematicBreakSpanPainter(range = range, markerColor = theme.markerColor)
     )
   }

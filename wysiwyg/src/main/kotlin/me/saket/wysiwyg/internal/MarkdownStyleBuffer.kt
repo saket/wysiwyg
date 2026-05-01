@@ -1,0 +1,107 @@
+package me.saket.wysiwyg.internal
+
+import androidx.compose.foundation.text.input.TextFieldBuffer
+import androidx.compose.ui.text.ParagraphStyle
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.style.LineHeightStyle
+import androidx.compose.ui.unit.sp
+import me.saket.wysiwyg.MarkdownSpanPainter
+
+// todo: kdoc
+interface MarkdownStyleBuffer {
+  /** The source text being styled. */
+  val unstyledText: CharSequence
+
+  fun addStyle(
+    style: SpanStyle,
+    range: TextRange,
+  )
+
+  /**
+   * @param trimVerticalPadding Compose always adds one extra empty line at every ParagraphStyle
+   *   slice boundary on top of whatever the source markdown already produces. When this is true,
+   *   the boundary newline's own line height is shrunk to nearly zero as a workaround, so the
+   *   styled block sits flush against its neighbour, matching what a plain TextField would
+   *   render. Author-intended blank-line separators are preserved because they contribute a
+   *   *second* `\n` that we don't touch.
+   *   https://issuetracker.google.com/u/1/issues/241426911
+   */
+  fun addStyle(
+    style: ParagraphStyle,
+    range: TextRange,
+    trimVerticalPadding: Boolean = false,
+  )
+
+  fun addSpanPainter(
+    painter: MarkdownSpanPainter,
+  )
+
+  /**
+   * Records a tag used by tests to assert the structure of rendered markdown. No-ops in production.
+   */
+  fun addTestTag(
+    tag: String,
+    range: TextRange,
+  )
+}
+
+internal class TextFieldMarkdownStyleBuffer(
+  private val textBuffer: TextFieldBuffer,
+  override val unstyledText: CharSequence,
+) : MarkdownStyleBuffer {
+  val spanPainters: MutableList<MarkdownSpanPainter> = mutableListOf()
+
+  override fun addStyle(style: SpanStyle, range: TextRange) {
+    textBuffer.addStyle(
+      spanStyle = style,
+      start = range.start.coerceAtMost(unstyledText.length - 1),
+      end = range.end.coerceAtMost(unstyledText.length),
+    )
+  }
+
+  override fun addStyle(
+    style: ParagraphStyle,
+    range: TextRange,
+    trimVerticalPadding: Boolean,
+  ) {
+    textBuffer.addStyle(
+      paragraphStyle = style,
+      start = range.start.coerceAtMost(unstyledText.length - 1),
+      end = range.end.coerceAtMost(unstyledText.length),
+    )
+    if (trimVerticalPadding) {
+      if (unstyledText.getOrNull(range.start - 1) == '\n') {
+        textBuffer.addStyle(
+          paragraphStyle = TinyParagraphStyle,
+          start = range.start - 1,
+          end = range.start
+        )
+      }
+      if (unstyledText.getOrNull(range.end) == '\n') {
+        textBuffer.addStyle(
+          paragraphStyle = TinyParagraphStyle,
+          start = range.end,
+          end = range.end + 1
+        )
+      }
+    }
+  }
+
+  override fun addSpanPainter(painter: MarkdownSpanPainter) {
+    spanPainters.add(painter)
+  }
+
+  override fun addTestTag(tag: String, range: TextRange) = Unit
+
+  companion object {
+    private val TinyParagraphStyle = ParagraphStyle(
+      lineHeight = 0.sp,
+      lineHeightStyle = LineHeightStyle(
+        alignment = LineHeightStyle.Alignment.Center,
+        trim = LineHeightStyle.Trim.Both,
+        mode = LineHeightStyle.Mode.Tight,
+      ),
+    )
+  }
+}

@@ -11,7 +11,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.util.fastForEach
 import androidx.tracing.trace
 import kotlinx.coroutines.flow.collectLatest
 import me.saket.wysiwyg.BuildConfig
@@ -91,21 +90,16 @@ private class StyledOutputTransformation(
   }
 
   private fun TextFieldBuffer.applyMarkdownStyles() {
-    val result = trace("Wysiwyg:buildAnnotatedString") {
-      renderer.buildAnnotatedString(
-        text = AnnotatedString(toString()),
-        document = document,
-      )
+    val styleBuffer = TextFieldMarkdownStyleBuffer(
+      textBuffer = this,
+      unstyledText = this.asCharSequence(),
+    )
+    trace("Wysiwyg:render") {
+      renderer.render(document, styleBuffer)
     }
-    lastRenderResult = result
-
-    trace("Wysiwyg:applySpans") {
-      result.text.spanStyles.fastForEach { range ->
-        addStyle(range.item, range.start, range.end)
-      }
-      result.text.paragraphStyles.fastForEach { range ->
-        addStyle(range.item, range.start, range.end)
-      }
-    }
+    lastRenderResult = MarkdownAnnotatedString(
+      text = AnnotatedString(""),
+      extraSpanPainters = styleBuffer.spanPainters,
+    )
   }
 }

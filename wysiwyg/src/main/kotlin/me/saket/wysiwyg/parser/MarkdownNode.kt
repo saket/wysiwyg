@@ -1,15 +1,15 @@
 package me.saket.wysiwyg.parser
 
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.util.fastForEach
 import dev.drewhamilton.poko.Poko
 import me.saket.wysiwyg.internal.MarkdownNodeRenderScope
+import me.saket.wysiwyg.internal.MarkdownStyleBuffer
 
 interface MarkdownNode {
   val range: LocalTextRange
 
-  fun MarkdownNodeRenderScope.render(text: AnnotatedString.Builder)
+  fun MarkdownNodeRenderScope.render(buffer: MarkdownStyleBuffer)
 }
 
 @Poko
@@ -44,9 +44,9 @@ class MarkdownDocument(
   val changes: List<TextChangeListSnapshot> = emptyList(),
 ) : MarkdownNode {
 
-  override fun MarkdownNodeRenderScope.render(text: AnnotatedString.Builder) {
+  override fun MarkdownNodeRenderScope.render(buffer: MarkdownStyleBuffer) {
     children.fastForEach { child ->
-      child.render(text)
+      child.render(buffer)
     }
   }
 
