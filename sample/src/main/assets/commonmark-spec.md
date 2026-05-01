@@ -4,7 +4,7 @@ author: John MacFarlane
 version: '0.31.2'
 date: '2024-01-28'
 license: '[CC-BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/)'
-...
+---
 
 # Introduction
 

@@ -6,6 +6,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.unit.sp
+import androidx.tracing.trace
 import me.saket.wysiwyg.MarkdownSpanPainter
 
 // todo: kdoc
@@ -61,11 +62,13 @@ internal class TextFieldMarkdownStyleBuffer(
   override val spanPainters: MutableList<MarkdownSpanPainter> = mutableListOf()
 
   override fun addStyle(style: SpanStyle, range: TextRange) {
-    textBuffer.addStyle(
-      spanStyle = style,
-      start = range.start.coerceAtMost(unstyledText.length - 1),
-      end = range.end.coerceAtMost(unstyledText.length),
-    )
+    trace("Wysiwyg:render:addStyle") {
+      textBuffer.addStyle(
+        spanStyle = style,
+        start = range.start.coerceAtMost(unstyledText.length - 1),
+        end = range.end.coerceAtMost(unstyledText.length),
+      )
+    }
   }
 
   override fun addStyle(
@@ -73,25 +76,27 @@ internal class TextFieldMarkdownStyleBuffer(
     range: TextRange,
     trimVerticalPadding: Boolean,
   ) {
-    textBuffer.addStyle(
-      paragraphStyle = style,
-      start = range.start.coerceAtMost(unstyledText.length - 1),
-      end = range.end.coerceAtMost(unstyledText.length),
-    )
-    if (trimVerticalPadding) {
-      if (unstyledText.getOrNull(range.start - 1) == '\n') {
-        textBuffer.addStyle(
-          paragraphStyle = TinyParagraphStyle,
-          start = range.start - 1,
-          end = range.start
-        )
-      }
-      if (unstyledText.getOrNull(range.end) == '\n') {
-        textBuffer.addStyle(
-          paragraphStyle = TinyParagraphStyle,
-          start = range.end,
-          end = range.end + 1
-        )
+    trace("Wysiwyg:render:addStyle") {
+      textBuffer.addStyle(
+        paragraphStyle = style,
+        start = range.start.coerceAtMost(unstyledText.length - 1),
+        end = range.end.coerceAtMost(unstyledText.length),
+      )
+      if (trimVerticalPadding) {
+        if (unstyledText.getOrNull(range.start - 1) == '\n') {
+          textBuffer.addStyle(
+            paragraphStyle = TinyParagraphStyle,
+            start = range.start - 1,
+            end = range.start
+          )
+        }
+        if (unstyledText.getOrNull(range.end) == '\n') {
+          textBuffer.addStyle(
+            paragraphStyle = TinyParagraphStyle,
+            start = range.end,
+            end = range.end + 1
+          )
+        }
       }
     }
   }

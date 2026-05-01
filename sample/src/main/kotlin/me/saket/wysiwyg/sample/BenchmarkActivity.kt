@@ -36,7 +36,7 @@ class BenchmarkActivity : AppCompatActivity() {
     enableEdgeToEdge()
     super.onCreate(savedInstanceState)
 
-    val markdown = assets.open("commonmark-spec.md")
+    val markdown = assets.open(this.intent.getStringExtra(MarkdownAssetPath)!!)
       .bufferedReader()
       .use { it.readText().take(50_000) }
 
@@ -89,5 +89,6 @@ class BenchmarkActivity : AppCompatActivity() {
 
   companion object {
     const val UseWysiwygTextEditor = "use_wysiwyg"
+    const val MarkdownAssetPath = "asset_path"
   }
 }

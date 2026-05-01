@@ -130,17 +130,23 @@ private class MarkdownSpanPainters(val wysiwyg: Wysiwyg) {
       val layoutResult = lastLayoutResult ?: return
       val painters = wysiwyg.outputTransformation.styleBuffer.spanPainters
 
-      val viewport = layoutResult.computeViewport(scrollState, contentPadding)
+      val viewport = trace("Wysiwyg:drawBehind:computeViewport") {
+        layoutResult.computeViewport(scrollState, contentPadding)
+      }
       val leftPadding = contentPadding.calculateLeftPadding(layoutDirection).toPx()
       val topPadding = contentPadding.calculateTopPadding().toPx()
 
       clipRect {
         translate(leftPadding, topPadding - scrollState.value.toFloat()) {
           val translatedScope = this
-          painters.fastForEach { painter ->
-            if (viewport.intersects(painter.range)) {
-              with(painter) {
-                translatedScope.draw(layoutResult)
+          trace("Wysiwyg:drawBehind:paintVisible") {
+            painters.fastForEach { painter ->
+              if (viewport.intersects(painter.range)) {
+                trace("Wysiwyg:drawBehind:paint") {
+                  with(painter) {
+                    translatedScope.draw(layoutResult)
+                  }
+                }
               }
             }
           }

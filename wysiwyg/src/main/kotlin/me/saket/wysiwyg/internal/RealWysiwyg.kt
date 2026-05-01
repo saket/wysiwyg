@@ -93,7 +93,9 @@ private class StyledOutputTransformation(
       unstyledText = this.asCharSequence(),
     )
     trace("Wysiwyg:render") {
-      renderer.render(document, styleBuffer)
+      trace("Wysiwyg:render:walk") {
+        renderer.render(document, styleBuffer)
+      }
     }
     this@StyledOutputTransformation.styleBuffer = styleBuffer
   }
