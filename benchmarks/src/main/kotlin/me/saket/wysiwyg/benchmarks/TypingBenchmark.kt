@@ -36,6 +36,7 @@ class TypingBenchmark {
         TraceSectionMetric("Wysiwyg:transformOutput", mode = TraceSectionMetric.Mode.Sum),
         TraceSectionMetric("Wysiwyg:buildAnnotatedString", mode = TraceSectionMetric.Mode.Sum),
         TraceSectionMetric("Wysiwyg:applySpans", mode = TraceSectionMetric.Mode.Sum),
+        TraceSectionMetric("Wysiwyg:drawBehind", mode = TraceSectionMetric.Mode.Sum),
       ),
       iterations = 5,
       startupMode = StartupMode.WARM,

@@ -33,6 +33,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
+import androidx.tracing.trace
 
 // todo: doc.
 @Composable
@@ -123,18 +124,20 @@ private class MarkdownSpanPainters(val wysiwyg: Wysiwyg) {
   // todo (future improvement): skip painters whose ranges are outside the visible viewport.
   context(scope: DrawScope)
   fun drawBehind(scrollState: ScrollState, contentPadding: PaddingValues) {
-    val layoutResult = lastLayoutResult ?: return
-    val painters = wysiwyg.outputTransformation.lastRenderResult?.extraSpanPainters.orEmpty()
+    trace("Wysiwyg:drawBehind") {
+      val layoutResult = lastLayoutResult ?: return
+      val painters = wysiwyg.outputTransformation.lastRenderResult?.extraSpanPainters.orEmpty()
 
-    val startPadding = with(scope) { contentPadding.calculateStartPadding(layoutDirection).toPx() }
-    val topPadding = with(scope) { contentPadding.calculateTopPadding().toPx() }
+      val startPadding = with(scope) { contentPadding.calculateStartPadding(layoutDirection).toPx() }
+      val topPadding = with(scope) { contentPadding.calculateTopPadding().toPx() }
 
-    scope.clipRect {
-      translate(left = startPadding, top = topPadding - scrollState.value.toFloat()) {
-        val translatedScope = this
-        painters.fastForEach { painter ->
-          with(painter) {
-            translatedScope.draw(layoutResult)
+      scope.clipRect {
+        translate(left = startPadding, top = topPadding - scrollState.value.toFloat()) {
+          val translatedScope = this
+          painters.fastForEach { painter ->
+            with(painter) {
+              translatedScope.draw(layoutResult)
+            }
           }
         }
       }
