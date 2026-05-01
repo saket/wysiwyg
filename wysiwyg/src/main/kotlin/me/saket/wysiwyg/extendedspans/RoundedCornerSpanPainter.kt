@@ -23,7 +23,7 @@ import me.saket.wysiwyg.MarkdownSpanPainter
  * Modeled after [extended-spans](https://github.com/saket/extended-spans).
  */
 class RoundedCornerSpanPainter(
-  private val range: TextRange,
+  override val range: TextRange,
   private val backgroundColor: Color,
   private val cornerRadius: TextUnit = 8.sp,
   private val padding: TextPaddingValues,

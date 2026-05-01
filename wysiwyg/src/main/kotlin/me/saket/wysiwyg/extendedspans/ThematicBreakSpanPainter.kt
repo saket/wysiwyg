@@ -8,7 +8,7 @@ import androidx.compose.ui.unit.dp
 import me.saket.wysiwyg.MarkdownSpanPainter
 
 class ThematicBreakSpanPainter(
-  private val range: TextRange,
+  override val range: TextRange,
   private val markerColor: Color,
 ) : MarkdownSpanPainter {
 

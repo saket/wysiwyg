@@ -3,7 +3,6 @@ package me.saket.wysiwyg
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicTextField
@@ -34,6 +33,7 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
 import androidx.tracing.trace
+import me.saket.wysiwyg.internal.computeViewport
 
 // todo: doc.
 @Composable
@@ -62,7 +62,11 @@ fun WsyiwygTextField(
   BasicTextField(
     state = wysiwyg.textState,
     modifier = modifier
-      .drawBehind { spanPainters.drawBehind(scrollState, contentPadding) }
+      .drawBehind {
+        with(spanPainters) {
+          drawBehind(scrollState, contentPadding)
+        }
+      }
       .padding(contentPadding),
     enabled = enabled,
     readOnly = readOnly,
@@ -121,22 +125,23 @@ private object WsyiwygTextFieldDefaults {
 private class MarkdownSpanPainters(val wysiwyg: Wysiwyg) {
   private var lastLayoutResult: TextLayoutResult? by mutableStateOf(null)
 
-  // todo (future improvement): skip painters whose ranges are outside the visible viewport.
-  context(scope: DrawScope)
-  fun drawBehind(scrollState: ScrollState, contentPadding: PaddingValues) {
+  fun DrawScope.drawBehind(scrollState: ScrollState, contentPadding: PaddingValues) {
     trace("Wysiwyg:drawBehind") {
       val layoutResult = lastLayoutResult ?: return
       val painters = wysiwyg.outputTransformation.lastRenderResult?.extraSpanPainters.orEmpty()
 
-      val startPadding = with(scope) { contentPadding.calculateStartPadding(layoutDirection).toPx() }
-      val topPadding = with(scope) { contentPadding.calculateTopPadding().toPx() }
+      val viewport = layoutResult.computeViewport(scrollState, contentPadding)
+      val leftPadding = contentPadding.calculateLeftPadding(layoutDirection).toPx()
+      val topPadding = contentPadding.calculateTopPadding().toPx()
 
-      scope.clipRect {
-        translate(left = startPadding, top = topPadding - scrollState.value.toFloat()) {
+      clipRect {
+        translate(leftPadding, topPadding - scrollState.value.toFloat()) {
           val translatedScope = this
           painters.fastForEach { painter ->
-            with(painter) {
-              translatedScope.draw(layoutResult)
+            if (viewport.intersects(painter.range)) {
+              with(painter) {
+                translatedScope.draw(layoutResult)
+              }
             }
           }
         }
