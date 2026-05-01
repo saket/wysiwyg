@@ -53,22 +53,25 @@ The scenario is: launch the editor, jump the cursor to end-of-doc, type 26 chara
 
 |                   | Plain `BasicTextField` | `WsyiwygTextField` | Ratio |
 |-------------------|------------------------|--------------------|-------|
-| P50 frame CPU     | 3.7 ms                 | 4.4 ms             | 1.2×  |
-| P90 frame CPU     | 17.0 ms                | 60.2 ms            | 3.5×  |
-| P95 frame CPU     | 25.7 ms                | 63.7 ms            | 2.5×  |
-| P99 frame CPU     | 46.5 ms                | 70.2 ms            | 1.5×  |
-| P99 frame overrun | 55.1 ms                | 118.8 ms           | 2.2×  |
+| P50 frame CPU     | 4.2 ms                 | 4.7 ms             | 1.1×  |
+| P90 frame CPU     | 20.7 ms                | 60.5 ms            | 2.9×  |
+| P95 frame CPU     | 34.9 ms                | 64.2 ms            | 1.8×  |
+| P99 frame CPU     | 51.4 ms                | 71.5 ms            | 1.4×  |
+| P99 frame overrun | 53.2 ms                | 125.8 ms           | 2.4×  |
 
 **Per-iteration trace section sums** (wysiwyg only):
 
-| Section                        | Median   | Calls / iter |
-|--------------------------------|----------|--------------|
-| `Wysiwyg:parse`                | 184.2 ms | 3            |
-| `Wysiwyg:drawBehind`           | 46.8 ms  | 8            |
-| `Wysiwyg:transformOutput`      | 18.2 ms  | 17           |
-| `Wysiwyg:buildAnnotatedString` | 15.8 ms  | 17           |
-| `Wysiwyg:applySpans`           | 1.3 ms   | 17           |
-| `Wysiwyg:edited` (overlay)     | < 0.1 ms | 3            |
+| Section                          | Median   | Calls / iteration |
+|----------------------------------|----------|-------------------|
+| `Wysiwyg:parse`                  | 197.6 ms | 3                 |
+| ↳ `Wysiwyg:flexmarkParse`        | 97.2 ms  | 3                 |
+| ↳ `Wysiwyg:convertFlexmarkAst`   | 2.6 ms   | 3                 |
+| `Wysiwyg:drawBehind`             | 48.6 ms  | 8                 |
+| `Wysiwyg:transformOutput`        | 23.8 ms  | 17                |
+| ↳ `Wysiwyg:buildAnnotatedString` | 21.2 ms  | 17                |
+| ↳ `Wysiwyg:applySpans`           | 1.4 ms   | 17                |
+| `Wysiwyg:inputTransformation`    | 0.2 ms   | 5                 |
+| `Wysiwyg:edited` (overlay)       | < 0.1 ms | 3                 |
 
 `Wysiwyg:parse` runs on `Dispatchers.Default`, so it doesn't block frames directly — but the main-thread work it triggers (`transformOutput` → `buildAnnotatedString` + `applySpans`), together with the per-frame `drawBehind` that paints inline backgrounds, explains most of the gap above plain `BasicTextField`.
 

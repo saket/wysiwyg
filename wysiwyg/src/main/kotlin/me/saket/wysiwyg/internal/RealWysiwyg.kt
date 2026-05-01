@@ -48,9 +48,14 @@ internal class RealWysiwyg internal constructor(
 
   override var outputTransformation by mutableStateOf(MarkdownOutputTransformation.Empty)
 
-  override val inputTransformation: InputTransformation = onEnterFormatters
-    .asInputTransformation()
-    .then(captureChangeList)
+  override val inputTransformation: InputTransformation = run {
+    val chain = onEnterFormatters.asInputTransformation().then(captureChangeList)
+    InputTransformation {
+      trace("Wysiwyg:inputTransformation") {
+        with(chain) { transformInput() }
+      }
+    }
+  }
 
   suspend fun syncOutputTransformationWithText() {
     snapshotFlow { textState.text }.collectLatest { text ->

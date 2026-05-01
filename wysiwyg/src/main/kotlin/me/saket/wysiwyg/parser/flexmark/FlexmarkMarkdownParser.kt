@@ -1,5 +1,6 @@
 package me.saket.wysiwyg.parser.flexmark
 
+import androidx.tracing.trace
 import com.vladsch.flexmark.ast.BlockQuote
 import com.vladsch.flexmark.ast.Code
 import com.vladsch.flexmark.ast.Emphasis
@@ -61,10 +62,13 @@ class FlexmarkMarkdownParser(
 
   override suspend fun parse(text: String, changes: TextChangeListSnapshot): MarkdownDocument {
     return withContext(dispatcher) {
+      val flexmarkRoot = trace("Wysiwyg:flexmarkParse") {
+        parser.parse(text)
+      }
       MarkdownDocument(
         range = LocalTextRange.span(0, text.length),
-        children = parser.parse(text).walkSubtree {
-          it.toWysiwygMarkdownNode()
+        children = trace("Wysiwyg:convertFlexmarkAst") {
+          flexmarkRoot.walkSubtree { it.toWysiwygMarkdownNode() }
         },
       )
     }
