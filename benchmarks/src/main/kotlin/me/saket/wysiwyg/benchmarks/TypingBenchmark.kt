@@ -34,7 +34,7 @@ class TypingBenchmark {
         TraceSectionMetric("Wysiwyg:inputTransformation"),
         TraceSectionMetric("Wysiwyg:parse"),
         TraceSectionMetric("Wysiwyg:flexmarkParse"),
-        TraceSectionMetric("Wysiwyg:convertAst"),
+        TraceSectionMetric("Wysiwyg:convertFlexmarkAst"),
         TraceSectionMetric("Wysiwyg:edited"),
         TraceSectionMetric("Wysiwyg:transformOutput"),
         TraceSectionMetric("Wysiwyg:buildAnnotatedString"),
