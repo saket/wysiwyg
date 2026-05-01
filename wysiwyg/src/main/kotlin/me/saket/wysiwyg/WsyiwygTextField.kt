@@ -128,7 +128,7 @@ private class MarkdownSpanPainters(val wysiwyg: Wysiwyg) {
   fun DrawScope.drawBehind(scrollState: ScrollState, contentPadding: PaddingValues) {
     trace("Wysiwyg:drawBehind") {
       val layoutResult = lastLayoutResult ?: return
-      val painters = wysiwyg.outputTransformation.lastRenderResult?.extraSpanPainters.orEmpty()
+      val painters = wysiwyg.outputTransformation.styleBuffer.spanPainters
 
       val viewport = layoutResult.computeViewport(scrollState, contentPadding)
       val leftPadding = contentPadding.calculateLeftPadding(layoutDirection).toPx()

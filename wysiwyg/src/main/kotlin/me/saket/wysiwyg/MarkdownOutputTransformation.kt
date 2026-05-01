@@ -2,15 +2,15 @@ package me.saket.wysiwyg
 
 import androidx.compose.foundation.text.input.OutputTransformation
 import androidx.compose.foundation.text.input.TextFieldBuffer
-import me.saket.wysiwyg.parser.MarkdownAnnotatedString
+import me.saket.wysiwyg.internal.MarkdownStyleBuffer
 
 interface MarkdownOutputTransformation : OutputTransformation {
   // todo: kdoc.
-  val lastRenderResult: MarkdownAnnotatedString?
+  val styleBuffer: MarkdownStyleBuffer
 
   companion object {
     val Empty: MarkdownOutputTransformation = object : MarkdownOutputTransformation {
-      override val lastRenderResult: MarkdownAnnotatedString? = null
+      override val styleBuffer: MarkdownStyleBuffer = MarkdownStyleBuffer.Empty
       override fun TextFieldBuffer.transformOutput() = Unit
     }
   }

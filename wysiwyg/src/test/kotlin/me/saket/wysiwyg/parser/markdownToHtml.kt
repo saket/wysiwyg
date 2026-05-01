@@ -1,11 +1,8 @@
 package me.saket.wysiwyg.parser
 
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.ParagraphStyle
-import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.unit.sp
-import me.saket.wysiwyg.MarkdownSpanPainter
 import me.saket.wysiwyg.WysiwygTheme
 import me.saket.wysiwyg.internal.MarkdownRenderer
 import me.saket.wysiwyg.internal.MarkdownStyleBuffer
@@ -32,23 +29,18 @@ internal fun MarkdownDocument.renderHtml(source: String): String {
 
 private class TestTagRecordingBuffer(
   override val unstyledText: CharSequence,
-) : MarkdownStyleBuffer {
-  data class TestTag(val tag: String, val range: TextRange)
-
-  val testTags: MutableList<TestTag> = mutableListOf()
+  val testTags: MutableList<TestTag> = mutableListOf(),
+) : MarkdownStyleBuffer by MarkdownStyleBuffer.Empty {
 
   override fun addTestTag(tag: String, range: TextRange) {
     testTags += TestTag(tag, range)
   }
-
-  override fun addSpanPainter(painter: MarkdownSpanPainter) = Unit
-  override fun addStyle(style: SpanStyle, range: TextRange) = Unit
-  override fun addStyle(
-    style: ParagraphStyle,
-    range: TextRange,
-    trimVerticalPadding: Boolean
-  ) = Unit
 }
+
+private data class TestTag(
+  val tag: String,
+  val range: TextRange,
+)
 
 private val FakeWysiwygTheme = WysiwygTheme(
   markerColor = Color.Unspecified,

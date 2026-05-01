@@ -10,7 +10,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
-import androidx.compose.ui.text.AnnotatedString
 import androidx.tracing.trace
 import kotlinx.coroutines.flow.collectLatest
 import me.saket.wysiwyg.BuildConfig
@@ -19,7 +18,6 @@ import me.saket.wysiwyg.Wysiwyg
 import me.saket.wysiwyg.WysiwygTheme
 import me.saket.wysiwyg.format.OnEnterMarkdownFormatters
 import me.saket.wysiwyg.parser.IncrementalMarkdownParser
-import me.saket.wysiwyg.parser.MarkdownAnnotatedString
 import me.saket.wysiwyg.parser.MarkdownDocument
 import me.saket.wysiwyg.parser.MarkdownParser
 import me.saket.wysiwyg.parser.TextChangeListSnapshot
@@ -81,7 +79,7 @@ private class StyledOutputTransformation(
   private val document: MarkdownDocument,
   private val renderer: MarkdownRenderer,
 ) : MarkdownOutputTransformation {
-  override var lastRenderResult: MarkdownAnnotatedString? by mutableStateOf(null)
+  override var styleBuffer: MarkdownStyleBuffer by mutableStateOf(MarkdownStyleBuffer.Empty)
 
   override fun TextFieldBuffer.transformOutput() {
     trace("Wysiwyg:transformOutput") {
@@ -97,9 +95,6 @@ private class StyledOutputTransformation(
     trace("Wysiwyg:render") {
       renderer.render(document, styleBuffer)
     }
-    lastRenderResult = MarkdownAnnotatedString(
-      text = AnnotatedString(""),
-      extraSpanPainters = styleBuffer.spanPainters,
-    )
+    this@StyledOutputTransformation.styleBuffer = styleBuffer
   }
 }

@@ -13,6 +13,9 @@ interface MarkdownStyleBuffer {
   /** The source text being styled. */
   val unstyledText: CharSequence
 
+  /** Painters collected via [addSpanPainter] during the last render. */
+  val spanPainters: List<MarkdownSpanPainter>
+
   fun addStyle(
     style: SpanStyle,
     range: TextRange,
@@ -44,13 +47,18 @@ interface MarkdownStyleBuffer {
     tag: String,
     range: TextRange,
   )
+
+  companion object {
+    /** A no-op buffer used as a placeholder before any rendering has occurred. */
+    val Empty: MarkdownStyleBuffer = EmptyMarkdownStyleBuffer
+  }
 }
 
 internal class TextFieldMarkdownStyleBuffer(
   private val textBuffer: TextFieldBuffer,
   override val unstyledText: CharSequence,
 ) : MarkdownStyleBuffer {
-  val spanPainters: MutableList<MarkdownSpanPainter> = mutableListOf()
+  override val spanPainters: MutableList<MarkdownSpanPainter> = mutableListOf()
 
   override fun addStyle(style: SpanStyle, range: TextRange) {
     textBuffer.addStyle(
@@ -104,4 +112,17 @@ internal class TextFieldMarkdownStyleBuffer(
       ),
     )
   }
+}
+
+private object EmptyMarkdownStyleBuffer : MarkdownStyleBuffer {
+  override val unstyledText: CharSequence = ""
+  override val spanPainters: List<MarkdownSpanPainter> = emptyList()
+  override fun addTestTag(tag: String, range: TextRange) = Unit
+  override fun addSpanPainter(painter: MarkdownSpanPainter) = Unit
+  override fun addStyle(style: SpanStyle, range: TextRange) = Unit
+  override fun addStyle(
+    style: ParagraphStyle,
+    range: TextRange,
+    trimVerticalPadding: Boolean
+  ) = Unit
 }
