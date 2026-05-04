@@ -87,9 +87,13 @@ private class RealMarkdownOutputTransformation(
   }
 
   private fun TextFieldBuffer.applyMarkdownStyles() {
+    // Note to self: create a copy of the text so the renderer reads from a stable snapshot.
+    // The live TextFieldBuffer view can mutate mid-walk and throw IndexOutOfBoundsException
+    // when its length shrinks under an in-flight read.
+    val textSnapshot = this.toString()
     val styleBuffer = TextFieldMarkdownStyleBuffer(
       textBuffer = this,
-      unstyledText = this.asCharSequence(),
+      unstyledText = textSnapshot,
     )
     trace("Wysiwyg:render") {
       renderer.render(document, styleBuffer)

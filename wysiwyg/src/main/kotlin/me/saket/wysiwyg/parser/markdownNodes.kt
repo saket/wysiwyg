@@ -325,7 +325,8 @@ class ThematicBreakNode(
 }
 
 private fun CharSequence.isAtxHeadingMarker(range: TextRange): Boolean {
-  return range.length >= 2 &&
+  return range.end <= length &&
+      range.length >= 2 &&
       this[range.end - 1].isWhitespace() &&
       (range.start..<range.end - 1).all { this[it] == '#' }
 }
