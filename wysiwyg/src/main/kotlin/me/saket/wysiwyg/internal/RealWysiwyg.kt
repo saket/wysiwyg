@@ -31,22 +31,21 @@ internal class RealWysiwyg internal constructor(
   onEnterFormatters: OnEnterMarkdownFormatters,
 ) : Wysiwyg {
   private val parser = IncrementalMarkdownParser(parser)
-  private val markdownRenderer = MarkdownRenderer(theme)
+  internal val layoutInfo = TextFieldLayoutInfo()
+  private val markdownRenderer = MarkdownRenderer(theme, layoutInfo)
 
   // Holds the ChangeList from the most recent InputTransformation invocation, awaiting consumption.
   // FWIW, this value isn't updated for non-user edits made directly using TextFieldState#edit().
   // In those cases, the highlighter will do a full re-scan even if it supported incremental highlighting.
   private var pendingChangeList: TextChangeListSnapshot = TextChangeListSnapshot.Empty
 
-  @OptIn(ExperimentalFoundationApi::class)
-  private val captureChangeList = InputTransformation {
-    pendingChangeList = changes.snapshot()
-  }
-
   override var outputTransformation by mutableStateOf(MarkdownOutputTransformation.Empty)
 
+  @OptIn(ExperimentalFoundationApi::class)
   override val inputTransformation: InputTransformation = run {
-    val chain = onEnterFormatters.asInputTransformation().then(captureChangeList)
+    val chain = onEnterFormatters.asInputTransformation().then {
+      pendingChangeList = changes.snapshot()
+    }
     InputTransformation {
       trace("Wysiwyg:inputTransformation") {
         with(chain) { transformInput() }
@@ -61,7 +60,7 @@ internal class RealWysiwyg internal constructor(
           .also { this.pendingChangeList = TextChangeListSnapshot.Empty }
 
         parser.parse(text.toString(), changes).collect { document ->
-          outputTransformation = StyledOutputTransformation(document, markdownRenderer)
+          outputTransformation = RealMarkdownOutputTransformation(document, markdownRenderer)
         }
       } catch (e: Throwable) {
         if (BuildConfig.DEBUG) {
@@ -75,7 +74,7 @@ internal class RealWysiwyg internal constructor(
   }
 }
 
-private class StyledOutputTransformation(
+private class RealMarkdownOutputTransformation(
   private val document: MarkdownDocument,
   private val renderer: MarkdownRenderer,
 ) : MarkdownOutputTransformation {
@@ -93,10 +92,8 @@ private class StyledOutputTransformation(
       unstyledText = this.asCharSequence(),
     )
     trace("Wysiwyg:render") {
-      trace("Wysiwyg:render:walk") {
-        renderer.render(document, styleBuffer)
-      }
+      renderer.render(document, styleBuffer)
     }
-    this@StyledOutputTransformation.styleBuffer = styleBuffer
+    this@RealMarkdownOutputTransformation.styleBuffer = styleBuffer
   }
 }

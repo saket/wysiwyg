@@ -14,26 +14,26 @@ import androidx.compose.foundation.text.input.TextFieldDecorator
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.then
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
 import androidx.tracing.trace
-import me.saket.wysiwyg.internal.computeViewport
+import me.saket.wysiwyg.internal.RealWysiwyg
 
 // todo: doc.
 @Composable
@@ -55,18 +55,30 @@ fun WsyiwygTextField(
   scrollState: ScrollState = rememberScrollState(),
   contentPadding: PaddingValues = PaddingValues(0.dp),
 ) {
+  check(wysiwyg is RealWysiwyg)
   val spanPainters = remember(wysiwyg) {
     MarkdownSpanPainters(wysiwyg)
+  }
+
+  // todo: i don't love this block. can it be offloaded into a rememberTextLayoutInfo()?
+  val layoutInfo = wysiwyg.layoutInfo
+  val density = LocalDensity.current
+  val layoutDirection = LocalLayoutDirection.current
+  SideEffect {
+    layoutInfo.scrollState = scrollState
+    layoutInfo.contentPaddingTopPx = with(density) {
+      contentPadding.calculateTopPadding().toPx()
+    }
+    layoutInfo.contentPaddingLeftPx = with(density) {
+      contentPadding.calculateLeftPadding(layoutDirection).toPx()
+    }
   }
 
   BasicTextField(
     state = wysiwyg.textState,
     modifier = modifier
-      .drawBehind {
-        with(spanPainters) {
-          drawBehind(scrollState, contentPadding)
-        }
-      }
+      .onSizeChanged { layoutInfo.viewportHeightPx = it.height.toFloat() }
+      .drawBehind { spanPainters.drawBehind() }
       .padding(contentPadding),
     enabled = enabled,
     readOnly = readOnly,
@@ -88,7 +100,7 @@ fun WsyiwygTextField(
       // todo: find out why result is a lambda. do i need to evaluate it on every call?
       val result = result()
       if (result != null) {
-        spanPainters.onTextLayout(result)
+        layoutInfo.lastLayoutResult = result
       }
     },
   )
@@ -122,40 +134,24 @@ private object WsyiwygTextFieldDefaults {
 }
 
 @Stable
-private class MarkdownSpanPainters(val wysiwyg: Wysiwyg) {
-  private var lastLayoutResult: TextLayoutResult? by mutableStateOf(null)
-
-  fun DrawScope.drawBehind(scrollState: ScrollState, contentPadding: PaddingValues) {
+private class MarkdownSpanPainters(val wysiwyg: RealWysiwyg) {
+  context(scope: DrawScope)
+  fun drawBehind() {
     trace("Wysiwyg:drawBehind") {
-      val layoutResult = lastLayoutResult ?: return
+      val layoutResult = wysiwyg.layoutInfo.lastLayoutResult ?: return
       val painters = wysiwyg.outputTransformation.styleBuffer.spanPainters
+      val viewport = wysiwyg.layoutInfo.currentViewport()
 
-      val viewport = trace("Wysiwyg:drawBehind:computeViewport") {
-        layoutResult.computeViewport(scrollState, contentPadding)
-      }
-      val leftPadding = contentPadding.calculateLeftPadding(layoutDirection).toPx()
-      val topPadding = contentPadding.calculateTopPadding().toPx()
-
-      clipRect {
-        translate(leftPadding, topPadding - scrollState.value.toFloat()) {
-          val translatedScope = this
-          trace("Wysiwyg:drawBehind:paintVisible") {
-            painters.fastForEach { painter ->
-              if (viewport.intersects(painter.range)) {
-                trace("Wysiwyg:drawBehind:paint") {
-                  with(painter) {
-                    translatedScope.draw(layoutResult)
-                  }
-                }
-              }
+      scope.translate(viewport.translationX, viewport.translationY) {
+        val translatedScope = this
+        painters.fastForEach { painter ->
+          if (viewport.intersects(painter.range)) {
+            with(painter) {
+              translatedScope.draw(layoutResult)
             }
           }
         }
       }
     }
-  }
-
-  fun onTextLayout(result: TextLayoutResult) {
-    lastLayoutResult = result
   }
 }

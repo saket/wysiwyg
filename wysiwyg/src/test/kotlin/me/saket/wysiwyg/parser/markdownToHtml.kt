@@ -6,9 +6,10 @@ import androidx.compose.ui.unit.sp
 import me.saket.wysiwyg.WysiwygTheme
 import me.saket.wysiwyg.internal.MarkdownRenderer
 import me.saket.wysiwyg.internal.MarkdownStyleBuffer
+import me.saket.wysiwyg.internal.TextFieldLayoutInfo
 
 internal fun MarkdownDocument.renderHtml(source: String): String {
-  val markdownRenderer = MarkdownRenderer(FakeWysiwygTheme)
+  val markdownRenderer = MarkdownRenderer(FakeWysiwygTheme, TextFieldLayoutInfo())
   val buffer = TestTagRecordingBuffer(source)
   markdownRenderer.render(document = this, buffer)
 

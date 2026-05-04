@@ -62,13 +62,13 @@ class FlexmarkMarkdownParser(
 
   override suspend fun parse(text: String, changes: TextChangeListSnapshot): MarkdownDocument {
     return withContext(dispatcher) {
-      val flexmarkRoot = trace("Wysiwyg:flexmarkParse") {
+      val parsed = trace("Wysiwyg:flexmarkParse") {
         parser.parse(text)
       }
       MarkdownDocument(
         range = LocalTextRange.span(0, text.length),
         children = trace("Wysiwyg:convertFlexmarkAst") {
-          flexmarkRoot.walkSubtree { it.toWysiwygMarkdownNode() }
+          parsed.walkSubtree { it.toWysiwygMarkdownNode() }
         },
       )
     }
@@ -166,18 +166,14 @@ class FlexmarkMarkdownParser(
         val trailingNewlines = chars.countTrailing(CharPredicate.anyOf('\n'))
         ListBlockNode(
           range = LocalTextRange.span(0, chars.length + ignoredTrailingSpaces - trailingNewlines),
-          children = this.walkSubtree {
-            it.toWysiwygMarkdownNode()
-          }
+          children = this.walkSubtree { it.toWysiwygMarkdownNode() },
         )
       }
       is ListItem -> {
         ListItemNode(
           range = LocalTextRange.span(0, chars.length),
           markerRange = LocalTextRange.span(0, openingMarker.length),
-          children = this.walkSubtree {
-            it.toWysiwygMarkdownNode()
-          },
+          children = this.walkSubtree { it.toWysiwygMarkdownNode() },
         )
       }
       is Heading -> {

@@ -45,7 +45,7 @@ fun TextFieldBuffer.ChangeList.snapshot(): TextChangeListSnapshot {
  * Note to self: each [TextChangeListSnapshot] is expressed relative to the text produced by all
  * prior entries, so these snapshots cannot be flattened by simply concatenating their change lists.
  */
-fun TextRange.rebased(changes: List<TextChangeListSnapshot>): TextRange? {
+internal fun TextRange.rebased(changes: List<TextChangeListSnapshot>): TextRange? {
   return changes.fastFold(this) { acc, changes ->
     acc.rebased(changes) ?: return null
   }

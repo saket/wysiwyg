@@ -21,16 +21,18 @@ import org.junit.runner.RunWith
 class TypingBenchmark {
   @get:Rule val rule = MacrobenchmarkRule()
 
-  @Test fun type_with_wysiwyg_enabled() =
+  @Test fun type_in_long_document_with_wysiwyg_enabled() =
     runScenario(useWysiwyg = true, assetPath = "commonmark-spec.md")
 
   /** Stock Compose UI over the same fixture with no markdown styling: the floor to beat. */
-  @Test fun type_with_wysiwyg_disabled() =
+  @Test fun type_in_long_document_with_wysiwyg_disabled() =
     runScenario(useWysiwyg = false, assetPath = "commonmark-spec.md")
 
-  /** Mirrors the everyday "user is composing a short note" path against a tiny fixture. */
-  @Test fun type_in_short_note_with_wysiwyg_enabled() =
-    runScenario(useWysiwyg = true, assetPath = "short-note.md")
+  @Test fun type_in_short_document_with_wysiwyg_enabled() =
+    runScenario(useWysiwyg = true, assetPath = "short-document.md")
+
+  @Test fun type_in_short_document_with_wysiwyg_disabled() =
+    runScenario(useWysiwyg = false, assetPath = "short-document.md")
 
   private fun runScenario(useWysiwyg: Boolean, assetPath: String) {
     rule.measureRepeated(
@@ -44,17 +46,19 @@ class TypingBenchmark {
         TraceSectionMetric("Wysiwyg:edited"),
         TraceSectionMetric("Wysiwyg:transformOutput"),
         TraceSectionMetric("Wysiwyg:render"),
-        TraceSectionMetric("Wysiwyg:render:walk"),
         TraceSectionMetric("Wysiwyg:render:addStyle"),
         TraceSectionMetric("Wysiwyg:drawBehind"),
-        TraceSectionMetric("Wysiwyg:drawBehind:computeViewport"),
-        TraceSectionMetric("Wysiwyg:drawBehind:paintVisible"),
-        TraceSectionMetric("Wysiwyg:drawBehind:paint"),
       ),
       iterations = 5,
       startupMode = StartupMode.WARM,
       compilationMode = CompilationMode.None(),
       setupBlock = {
+        // Wake the screen and dismiss the keyguard before launching. With the screen
+        // off the device sits in a low-power state and frame-CPU timings get throttled.
+        // KEYCODE_WAKEUP is idempotent; safe to issue every iteration.
+        device.executeShellCommand("input keyevent KEYCODE_WAKEUP")
+        device.executeShellCommand("wm dismiss-keyguard")
+
         val intent = Intent().apply {
           setClassName(TargetPackage, "${TargetPackage}.BenchmarkActivity")
           flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -87,15 +91,8 @@ class TypingBenchmark {
       // chasing only reproduce via real IME commits, swap this for a test
       // InputMethodService driven from this scenario.
       //
-      // todo: dropped chars. On the long-doc fixture the full "Lorem ipsum dolor
-      // sit amet" doesn't always land in the editor — when transformOutput is
-      // slow enough, some keystrokes are coalesced or waitForIdle returns
-      // before the burst finishes committing. Trace counts (transformOutput
-      // calls/iteration) stay stable across runs so the comparison still works,
-      // but "26 chars" is aspirational. Fix later by either driving input via
-      // an InputConnection from a test IME, or asserting the editor's text
-      // length matches the injected string before exiting the iteration.
-      device.executeShellCommand("input text 'Lorem ipsum dolor sit amet'")
+      // todo: when wysiwyg is enabled, chars are dropped
+      device.executeShellCommand("input text Lorem%sipsum%sdolor%ssit%samet")
       device.waitForIdle()
     }
   }

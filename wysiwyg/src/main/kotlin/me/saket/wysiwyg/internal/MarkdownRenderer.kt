@@ -11,6 +11,7 @@ import me.saket.wysiwyg.parser.rebased
 
 internal class MarkdownRenderer(
   private val theme: WysiwygTheme,
+  private val layoutInfo: TextFieldLayoutInfo,
 ) {
   fun render(
     document: MarkdownDocument,
@@ -20,6 +21,7 @@ internal class MarkdownRenderer(
       theme = theme,
       changes = document.changes,
       offsetInRoot = 0,
+      viewport = layoutInfo.currentViewport(),
     )
     with(document) {
       scope.render(buffer)
@@ -49,17 +51,7 @@ interface MarkdownNodeRenderScope {
    * blockquote's `>`) where any edit invalidates the syntax. Skip it for repeatable markers
    * like a heading's `#`s.
    */
-  fun LocalTextRange.resolve(dropOnEdit: Boolean = false): TextRange? {
-    val rangeInRoot = TextRange(
-      start = textRange.start + offsetInRoot,
-      end = textRange.end + offsetInRoot,
-    )
-    return if (dropOnEdit && changes.editsOverlap(rangeInRoot)) {
-      null
-    } else {
-      rangeInRoot.rebased(changes)
-    }
-  }
+  fun LocalTextRange.resolve(dropOnEdit: Boolean = false): TextRange?
 
   // todo: kdoc
   fun MarkdownChildNode.render(buffer: MarkdownStyleBuffer) {
@@ -74,11 +66,30 @@ private data class RealMarkdownNodeRenderScope(
   override val theme: WysiwygTheme,
   override val changes: List<TextChangeListSnapshot>,
   override val offsetInRoot: Int,
+  private val viewport: TextFieldViewport,
 ) : MarkdownNodeRenderScope {
 
   override fun childScope(child: MarkdownChildNode): MarkdownNodeRenderScope {
     return copy(
       offsetInRoot = offsetInRoot + child.offsetInParent,
     )
+  }
+
+  override fun LocalTextRange.resolve(dropOnEdit: Boolean): TextRange? {
+    val rangeInRoot = TextRange(
+      start = textRange.start + offsetInRoot,
+      end = textRange.end + offsetInRoot,
+    )
+    val rebased = if (dropOnEdit && changes.editsOverlap(rangeInRoot)) {
+      null
+    } else {
+      rangeInRoot.rebased(changes)
+    }
+    // Skip nodes whose absolute range falls outside the visible viewport.
+    return if (rebased == null || viewport.intersects(rebased, includeBeyondViewport = true)) {
+      rebased
+    } else {
+      null
+    }
   }
 }
