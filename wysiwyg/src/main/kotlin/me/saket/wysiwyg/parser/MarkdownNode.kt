@@ -36,25 +36,3 @@ value class LocalTextRange private constructor(
     }
   }
 }
-
-@Poko
-class MarkdownDocument(
-  override val range: LocalTextRange,
-  val children: List<MarkdownChildNode>,
-  val changes: List<TextChangeListSnapshot> = emptyList(),
-) : MarkdownNode {
-
-  override fun MarkdownNodeRenderScope.render(buffer: MarkdownStyleBuffer) {
-    children.fastForEach { child ->
-      child.render(buffer)
-    }
-  }
-
-  fun copy(changes: List<TextChangeListSnapshot>): MarkdownDocument {
-    return MarkdownDocument(
-      range = this.range,
-      children = this.children,
-      changes = changes,
-    )
-  }
-}

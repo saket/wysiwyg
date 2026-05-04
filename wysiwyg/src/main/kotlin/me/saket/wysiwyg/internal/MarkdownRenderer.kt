@@ -30,6 +30,7 @@ internal class MarkdownRenderer(
 }
 
 // todo: kdoc
+// todo: move to its own file
 interface MarkdownNodeRenderScope {
   val theme: WysiwygTheme
 
