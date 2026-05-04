@@ -12,7 +12,7 @@ import me.saket.wysiwyg.MarkdownSpanPainter
 // todo: kdoc
 interface MarkdownStyleBuffer {
   /** The source text being styled. */
-  val unstyledText: CharSequence
+  val unstyledText: String
 
   /** Painters collected via [addSpanPainter] during the last render. */
   val spanPainters: List<MarkdownSpanPainter>
@@ -57,7 +57,7 @@ interface MarkdownStyleBuffer {
 
 internal class TextFieldMarkdownStyleBuffer(
   private val textBuffer: TextFieldBuffer,
-  override val unstyledText: CharSequence,
+  override val unstyledText: String,
 ) : MarkdownStyleBuffer {
   override val spanPainters: MutableList<MarkdownSpanPainter> = mutableListOf()
 
@@ -120,7 +120,7 @@ internal class TextFieldMarkdownStyleBuffer(
 }
 
 private object EmptyMarkdownStyleBuffer : MarkdownStyleBuffer {
-  override val unstyledText: CharSequence = ""
+  override val unstyledText: String = ""
   override val spanPainters: List<MarkdownSpanPainter> = emptyList()
   override fun addTestTag(tag: String, range: TextRange) = Unit
   override fun addSpanPainter(painter: MarkdownSpanPainter) = Unit

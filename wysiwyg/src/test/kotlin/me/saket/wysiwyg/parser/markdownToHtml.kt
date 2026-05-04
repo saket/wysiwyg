@@ -29,7 +29,7 @@ internal fun MarkdownDocument.renderHtml(source: String): String {
 }
 
 private class TestTagRecordingBuffer(
-  override val unstyledText: CharSequence,
+  override val unstyledText: String,
   val testTags: MutableList<TestTag> = mutableListOf(),
 ) : MarkdownStyleBuffer by MarkdownStyleBuffer.Empty {
 
