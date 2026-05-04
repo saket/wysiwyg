@@ -44,7 +44,7 @@ TODO
 TODO
 
 ### Performance
-Last measured: 2026-05-02.
+Last measured: long document on 2026-05-03; short note on 2026-05-04.
 
 Numbers below were taken on a Pixel 10 Pro (Android 16), Compose UI 1.11.0-rc01.
 The scenario is: launch the editor, jump the cursor to end-of-doc, type 26 characters with no inter-char delay.
@@ -84,29 +84,29 @@ Two signals stand out under the granular traces. **Render scales with the visibl
 
 **Frame timing during the typing burst:**
 
-| Metric            | `WsyiwygTextField` |
-|-------------------|--------------------|
-| P50 frame CPU     | 3.6 ms             |
-| P90 frame CPU     | 9.8 ms             |
-| P95 frame CPU     | 13.8 ms            |
-| P99 frame CPU     | 36.0 ms            |
-| P99 frame overrun | 56.2 ms            |
+|                   | Plain `BasicTextField` | `WsyiwygTextField` | Ratio |
+|-------------------|-----------------------:|-------------------:|------:|
+| P50 frame CPU     |                 3.4 ms |             3.5 ms |  1.0× |
+| P90 frame CPU     |                 5.2 ms |             5.6 ms |  1.1× |
+| P95 frame CPU     |                 7.2 ms |             7.5 ms |  1.0× |
+| P99 frame CPU     |                26.0 ms |            22.6 ms |  0.9× |
+| P99 frame overrun |                35.5 ms |            28.2 ms |  0.8× |
 
-**Per-iteration trace section sums:**
+**Per-iteration trace section sums** (wysiwyg only):
 
-| Section                             | Median  | Calls / iteration |
-|-------------------------------------|---------|-------------------|
-| `Wysiwyg:parse`                     | 25.1 ms | 3                 |
-| ↳ `Wysiwyg:flexmarkParse`           | 7.0 ms  | 3                 |
-| ↳ `Wysiwyg:convertFlexmarkAst`      | 0.2 ms  | 3                 |
-| `Wysiwyg:drawBehind`                | 2.1 ms  | 5                 |
-| `Wysiwyg:transformOutput`           | 3.7 ms  | 13                |
-| ↳ `Wysiwyg:render`                  | 3.4 ms  | 13                |
-| ↳↳ `Wysiwyg:render:addStyle`        | 0.7 ms  | 247               |
-| `Wysiwyg:inputTransformation`       | 0.1 ms  | 3                 |
-| `Wysiwyg:edited` (overlay)          | 0.06 ms | 3                 |
+| Section                             |  Median | Calls / iteration |
+|-------------------------------------|--------:|------------------:|
+| `Wysiwyg:parse`                     | 76.0 ms |                22 |
+| ↳ `Wysiwyg:flexmarkParse`           | 44.1 ms |                22 |
+| ↳ `Wysiwyg:convertFlexmarkAst`      |  1.4 ms |                22 |
+| `Wysiwyg:drawBehind`                |  4.9 ms |                21 |
+| `Wysiwyg:transformOutput`           | 14.2 ms |               110 |
+| ↳ `Wysiwyg:render`                  | 13.7 ms |               110 |
+| ↳↳ `Wysiwyg:render:addStyle`        |  3.0 ms |             2,090 |
+| `Wysiwyg:inputTransformation`       |  0.7 ms |                26 |
+| `Wysiwyg:edited` (overlay)          |  0.4 ms |                22 |
 
-Render is small: `addStyle` (247 calls) and `transformOutput` (3.7 ms) clear the 8.3 ms budget at P50 with room to spare. Most of the document fits in the viewport, so the offscreen-filter is bypassed and emissions are bounded by the doc itself. The P95+ tail is driven by the off-thread `Wysiwyg:parse` triggering the next `transformOutput`, not render itself.
+P50 is effectively tied with plain `BasicTextField` (3.5 ms vs 3.4 ms), well under the 8.3 ms 120 Hz budget. The P90 gap is 0.4 ms (5.6 ms vs 5.2 ms), and P95 is 0.3 ms over the plain field (7.5 ms vs 7.2 ms). In this run, the WYSIWYG field had a better tail: P99 frame CPU was 22.6 ms vs 26.0 ms, and P99 frame overrun was 28.2 ms vs 35.5 ms. `transformOutput` uses a stable `OutputTransformation` and re-renders markdown from the latest parsed AST on every Compose query; the 14.2 ms trace value is the median per-iteration sum across 110 calls, not a single-call duration.
 
 ### License
 

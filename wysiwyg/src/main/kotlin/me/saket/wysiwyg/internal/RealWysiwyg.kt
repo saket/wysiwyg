@@ -18,6 +18,7 @@ import me.saket.wysiwyg.Wysiwyg
 import me.saket.wysiwyg.WysiwygTheme
 import me.saket.wysiwyg.format.OnEnterMarkdownFormatters
 import me.saket.wysiwyg.parser.IncrementalMarkdownParser
+import me.saket.wysiwyg.parser.LocalTextRange
 import me.saket.wysiwyg.parser.MarkdownDocument
 import me.saket.wysiwyg.parser.MarkdownParser
 import me.saket.wysiwyg.parser.TextChangeListSnapshot
@@ -39,7 +40,8 @@ internal class RealWysiwyg internal constructor(
   // In those cases, the highlighter will do a full re-scan even if it supported incremental highlighting.
   private var pendingChangeList: TextChangeListSnapshot = TextChangeListSnapshot.Empty
 
-  override var outputTransformation by mutableStateOf(MarkdownOutputTransformation.Empty)
+  private val realOutputTransformation = RealMarkdownOutputTransformation(markdownRenderer)
+  override val outputTransformation: MarkdownOutputTransformation = realOutputTransformation
 
   @OptIn(ExperimentalFoundationApi::class)
   override val inputTransformation: InputTransformation = run {
@@ -60,44 +62,60 @@ internal class RealWysiwyg internal constructor(
           .also { this.pendingChangeList = TextChangeListSnapshot.Empty }
 
         parser.parse(text.toString(), changes).collect { document ->
-          outputTransformation = RealMarkdownOutputTransformation(document, markdownRenderer)
+          realOutputTransformation.document = document
         }
       } catch (e: Throwable) {
         if (BuildConfig.DEBUG) {
           throw e
         } else {
           // todo: expose errors to consumers
-          outputTransformation = MarkdownOutputTransformation.Empty
         }
       }
     }
   }
 }
 
+/**
+ * Stable [MarkdownOutputTransformation] instance reused for the lifetime of [RealWysiwyg].
+ *
+ * Replacing the output transformation while editing causes Compose to restart parts of the text
+ * input/output pipeline. In practice that dropped typed characters and interrupted long-press
+ * backspace deletion, so parsed markdown is swapped through [document] instead.
+ */
 private class RealMarkdownOutputTransformation(
-  private val document: MarkdownDocument,
-  private val renderer: MarkdownRenderer,
+  private val markdownRenderer: MarkdownRenderer,
 ) : MarkdownOutputTransformation {
-  override var styleBuffer: MarkdownStyleBuffer by mutableStateOf(MarkdownStyleBuffer.Empty)
+
+  // This is not backed by snapshot state because transformOutput() can run inside
+  // a read-only snapshot, and Compose will throw an IllegalStateException if snapshot
+  // state is written from there. As a result, writes to this field do not invalidate
+  // readers directly. That is okay for now because the styles are rebuilt as part of
+  // an already invalidated text/output/layout pass, and draw code reads the latest
+  // buffer from there.
+  override var styleBuffer: MarkdownStyleBuffer = MarkdownStyleBuffer.Empty
+    private set
+
+  var document: MarkdownDocument by mutableStateOf(
+    MarkdownDocument(
+      range = LocalTextRange.span(0, 0),
+      children = emptyList(),
+    )
+  )
 
   override fun TextFieldBuffer.transformOutput() {
     trace("Wysiwyg:transformOutput") {
-      applyMarkdownStyles()
+      // Note to self: create a copy of the text so the renderer reads from a stable snapshot.
+      // The live TextFieldBuffer view can mutate mid-walk and throw IndexOutOfBoundsException
+      // when its length shrinks under an in-flight read.
+      val textSnapshot = this.toString()
+      val styleBuffer = TextFieldMarkdownStyleBuffer(
+        textBuffer = this,
+        unstyledText = textSnapshot,
+      )
+      trace("Wysiwyg:render") {
+        markdownRenderer.render(document, styleBuffer)
+      }
+      this@RealMarkdownOutputTransformation.styleBuffer = styleBuffer
     }
-  }
-
-  private fun TextFieldBuffer.applyMarkdownStyles() {
-    // Note to self: create a copy of the text so the renderer reads from a stable snapshot.
-    // The live TextFieldBuffer view can mutate mid-walk and throw IndexOutOfBoundsException
-    // when its length shrinks under an in-flight read.
-    val textSnapshot = this.toString()
-    val styleBuffer = TextFieldMarkdownStyleBuffer(
-      textBuffer = this,
-      unstyledText = textSnapshot,
-    )
-    trace("Wysiwyg:render") {
-      renderer.render(document, styleBuffer)
-    }
-    this@RealMarkdownOutputTransformation.styleBuffer = styleBuffer
   }
 }
