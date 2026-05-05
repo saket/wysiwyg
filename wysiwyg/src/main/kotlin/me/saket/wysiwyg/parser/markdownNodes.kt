@@ -15,6 +15,7 @@ import dev.drewhamilton.poko.Poko
 import me.saket.wysiwyg.extendedspans.BlockQuoteSpanPainter
 import me.saket.wysiwyg.extendedspans.RoundedCornerSpanPainter
 import me.saket.wysiwyg.extendedspans.RoundedCornerSpanPainter.TextPaddingValues
+import me.saket.wysiwyg.extendedspans.TaskCheckboxSpanPainter
 import me.saket.wysiwyg.extendedspans.ThematicBreakSpanPainter
 import me.saket.wysiwyg.internal.MarkdownNodeRenderScope
 import me.saket.wysiwyg.internal.MarkdownStyleBuffer
@@ -278,6 +279,9 @@ class TaskListItemNode(
     buffer.addStyle(
       SpanStyle(color = theme.markerColor, fontFamily = FontFamily.Monospace),
       taskMarkerRange,
+    )
+    buffer.addSpanPainter(
+      TaskCheckboxSpanPainter(range = taskMarkerRange, isChecked = isChecked),
     )
     buffer.addTestTag(
       if (isChecked) "task-checked" else "task-unchecked", taskMarkerRange

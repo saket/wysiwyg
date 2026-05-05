@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
@@ -20,13 +21,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.cash.paparazzi.DeviceConfig
+import assertk.assertThat
+import assertk.assertions.isEqualTo
+import assertk.assertions.startsWith
 import app.cash.paparazzi.Paparazzi
 import com.android.ide.common.rendering.api.SessionParams
 import kotlinx.coroutines.Dispatchers
@@ -43,6 +51,15 @@ class WysiwygTest {
     deviceConfig = DeviceConfig.PIXEL_5,
     renderingMode = SessionParams.RenderingMode.SHRINK,
   )
+
+  // Calibrated for PIXEL_5 (density 2.75) with the Material bodyLarge text style and the
+  // editor's 16dp content padding. Captured once via TaskCheckboxSpanPainter.boundsIn(layout)
+  // and hardcoded here to keep the touch tests below readable.
+  private companion object {
+    const val CheckboxX = 153
+    const val FirstLineY = 77
+    const val LineStep = 66
+  }
 
   @Test fun canary() {
     paparazzi.snapshot {
@@ -240,6 +257,117 @@ class WysiwygTest {
     }
   }
 
+  @Test fun `tap toggles task list checkbox`() {
+    paparazzi.gif(end = 1500) {
+      Scaffold {
+        WysiwygEditor(
+          markdown = """
+          |- [ ] Buy milk
+          |- [x] Write blog post
+          |- [ ] Refactor parser
+          |- [X] Ship release
+          """.trimMargin(),
+        )
+      }
+
+      val touchRobot = rememberTouchRobot()
+      LaunchedEffect(Unit) {
+        touchRobot.onNode(hasTestTag("editor")).performGesture {
+          repeat(times = 4) { lineIndex ->
+            click(IntOffset(x = CheckboxX, y = FirstLineY + lineIndex * LineStep))
+            delay(200)
+          }
+        }
+      }
+    }
+  }
+
+  @Test fun `tapping a checkbox does not move the cursor`() {
+    val markdown = """
+      |- [ ] Buy milk
+      |- [ ] Write blog post
+      |
+      |Cursor sits here at the end.
+    """.trimMargin()
+    val textState = TextFieldState(
+      initialText = markdown,
+      initialSelection = TextRange(markdown.length),
+    )
+
+    paparazzi.gif(end = 1200) {
+      val focusRequester = remember { FocusRequester() }
+      Scaffold {
+        WysiwygEditor(
+          modifier = Modifier.focusRequester(focusRequester),
+          markdown = markdown,
+          textState = textState,
+        )
+      }
+
+      LaunchedEffect(focusRequester) {
+        focusRequester.requestFocus()
+      }
+
+      val touchRobot = rememberTouchRobot()
+      LaunchedEffect(Unit) {
+        // Hold for a beat so the cursor blink at the document's end is captured
+        // in the recording before the tap fires.
+        delay(500)
+        touchRobot.onNode(hasTestTag("editor")).performGesture {
+          click(IntOffset(x = CheckboxX, y = FirstLineY))
+        }
+      }
+    }
+
+    // The tap should toggle the first checkbox without moving the cursor away from
+    // the document's end. If our handler hadn't consumed the up event, BasicTextField
+    // would have placed the cursor at the tapped offset.
+    assertThat(textState.text.toString()).startsWith("- [x] Buy milk")
+    assertThat(textState.selection).isEqualTo(TextRange(textState.text.length))
+  }
+
+  @Test fun `swipe starting on a checkbox scrolls the document`() {
+    paparazzi.gif(end = 1200) {
+      Scaffold {
+        WysiwygEditor(
+          modifier = Modifier.height(300.dp),
+          markdown = """
+          |- [ ] First task at the top of the document
+          |- [ ] Second task
+          |- [ ] Third task
+          |- [ ] Fourth task
+          |- [ ] Fifth task
+          |- [ ] Sixth task
+          |
+          |Body paragraph one. Filler text to push the document past the visible viewport.
+          |
+          |Body paragraph two. More prose so the scroll has somewhere to go.
+          |
+          |Body paragraph three. Yet more text giving the user a meaningful scroll range.
+          |
+          |Body paragraph four. Filler. Filler. Filler. Filler. Filler. Filler. Filler.
+          |
+          |Body paragraph five. The bottom of the document, only visible after scrolling.
+          """.trimMargin(),
+        )
+      }
+
+      val touchRobot = rememberTouchRobot()
+      LaunchedEffect(Unit) {
+        touchRobot.onNode(hasTestTag("editor")).performGesture {
+          // Swipe upward from inside the first checkbox, far enough to scroll past the
+          // task list. If the tap handler mistakenly consumed the down, scroll wouldn't
+          // engage and the document would stay put.
+          swipe(
+            start = IntOffset(x = CheckboxX, y = FirstLineY),
+            stop = IntOffset(x = CheckboxX, y = -600),
+            duration = 600.milliseconds,
+          )
+        }
+      }
+    }
+  }
+
   @Test fun `invalid headings`() {
     paparazzi.snapshot {
       Scaffold {
@@ -405,12 +533,13 @@ class WysiwygTest {
     markdown: String,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(16.dp),
+    textState: TextFieldState = rememberTextFieldState(markdown),
   ) {
     WsyiwygTextField(
       modifier = modifier.testTag("editor"),
       contentPadding = contentPadding,
       wysiwyg = rememberWysiwyg(
-        textState = rememberTextFieldState(markdown),
+        textState = textState,
         theme = wysiwygTheme(),
         parser = remember {
           FlexmarkMarkdownParser(dispatcher = Dispatchers.Unconfined)

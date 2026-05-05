@@ -10,7 +10,7 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.unit.dp
 import me.saket.wysiwyg.MarkdownSpanPainter
 
-class BlockQuoteSpanPainter(
+internal class BlockQuoteSpanPainter(
   override val range: TextRange,
   private val markerColor: Color,
 ) : MarkdownSpanPainter {
