@@ -264,6 +264,7 @@ class TaskListItemNode(
   override val range: LocalTextRange,
   val listItemMarkerRange: LocalTextRange,
   val taskMarkerRange: LocalTextRange,
+  val textRange: LocalTextRange,
   val isChecked: Boolean,
   val children: List<MarkdownChildNode>,
 ) : MarkdownNode {
@@ -272,19 +273,30 @@ class TaskListItemNode(
     val listItemMarkerRange = listItemMarkerRange.resolve(dropOnEdit = true) ?: return
     val taskMarkerRange = taskMarkerRange.resolve(dropOnEdit = true) ?: return
 
+    val markerColor = if (isChecked) theme.struckThroughTextColor else theme.markerColor
     buffer.addStyle(
-      SpanStyle(theme.markerColor),
+      SpanStyle(markerColor),
       listItemMarkerRange
     )
     buffer.addStyle(
-      SpanStyle(color = theme.markerColor, fontFamily = FontFamily.Monospace),
+      SpanStyle(color = markerColor, fontFamily = FontFamily.Monospace),
       taskMarkerRange,
     )
+    if (isChecked) {
+      val textRange = textRange.resolve()
+      if (textRange != null) {
+        buffer.addStyle(
+          SpanStyle(
+            color = theme.struckThroughTextColor,
+            textDecoration = TextDecoration.LineThrough,
+          ),
+          textRange,
+        )
+      }
+    }
+
     buffer.addSpanPainter(
       TaskCheckboxSpanPainter(range = taskMarkerRange, isChecked = isChecked),
-    )
-    buffer.addTestTag(
-      if (isChecked) "task-checked" else "task-unchecked", taskMarkerRange
     )
 
     children.fastForEach { child ->

@@ -180,6 +180,12 @@ class FlexmarkMarkdownParser(
             startOffset = markerSuffix.startOffset - chars.startOffset,
             endOffset = markerSuffix.endOffset - chars.startOffset,
           ),
+          textRange = firstChild!!.let { first ->
+            LocalTextRange(
+              startOffset = first.chars.startOffset - chars.startOffset,
+              endOffset = first.chars.endOffset - chars.startOffset,
+            )
+          },
           isChecked = isItemDoneMarker,
           children = this.walkSubtree { it.toWysiwygMarkdownNode() },
         )

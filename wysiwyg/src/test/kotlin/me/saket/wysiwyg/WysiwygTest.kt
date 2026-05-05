@@ -32,10 +32,10 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.cash.paparazzi.DeviceConfig
+import app.cash.paparazzi.Paparazzi
 import assertk.assertThat
 import assertk.assertions.isEqualTo
 import assertk.assertions.startsWith
-import app.cash.paparazzi.Paparazzi
 import com.android.ide.common.rendering.api.SessionParams
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -51,15 +51,6 @@ class WysiwygTest {
     deviceConfig = DeviceConfig.PIXEL_5,
     renderingMode = SessionParams.RenderingMode.SHRINK,
   )
-
-  // Calibrated for PIXEL_5 (density 2.75) with the Material bodyLarge text style and the
-  // editor's 16dp content padding. Captured once via TaskCheckboxSpanPainter.boundsIn(layout)
-  // and hardcoded here to keep the touch tests below readable.
-  private companion object {
-    const val CheckboxX = 153
-    const val FirstLineY = 77
-    const val LineStep = 66
-  }
 
   @Test fun canary() {
     paparazzi.snapshot {
@@ -247,11 +238,17 @@ class WysiwygTest {
       Scaffold {
         WysiwygEditor(
           markdown = """
-          |- [ ] Buy milk
-          |- [x] Write blog post
-          |- [ ] Refactor parser
-          |- [X] Ship release
-          """.trimMargin(),
+            |### Unordered list
+            |- [ ] Buy milk
+            |- [x] Write blog post
+            |- [ ] Refactor parser
+            |- [X] Ship release
+            |
+            |### Ordered list
+            |1. [ ] Alphonso
+            |2. [x] Kesar
+            |3. [ ] Malda
+            """.trimMargin(),
         )
       }
     }
@@ -274,7 +271,7 @@ class WysiwygTest {
       LaunchedEffect(Unit) {
         touchRobot.onNode(hasTestTag("editor")).performGesture {
           repeat(times = 4) { lineIndex ->
-            click(IntOffset(x = CheckboxX, y = FirstLineY + lineIndex * LineStep))
+            click(IntOffset(x = 153, y = 77 + lineIndex * 66))
             delay(200)
           }
         }
@@ -314,7 +311,7 @@ class WysiwygTest {
         // in the recording before the tap fires.
         delay(500)
         touchRobot.onNode(hasTestTag("editor")).performGesture {
-          click(IntOffset(x = CheckboxX, y = FirstLineY))
+          click(IntOffset(x = 153, y = 77))
         }
       }
     }
@@ -359,8 +356,8 @@ class WysiwygTest {
           // task list. If the tap handler mistakenly consumed the down, scroll wouldn't
           // engage and the document would stay put.
           swipe(
-            start = IntOffset(x = CheckboxX, y = FirstLineY),
-            stop = IntOffset(x = CheckboxX, y = -600),
+            start = IntOffset(x = 153, y = 77),
+            stop = IntOffset(x = 153, y = -600),
             duration = 600.milliseconds,
           )
         }
