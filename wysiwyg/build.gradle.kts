@@ -46,6 +46,7 @@ android {
 dependencies {
   api(libs.flexmark.java)
   api(libs.flexmark.ext.gfm.strikethrough)
+  api(libs.flexmark.ext.gfm.tasklist)
   api(libs.kotlinx.coroutines.core)
 
   implementation(libs.extendedspans)

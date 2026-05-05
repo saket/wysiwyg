@@ -13,6 +13,8 @@ import com.vladsch.flexmark.ast.StrongEmphasis
 import com.vladsch.flexmark.ast.ThematicBreak
 import com.vladsch.flexmark.ext.gfm.strikethrough.Strikethrough
 import com.vladsch.flexmark.ext.gfm.strikethrough.StrikethroughExtension
+import com.vladsch.flexmark.ext.gfm.tasklist.TaskListExtension
+import com.vladsch.flexmark.ext.gfm.tasklist.TaskListItem
 import com.vladsch.flexmark.util.misc.CharPredicate
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -32,6 +34,7 @@ import me.saket.wysiwyg.parser.MarkdownDocument
 import me.saket.wysiwyg.parser.MarkdownNode
 import me.saket.wysiwyg.parser.MarkdownParser
 import me.saket.wysiwyg.parser.StrikeThroughNode
+import me.saket.wysiwyg.parser.TaskListItemNode
 import me.saket.wysiwyg.parser.TextChangeListSnapshot
 import me.saket.wysiwyg.parser.ThematicBreakNode
 import com.vladsch.flexmark.parser.Parser as FlexmarkParser
@@ -57,7 +60,7 @@ class FlexmarkMarkdownParser(
       // List items should start with a space.
       set(FlexmarkParser.LISTS_ITEM_MARKER_SPACE, true)
     }
-    .extensions(listOf(StrikethroughExtension.create()))
+    .extensions(listOf(StrikethroughExtension.create(), TaskListExtension.create()))
     .build()
 
   override suspend fun parse(text: String, changes: TextChangeListSnapshot): MarkdownDocument {
@@ -166,6 +169,18 @@ class FlexmarkMarkdownParser(
         val trailingNewlines = chars.countTrailing(CharPredicate.anyOf('\n'))
         ListBlockNode(
           range = LocalTextRange.span(0, chars.length + ignoredTrailingSpaces - trailingNewlines),
+          children = this.walkSubtree { it.toWysiwygMarkdownNode() },
+        )
+      }
+      is TaskListItem -> {
+        TaskListItemNode(
+          range = LocalTextRange.span(0, chars.length),
+          listItemMarkerRange = LocalTextRange.span(0, openingMarker.length),
+          taskMarkerRange = LocalTextRange(
+            startOffset = markerSuffix.startOffset - chars.startOffset,
+            endOffset = markerSuffix.endOffset - chars.startOffset,
+          ),
+          isChecked = isItemDoneMarker,
           children = this.walkSubtree { it.toWysiwygMarkdownNode() },
         )
       }

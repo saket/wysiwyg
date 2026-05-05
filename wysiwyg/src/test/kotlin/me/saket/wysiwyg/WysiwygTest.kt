@@ -225,6 +225,21 @@ class WysiwygTest {
     }
   }
 
+  @Test fun `task list items`() {
+    paparazzi.snapshot {
+      Scaffold {
+        WysiwygEditor(
+          markdown = """
+          |- [ ] Buy milk
+          |- [x] Write blog post
+          |- [ ] Refactor parser
+          |- [X] Ship release
+          """.trimMargin(),
+        )
+      }
+    }
+  }
+
   @Test fun `invalid headings`() {
     paparazzi.snapshot {
       Scaffold {

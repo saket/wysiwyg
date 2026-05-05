@@ -259,6 +259,37 @@ class ListItemNode(
 }
 
 @Poko
+class TaskListItemNode(
+  override val range: LocalTextRange,
+  val listItemMarkerRange: LocalTextRange,
+  val taskMarkerRange: LocalTextRange,
+  val isChecked: Boolean,
+  val children: List<MarkdownChildNode>,
+) : MarkdownNode {
+
+  override fun MarkdownNodeRenderScope.render(buffer: MarkdownStyleBuffer) {
+    val listItemMarkerRange = listItemMarkerRange.resolve(dropOnEdit = true) ?: return
+    val taskMarkerRange = taskMarkerRange.resolve(dropOnEdit = true) ?: return
+
+    buffer.addStyle(
+      SpanStyle(theme.markerColor),
+      listItemMarkerRange
+    )
+    buffer.addStyle(
+      SpanStyle(color = theme.markerColor, fontFamily = FontFamily.Monospace),
+      taskMarkerRange,
+    )
+    buffer.addTestTag(
+      if (isChecked) "task-checked" else "task-unchecked", taskMarkerRange
+    )
+
+    children.fastForEach { child ->
+      child.render(buffer)
+    }
+  }
+}
+
+@Poko
 class HeadingNode(
   override val range: LocalTextRange,
   val openingMarkerRange: LocalTextRange,
