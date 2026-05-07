@@ -173,6 +173,7 @@ class FlexmarkMarkdownParser(
         )
       }
       is TaskListItem -> {
+        val body = firstChild?.chars ?: markerSuffix.subSequence(markerSuffix.length)
         TaskListItemNode(
           range = LocalTextRange.span(0, chars.length),
           listItemMarkerRange = LocalTextRange.span(0, openingMarker.length),
@@ -180,12 +181,10 @@ class FlexmarkMarkdownParser(
             startOffset = markerSuffix.startOffset - chars.startOffset,
             endOffset = markerSuffix.endOffset - chars.startOffset,
           ),
-          textRange = firstChild!!.let { first ->
-            LocalTextRange(
-              startOffset = first.chars.startOffset - chars.startOffset,
-              endOffset = first.chars.endOffset - chars.startOffset,
-            )
-          },
+          childrenRange = LocalTextRange(
+            startOffset = body.startOffset - chars.startOffset,
+            endOffset = body.endOffset - chars.startOffset,
+          ),
           isChecked = isItemDoneMarker,
           children = this.walkSubtree { it.toWysiwygMarkdownNode() },
         )

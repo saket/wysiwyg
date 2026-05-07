@@ -243,6 +243,7 @@ class WysiwygTest {
             |- [x] Write blog post
             |- [ ] Refactor parser
             |- [X] Ship release
+            |- [ ]${" "}
             |
             |### Ordered list
             |1. [ ] Alphonso

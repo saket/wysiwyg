@@ -264,7 +264,7 @@ class TaskListItemNode(
   override val range: LocalTextRange,
   val listItemMarkerRange: LocalTextRange,
   val taskMarkerRange: LocalTextRange,
-  val textRange: LocalTextRange,
+  val childrenRange: LocalTextRange,
   val isChecked: Boolean,
   val children: List<MarkdownChildNode>,
 ) : MarkdownNode {
@@ -283,7 +283,7 @@ class TaskListItemNode(
       taskMarkerRange,
     )
     if (isChecked) {
-      val textRange = textRange.resolve()
+      val textRange = childrenRange.resolve()
       if (textRange != null) {
         buffer.addStyle(
           SpanStyle(
