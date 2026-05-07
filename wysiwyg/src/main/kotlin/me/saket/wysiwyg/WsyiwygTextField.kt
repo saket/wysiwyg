@@ -24,7 +24,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.translate
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -34,7 +33,7 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
 import androidx.tracing.trace
-import me.saket.wysiwyg.extendedspans.handleCheckboxClicks
+import me.saket.wysiwyg.extendedspans.toggleTaskCheckboxesOnClick
 import me.saket.wysiwyg.internal.RealWysiwyg
 
 // todo: doc.
@@ -81,7 +80,7 @@ fun WsyiwygTextField(
     modifier = modifier
       .onSizeChanged { layoutInfo.viewportHeightPx = it.height.toFloat() }
       .drawBehind { spanPainters.drawBehind() }
-      .pointerInput(wysiwyg) { handleCheckboxClicks(wysiwyg) }
+      .toggleTaskCheckboxesOnClick(wysiwyg)
       .padding(contentPadding),
     enabled = enabled,
     readOnly = readOnly,

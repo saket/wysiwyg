@@ -52,6 +52,7 @@ dependencies {
   implementation(libs.extendedspans)
   implementation(libs.androidx.compose.ui)
   implementation(libs.androidx.compose.foundation)
+  implementation(libs.androidx.compose.material.ripple)
   implementation(libs.androidx.tracing.ktx)
   implementation(libs.poko.annotations)
 

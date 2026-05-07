@@ -14,6 +14,7 @@ fun rememberWysiwyg(
   textState: TextFieldState,
   theme: WysiwygTheme,
   parser: MarkdownParser,
+  // todo: should this still be offered instead of providing OnEnterMarkdownFormatters as an InputTransformation?
   onEnterFormatters: OnEnterMarkdownFormatters = OnEnterMarkdownFormatters.Default,
 ): Wysiwyg {
   val wysiwyg = remember(textState, theme, parser, onEnterFormatters) {

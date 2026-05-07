@@ -255,14 +255,20 @@ class WysiwygTest {
   }
 
   @Test fun `tap toggles task list checkbox`() {
-    paparazzi.gif(end = 1500) {
+    paparazzi.gif(end = 3000) {
       Scaffold {
         WysiwygEditor(
+          modifier = Modifier.height(300.dp),
           markdown = """
           |- [ ] Buy milk
           |- [x] Write blog post
           |- [ ] Refactor parser
           |- [X] Ship release
+          |- [ ] Long task with a description that wraps to multiple visual lines so the document grows past the visible viewport
+          |- [ ] Another long task with a verbose description spanning multiple lines to keep adding vertical space
+          |- [ ] Yet another long task whose text wraps to several lines so the document content extends past two viewport heights
+          |- [ ] One more long task pushing the document content well below the visible area so the final item is far offscreen
+          |- [ ] Final task at the bottom of the document
           """.trimMargin(),
         )
       }
@@ -270,15 +276,23 @@ class WysiwygTest {
       val touchRobot = rememberTouchRobot()
       LaunchedEffect(Unit) {
         touchRobot.onNode(hasTestTag("editor")).performGesture {
+          // Toggle the first four items at the top of the document.
           repeat(times = 4) { lineIndex ->
             click(IntOffset(x = 153, y = 77 + lineIndex * 66))
             delay(200)
           }
+          // Scroll the final task into view, then tap it. The press indicator's
+          // bounds are computed at press time using the current layout, so they
+          // must reflect the post-scroll position, not the doc-space coords.
+          swipe(start = bottomCenter, stop = topCenter, duration = 600.milliseconds)
+          delay(300)
+          click(IntOffset(x = 153, y = 700))
         }
       }
     }
   }
 
+  // todo: this test is failing because of the blinking cursor. maybe the cursor can be made fixed using LocalCursorBlinkEnabled.
   @Test fun `tapping a checkbox does not move the cursor`() {
     val markdown = """
       |- [ ] Buy milk
@@ -352,11 +366,11 @@ class WysiwygTest {
       val touchRobot = rememberTouchRobot()
       LaunchedEffect(Unit) {
         touchRobot.onNode(hasTestTag("editor")).performGesture {
-          // Swipe upward from inside the first checkbox, far enough to scroll past the
-          // task list. If the tap handler mistakenly consumed the down, scroll wouldn't
-          // engage and the document would stay put.
+          // Swipe upward from inside the last visible checkbox, far enough to scroll
+          // past the task list. If the tap handler mistakenly consumed the down,
+          // scroll wouldn't engage and the document would stay put.
           swipe(
-            start = IntOffset(x = 153, y = 77),
+            start = IntOffset(x = 153, y = 77 + 5 * 66),
             stop = IntOffset(x = 153, y = -600),
             duration = 600.milliseconds,
           )
