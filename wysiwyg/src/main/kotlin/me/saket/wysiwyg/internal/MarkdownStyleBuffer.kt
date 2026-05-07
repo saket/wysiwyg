@@ -41,14 +41,6 @@ interface MarkdownStyleBuffer {
     painter: MarkdownSpanPainter,
   )
 
-  /**
-   * Records a tag used by tests to assert the structure of rendered markdown. No-ops in production.
-   */
-  fun addTestTag(
-    tag: String,
-    range: TextRange,
-  )
-
   companion object {
     /** A no-op buffer used as a placeholder before any rendering has occurred. */
     val Empty: MarkdownStyleBuffer = EmptyMarkdownStyleBuffer
@@ -105,8 +97,6 @@ internal class TextFieldMarkdownStyleBuffer(
     spanPainters.add(painter)
   }
 
-  override fun addTestTag(tag: String, range: TextRange) = Unit
-
   companion object {
     private val TinyParagraphStyle = ParagraphStyle(
       lineHeight = 0.sp,
@@ -122,7 +112,6 @@ internal class TextFieldMarkdownStyleBuffer(
 private object EmptyMarkdownStyleBuffer : MarkdownStyleBuffer {
   override val unstyledText: String = ""
   override val spanPainters: List<MarkdownSpanPainter> = emptyList()
-  override fun addTestTag(tag: String, range: TextRange) = Unit
   override fun addSpanPainter(painter: MarkdownSpanPainter) = Unit
   override fun addStyle(style: SpanStyle, range: TextRange) = Unit
   override fun addStyle(

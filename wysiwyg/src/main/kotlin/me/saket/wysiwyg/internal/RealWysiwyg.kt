@@ -21,6 +21,7 @@ import me.saket.wysiwyg.parser.IncrementalMarkdownParser
 import me.saket.wysiwyg.parser.LocalTextRange
 import me.saket.wysiwyg.parser.MarkdownDocument
 import me.saket.wysiwyg.parser.MarkdownParser
+import me.saket.wysiwyg.parser.RealMarkdownRenderScope
 import me.saket.wysiwyg.parser.TextChangeListSnapshot
 import me.saket.wysiwyg.parser.snapshot
 
@@ -33,14 +34,14 @@ internal class RealWysiwyg internal constructor(
 ) : Wysiwyg {
   private val parser = IncrementalMarkdownParser(parser)
   internal val layoutInfo = TextFieldLayoutInfo()
-  private val markdownRenderer = MarkdownRenderer(theme, layoutInfo)
+  private val renderer = AnnotatedStringRenderer(theme)
 
   // Holds the ChangeList from the most recent InputTransformation invocation, awaiting consumption.
   // FWIW, this value isn't updated for non-user edits made directly using TextFieldState#edit().
   // In those cases, the highlighter will do a full re-scan even if it supported incremental highlighting.
   private var pendingChangeList: TextChangeListSnapshot = TextChangeListSnapshot.Empty
 
-  private val realOutputTransformation = RealMarkdownOutputTransformation(markdownRenderer)
+  private val realOutputTransformation = RealMarkdownOutputTransformation(renderer, layoutInfo)
   override val outputTransformation: MarkdownOutputTransformation = realOutputTransformation
 
   @OptIn(ExperimentalFoundationApi::class)
@@ -83,7 +84,8 @@ internal class RealWysiwyg internal constructor(
  * backspace deletion, so parsed markdown is swapped through [document] instead.
  */
 private class RealMarkdownOutputTransformation(
-  private val markdownRenderer: MarkdownRenderer,
+  private val renderer: AnnotatedStringRenderer,
+  private val layoutInfo: TextFieldLayoutInfo,
 ) : MarkdownOutputTransformation {
 
   // This is not backed by snapshot state because transformOutput() can run inside
@@ -94,6 +96,10 @@ private class RealMarkdownOutputTransformation(
   // buffer from there.
   override var styleBuffer: MarkdownStyleBuffer = MarkdownStyleBuffer.Empty
     private set
+
+  // Reused across passes; the renderer auto-zeroes offsetInRoot and refreshes changes when
+  // it encounters the root MarkdownDocument, so only viewport needs to be reassigned per pass.
+  private val scope = RealMarkdownRenderScope()
 
   var document: MarkdownDocument by mutableStateOf(
     MarkdownDocument(
@@ -114,7 +120,9 @@ private class RealMarkdownOutputTransformation(
         },
       )
       trace("Wysiwyg:render") {
-        markdownRenderer.render(document, styleBuffer)
+        renderer.buffer = styleBuffer
+        scope.viewport = layoutInfo.currentViewport()
+        renderer.render(document, scope)
       }
       this@RealMarkdownOutputTransformation.styleBuffer = styleBuffer
     }

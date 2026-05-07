@@ -1,57 +1,65 @@
 package me.saket.wysiwyg.parser
 
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextRange
-import androidx.compose.ui.unit.sp
-import me.saket.wysiwyg.WysiwygTheme
-import me.saket.wysiwyg.internal.MarkdownRenderer
-import me.saket.wysiwyg.internal.MarkdownStyleBuffer
-import me.saket.wysiwyg.internal.TextFieldLayoutInfo
 
 internal fun MarkdownDocument.renderHtml(source: String): String {
-  val markdownRenderer = MarkdownRenderer(FakeWysiwygTheme, TextFieldLayoutInfo())
-  val buffer = TestTagRecordingBuffer(source)
-  markdownRenderer.render(document = this, buffer)
+  val renderer = HtmlRenderer()
+  renderer.render(this, RealMarkdownRenderScope())
+  return renderer.build(source)
+}
 
-  val tags = buffer.testTags
-    .flatMap { listOf(it.range.start to "<${it.tag}>", it.range.end to "</${it.tag}>") }
-    .sortedBy { it.first }
+/**
+ * Test-only [MarkdownRenderer] that records HTML-like tags around the rebased range of recognized
+ * nodes, then interleaves them with the source in [build]. The tag set matches the expectations
+ * in `IncrementalMarkdownParserTest`.
+ */
+private class HtmlRenderer : MarkdownRenderer {
+  private val tags = mutableListOf<Tag>()
 
-  return buildString {
-    var cursor = 0
-    for ((offset, tag) in tags) {
-      append(source, cursor, offset)
-      append(tag)
-      cursor = offset
+  override fun render(node: MarkdownNode, scope: MarkdownRenderScope) {
+    if (node is MarkdownDocument) {
+      scope.offsetInRoot = 0
+      scope.changes = node.changes
+      tags.clear()
     }
-    append(source, cursor, source.length)
+    val tagName = node.htmlTag()
+    if (tagName != null) {
+      with(scope) {
+        val resolved = node.range.resolve()
+        if (resolved != null) {
+          tags += Tag(tagName, resolved)
+        }
+      }
+    }
+    descendInto(node, scope)
   }
+
+  fun build(source: String): String {
+    val markers = tags
+      .flatMap { listOf(it.range.start to "<${it.name}>", it.range.end to "</${it.name}>") }
+      .sortedBy { it.first }
+    return buildString {
+      var cursor = 0
+      for ((offset, tag) in markers) {
+        append(source, cursor, offset)
+        append(tag)
+        cursor = offset
+      }
+      append(source, cursor, source.length)
+    }
+  }
+
+  private data class Tag(val name: String, val range: TextRange)
 }
 
-private class TestTagRecordingBuffer(
-  override val unstyledText: String,
-  val testTags: MutableList<TestTag> = mutableListOf(),
-) : MarkdownStyleBuffer by MarkdownStyleBuffer.Empty {
-
-  override fun addTestTag(tag: String, range: TextRange) {
-    testTags += TestTag(tag, range)
+private fun MarkdownNode.htmlTag(): String? {
+  return when (this) {
+    is BoldNode -> "b"
+    is StrikeThroughNode -> "s"
+    is LinkNode -> "link"
+    is BlockQuoteNode -> "blockquote"
+    is ListBlockNode -> "list"
+    is HeadingNode -> "h$level"
+    else -> null
   }
 }
-
-private data class TestTag(
-  val tag: String,
-  val range: TextRange,
-)
-
-private val FakeWysiwygTheme = WysiwygTheme(
-  markerColor = Color.Unspecified,
-  linkTextColor = Color.Unspecified,
-  linkUrlColor = Color.Unspecified,
-  struckThroughTextColor = Color.Unspecified,
-  codeBackground = Color.Unspecified,
-  codeBlockLeadingPadding = 0.sp,
-  blockQuoteText = Color.Unspecified,
-  blockQuoteLeadingPadding = 0.sp,
-  listBlockLeadingPadding = 0.sp,
-  headingColor = Color.Unspecified,
-)

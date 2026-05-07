@@ -1,15 +1,11 @@
 package me.saket.wysiwyg.parser
 
 import androidx.compose.ui.text.TextRange
-import androidx.compose.ui.util.fastForEach
 import dev.drewhamilton.poko.Poko
-import me.saket.wysiwyg.internal.MarkdownNodeRenderScope
-import me.saket.wysiwyg.internal.MarkdownStyleBuffer
 
 interface MarkdownNode {
   val range: LocalTextRange
-
-  fun MarkdownNodeRenderScope.render(buffer: MarkdownStyleBuffer)
+  val children: List<MarkdownChildNode> get() = emptyList()
 }
 
 @Poko
