@@ -145,10 +145,15 @@ class FencedCodeBlockNode(
 @Poko
 class StrikeThroughNode(
   override val range: LocalTextRange,
+  val openingMarkerRange: LocalTextRange,
+  val closingMarkerRange: LocalTextRange,
 ) : MarkdownNode {
 
   override fun MarkdownNodeRenderScope.render(buffer: MarkdownStyleBuffer) {
     val range = range.resolve() ?: return
+    openingMarkerRange.resolve(dropOnEdit = true) ?: return
+    closingMarkerRange.resolve(dropOnEdit = true) ?: return
+
     val style = SpanStyle(
       color = theme.struckThroughTextColor,
       textDecoration = TextDecoration.LineThrough,

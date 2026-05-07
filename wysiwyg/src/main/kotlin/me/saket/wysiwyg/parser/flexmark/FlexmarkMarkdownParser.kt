@@ -96,6 +96,8 @@ class FlexmarkMarkdownParser(
       is Strikethrough -> {
         StrikeThroughNode(
           range = LocalTextRange.span(0, chars.length),
+          openingMarkerRange = LocalTextRange.span(0, openingMarker.length),
+          closingMarkerRange = LocalTextRange(chars.length - closingMarker.length, chars.length),
         )
       }
       is Link -> {
