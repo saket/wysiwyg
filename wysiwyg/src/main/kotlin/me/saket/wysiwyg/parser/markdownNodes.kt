@@ -256,7 +256,11 @@ class ListItemNode(
 
   override fun MarkdownNodeRenderScope.render(buffer: MarkdownStyleBuffer) {
     val markerRange = markerRange.resolve(dropOnEdit = true) ?: return
-    buffer.addStyle(SpanStyle(theme.markerColor), markerRange)
+    val prefixRange = TextRange(markerRange.start, markerRange.end + 1)
+    buffer.addStyle(
+      SpanStyle(color = theme.markerColor, fontFamily = FontFamily.Monospace),
+      prefixRange,
+    )
 
     children.fastForEach { child ->
       child.render(buffer)
@@ -275,8 +279,12 @@ class TaskListItemNode(
 ) : MarkdownNode {
 
   override fun MarkdownNodeRenderScope.render(buffer: MarkdownStyleBuffer) {
+    val itemRange = range.resolve() ?: return
     val listItemMarkerRange = listItemMarkerRange.resolve(dropOnEdit = true) ?: return
     val taskMarkerRange = taskMarkerRange.resolve(dropOnEdit = true) ?: return
+
+    val prefixRange = TextRange(itemRange.start, itemRange.start + childrenRange.start)
+    buffer.addStyle(SpanStyle(fontFamily = FontFamily.Monospace), prefixRange)
 
     val markerColor = if (isChecked) theme.struckThroughTextColor else theme.markerColor
     buffer.addStyle(
@@ -284,7 +292,7 @@ class TaskListItemNode(
       listItemMarkerRange
     )
     buffer.addStyle(
-      SpanStyle(color = markerColor, fontFamily = FontFamily.Monospace),
+      SpanStyle(color = markerColor),
       taskMarkerRange,
     )
     if (isChecked) {

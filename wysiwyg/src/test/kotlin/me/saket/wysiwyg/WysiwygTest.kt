@@ -225,6 +225,7 @@ class WysiwygTest {
           |1.    Milk
           |2. Mangoes
           |3. Notebooks
+          |4. A list item so long it overflows to the next line, then keeps going for a third line just to be sure the indent holds
           |
           |Unrelated text.
           """.trimMargin(),
@@ -241,8 +242,8 @@ class WysiwygTest {
             |### Unordered list
             |- [ ] Buy milk
             |- [x] Write blog post
-            |- [ ] Refactor parser
             |- [X] Ship release
+            |- [ ] A task item so long it overflows to the next line, then keeps going for a third line just to be sure the indent holds
             |- [ ]${" "}
             |
             |### Ordered list
