@@ -217,6 +217,7 @@ class WysiwygTest {
     }
   }
 
+  // todo: try out the indentation in various font sizes.
   @Test fun `list items`() {
     paparazzi.snapshot {
       Scaffold {
@@ -228,6 +229,27 @@ class WysiwygTest {
           |4. A list item so long it overflows to the next line, then keeps going for a third line just to be sure the indent holds
           |
           |Unrelated text.
+          """.trimMargin(),
+        )
+      }
+    }
+  }
+
+  @Test fun `list items with mixed markers`() {
+    paparazzi.snapshot {
+      Scaffold {
+        WysiwygEditor(
+          markdown = """
+          |- Hyphen marker
+          |* Asterisk marker
+          |+ Plus marker
+          |
+          |1. Single digit
+          |2) Single digit, with text long enough to wrap to a second visual line so the hanging indent is visible
+          |
+          |9. Single digit
+          |10. Double digit
+          |100. Triple digit, with text long enough to wrap to a second visual line so the hanging indent is visible
           """.trimMargin(),
         )
       }
