@@ -160,14 +160,15 @@ class FlexmarkMarkdownParser(
         )
       }
       is ListBlock -> {
-        // Workaround for https://github.com/vsch/flexmark-java/issues/519.
+        // Workaround for https://github.com/vsch/flexmark-java/issues/519. Flexmark drops
+        // trailing spaces from an empty item's `chars`, so add them back explicitly. The
+        // `+1` over-extends the range by one phantom character so that a keystroke at the
+        // cursor (which sits at end of text) gets absorbed by the overlay's range rebasing,
+        // keeping the new character inside the list paragraph until the reparse arrives.
         val lastItem = lastChild as ListItem
-        val wereSpacesIgnored = lastItem.chars == lastItem.openingMarker
-        val ignoredTrailingSpaces = if (wereSpacesIgnored) {
-          baseSequence.subSequence(lastItem.openingMarker.endOffset).countLeadingSpace() + 1
-        } else {
-          0
-        }
+        val ignoredTrailingSpaces = baseSequence.subSequence(lastItem.chars.endOffset)
+          .countLeadingSpace()
+          .let { if (it > 0) it + 1 else 0 }
         val trailingNewlines = chars.countTrailing(CharPredicate.anyOf('\n'))
         ListBlockNode(
           range = LocalTextRange.span(0, chars.length + ignoredTrailingSpaces - trailingNewlines),

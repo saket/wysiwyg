@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.foundation.text.input.placeCursorAtEnd
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
@@ -33,14 +34,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
+import app.cash.turbine.Turbine
 import assertk.assertThat
 import assertk.assertions.isEqualTo
 import assertk.assertions.startsWith
 import com.android.ide.common.rendering.api.SessionParams
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.sync.Semaphore
 import me.saket.touchrobot.onNode
 import me.saket.touchrobot.rememberTouchRobot
+import me.saket.wysiwyg.parser.MarkdownDocument
+import me.saket.wysiwyg.parser.MarkdownParser
+import me.saket.wysiwyg.parser.TextChangeListSnapshot
 import me.saket.wysiwyg.parser.flexmark.FlexmarkMarkdownParser
 import org.junit.Rule
 import org.junit.Test
@@ -274,6 +280,64 @@ class WysiwygTest {
             |3. [ ] Malda
             """.trimMargin(),
         )
+      }
+    }
+  }
+
+  @Test fun `typing on an empty task list item keeps characters inline`() {
+    val initialMarkdown = "Some text before tasks\n\n- [ ] "
+    val textState = TextFieldState(initialMarkdown)
+
+    paparazzi.gif(end = 2400, fps = 4) {
+      // Gate every parse so the test orchestrates exactly when each one finishes.
+      // After releasing the initial parse (so the cache is populated), both keystrokes
+      // run while subsequent parses stay blocked, mirroring the live editing scenario
+      // where flexmark hasn't caught up yet.
+      val parser = remember {
+        GatedMarkdownParser(FlexmarkMarkdownParser(dispatcher = Dispatchers.Unconfined))
+      }
+      val wysiwyg = rememberWysiwyg(
+        textState = textState,
+        theme = wysiwygTheme(),
+        parser = parser,
+      )
+      val focusRequester = remember { FocusRequester() }
+
+      Scaffold {
+        WysiwygEditor(
+          modifier = Modifier.focusRequester(focusRequester),
+          markdown = initialMarkdown,
+          textState = textState,
+          wysiwyg = wysiwyg,
+        )
+      }
+
+      LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
+        parser.allowAndAwaitNextParse()
+
+        delay(600.milliseconds)
+        textState.edit {
+          append("a")
+          placeCursorAtEnd()
+          with(wysiwyg.inputTransformation) {
+            transformInput()
+          }
+        }
+
+        // Type 'b' while the reparse remains gated. The two ChangeLists must accumulate
+        // through IncrementalMarkdownParser so that the cached BulletList range, rebased
+        // through both, still covers the typed characters. The delay also gives the
+        // snapshotFlow collector inside RealWysiwyg time to dispatch the post-'a' state
+        // before its pendingChangeList gets overwritten by 'b'.
+        delay(600.milliseconds)
+        textState.edit {
+          append("b")
+          placeCursorAtEnd()
+          with(wysiwyg.inputTransformation) {
+            transformInput()
+          }
+        }
       }
     }
   }
@@ -569,17 +633,18 @@ class WysiwygTest {
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(16.dp),
     textState: TextFieldState = rememberTextFieldState(markdown),
+    wysiwyg: Wysiwyg = rememberWysiwyg(
+      textState = textState,
+      theme = wysiwygTheme(),
+      parser = remember {
+        FlexmarkMarkdownParser(dispatcher = Dispatchers.Unconfined)
+      },
+    ),
   ) {
     WsyiwygTextField(
       modifier = modifier.testTag("editor"),
       contentPadding = contentPadding,
-      wysiwyg = rememberWysiwyg(
-        textState = textState,
-        theme = wysiwygTheme(),
-        parser = remember {
-          FlexmarkMarkdownParser(dispatcher = Dispatchers.Unconfined)
-        },
-      ),
+      wysiwyg = wysiwyg,
       cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
       textStyle = LocalTextStyle.current.copy(color = LocalContentColor.current),
     )
@@ -600,6 +665,25 @@ private fun wysiwygTheme(): WysiwygTheme {
     blockQuoteLeadingPadding = 16.sp,
     listBlockLeadingPadding = 16.sp,
   )
+}
+
+private class GatedMarkdownParser(
+  private val delegate: MarkdownParser,
+) : MarkdownParser {
+  private val parsePermits = Semaphore(permits = Int.MAX_VALUE, acquiredPermits = Int.MAX_VALUE)
+  private val completions = Turbine<Unit>()
+
+  suspend fun allowAndAwaitNextParse() {
+    parsePermits.release()
+    completions.awaitItem()
+  }
+
+  override suspend fun parse(text: String, changes: TextChangeListSnapshot): MarkdownDocument {
+    parsePermits.acquire()
+    return delegate.parse(text, changes).also {
+      completions.add(Unit)
+    }
+  }
 }
 
 // todo: upstream this to paparazzi.
