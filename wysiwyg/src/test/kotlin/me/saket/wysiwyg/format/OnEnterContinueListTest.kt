@@ -321,4 +321,134 @@ class OnEnterContinueListTest {
       expect = null,
     )
   }
+
+  @Test fun `enter key after a valid task list item`() {
+    formatters.assertOnEnter(
+      input = """
+              |# Shopping list
+              |- [ ] Milk
+              |- [ ] Bread▮
+              """.trimMargin(),
+      expect = """
+              |# Shopping list
+              |- [ ] Milk
+              |- [ ] Bread
+              |- [ ] ▮
+              """.trimMargin(),
+    )
+
+    formatters.assertOnEnter(
+      input = """
+              |# Shopping list
+              |+ [ ] Milk
+              |+ [ ] Bread▮
+              """.trimMargin(),
+      expect = """
+              |# Shopping list
+              |+ [ ] Milk
+              |+ [ ] Bread
+              |+ [ ] ▮
+              """.trimMargin(),
+    )
+
+    formatters.assertOnEnter(
+      input = """
+              |# Shopping list
+              |* [ ] Milk
+              |* [ ] Bread▮
+              """.trimMargin(),
+      expect = """
+              |# Shopping list
+              |* [ ] Milk
+              |* [ ] Bread
+              |* [ ] ▮
+              """.trimMargin(),
+    )
+  }
+
+  @Test fun `enter key after a checked task list item starts a fresh unchecked task`() {
+    formatters.assertOnEnter(
+      input = """
+              |- [x] Milk
+              |- [x] Bread▮
+              """.trimMargin(),
+      expect = """
+              |- [x] Milk
+              |- [x] Bread
+              |- [ ] ▮
+              """.trimMargin(),
+    )
+
+    formatters.assertOnEnter(
+      input = """
+              |- [X] Milk▮
+              """.trimMargin(),
+      expect = """
+              |- [X] Milk
+              |- [ ] ▮
+              """.trimMargin(),
+    )
+  }
+
+  @Test fun `enter key after a valid task list item with margin`() {
+    formatters.assertOnEnter(
+      input = """
+              |# Shopping list
+              |- [ ] Milk
+              |- [ ] Drinks
+              |  - [ ] Coke▮
+              """.trimMargin(),
+      expect = """
+              |# Shopping list
+              |- [ ] Milk
+              |- [ ] Drinks
+              |  - [ ] Coke
+              |  - [ ] ▮
+              """.trimMargin(),
+    )
+  }
+
+  @Test fun `enter key on an empty task list item ends the list`() {
+    formatters.assertOnEnter(
+      input = """
+              |- [ ] Milk
+              |- [ ] Bread
+              |- [ ] ▮
+              |
+              |Some other text
+              """.trimMargin(),
+      expect = """
+              |- [ ] Milk
+              |- [ ] Bread
+              |
+              |▮
+              |
+              |Some other text
+              """.trimMargin(),
+    )
+
+    formatters.assertOnEnter(
+      input = """
+              |- [x] Milk
+              |- [ ] ▮
+              """.trimMargin(),
+      expect = """
+              |- [x] Milk
+              |
+              |▮
+              """.trimMargin(),
+    )
+  }
+
+  @Test fun `enter key after task item without trailing space falls back to plain list`() {
+    formatters.assertOnEnter(
+      input = """
+              |- [ ]▮
+              """.trimMargin(),
+      expect = """
+              |- [ ]
+              |- ▮
+              """.trimMargin(),
+    )
+  }
 }

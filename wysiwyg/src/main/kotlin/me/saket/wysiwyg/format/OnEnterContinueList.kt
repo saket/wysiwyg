@@ -1,5 +1,6 @@
 package me.saket.wysiwyg.format
 
+import androidx.compose.ui.util.fastAny
 import kotlin.LazyThreadSafetyMode.NONE
 
 /**
@@ -26,7 +27,16 @@ class OnEnterContinueList : OnEnterMarkdownFormatter {
       && contentStart + 1 < paragraphLength
       && paragraphText[contentStart + 1].isWhitespace()
     ) {
-      val isItemEmpty = paragraphLength == contentStart + 2
+      val body = paragraphText.substring(contentStart + 2)
+      val isTaskItem = taskMarkers.fastAny { body.startsWith(it) }
+      val syntax = buildString {
+        append(paragraphText[contentStart])
+        append(' ')
+        if (isTaskItem) {
+          append("[ ] ")
+        }
+      }
+      val isItemEmpty = paragraphLength == contentStart + syntax.length
       return if (isItemEmpty) {
         endListSyntax(
           lastItem = paragraph,
@@ -36,7 +46,7 @@ class OnEnterContinueList : OnEnterMarkdownFormatter {
         continueListSyntax(
           cursorPositionBeforeEnter = cursorPositionBeforeEnter,
           paragraphLeadingMargin = paragraphText.substring(0, contentStart),
-          syntax = "${paragraphText[contentStart]} ",
+          syntax = syntax,
         )
       }
     }
@@ -95,6 +105,7 @@ class OnEnterContinueList : OnEnterMarkdownFormatter {
 
   companion object {
     private const val itemMarkers = "*+-"
+    private val taskMarkers = listOf("[ ] ", "[x] ", "[X] ")
     private val orderedItemRegex by lazy(NONE) { Regex("(\\d+)\\.\\s") }
   }
 }
