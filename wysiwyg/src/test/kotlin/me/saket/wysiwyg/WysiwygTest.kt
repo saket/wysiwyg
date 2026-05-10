@@ -342,6 +342,42 @@ class WysiwygTest {
     }
   }
 
+  @Test fun `typing experience of task items`() {
+    val textState = TextFieldState()
+
+    val finalText = """
+          |Shopping list:
+          |- [ ] Milk
+          |- [ ] Mangoes
+        """.trimMargin()
+    val delayPerChar = 250.milliseconds
+
+    paparazzi.gif(
+      end = finalText.length * delayPerChar.inWholeMilliseconds + 500,
+      fps = 10,
+    ) {
+      val focusRequester = remember { FocusRequester() }
+      Scaffold {
+        WysiwygEditor(
+          modifier = Modifier.focusRequester(focusRequester),
+          markdown = "",
+          textState = textState,
+        )
+      }
+
+      LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
+        for (nextChar in finalText) {
+          textState.edit {
+            append(nextChar)
+            placeCursorAtEnd()
+          }
+          delay(delayPerChar)
+        }
+      }
+    }
+  }
+
   @Test fun `tap toggles task list checkbox`() {
     paparazzi.gif(end = 3000) {
       Scaffold {
