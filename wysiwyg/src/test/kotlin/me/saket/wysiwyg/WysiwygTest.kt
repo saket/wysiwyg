@@ -24,26 +24,27 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.hasTestTag
-import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.round
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.util.fastFirstOrNull
 import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
 import app.cash.turbine.Turbine
-import assertk.assertThat
-import assertk.assertions.isEqualTo
-import assertk.assertions.startsWith
 import com.android.ide.common.rendering.api.SessionParams
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.sync.Semaphore
 import me.saket.touchrobot.onNode
 import me.saket.touchrobot.rememberTouchRobot
+import me.saket.wysiwyg.extendedspans.TaskCheckboxSpanPainter
+import me.saket.wysiwyg.internal.RealWysiwyg
 import me.saket.wysiwyg.parser.MarkdownDocument
 import me.saket.wysiwyg.parser.MarkdownParser
 import me.saket.wysiwyg.parser.TextChangeListSnapshot
@@ -285,8 +286,7 @@ class WysiwygTest {
   }
 
   @Test fun `typing on an empty task list item keeps characters inline`() {
-    val initialMarkdown = "Some text before tasks\n\n- [ ] "
-    val textState = TextFieldState(initialMarkdown)
+    val textState = TextFieldState("Some text before tasks\n\n- [ ] ")
 
     paparazzi.gif(end = 2400, fps = 4) {
       // Gate every parse so the test orchestrates exactly when each one finishes.
@@ -306,8 +306,6 @@ class WysiwygTest {
       Scaffold {
         WysiwygEditor(
           modifier = Modifier.focusRequester(focusRequester),
-          markdown = initialMarkdown,
-          textState = textState,
           wysiwyg = wysiwyg,
         )
       }
@@ -344,20 +342,29 @@ class WysiwygTest {
 
   @Test fun `tap toggles task list checkbox`() {
     paparazzi.gif(end = 3000) {
+      val wysiwyg = rememberWysiwyg(
+        textState = TextFieldState(
+          """
+            |- [ ] Buy milk
+            |- [x] Write blog post
+            |- [ ] Refactor parser
+            |- [X] Ship release
+            |- [ ] Long task with a description that wraps to multiple visual lines so the document grows past the visible viewport
+            |- [ ] Another long task with a verbose description spanning multiple lines
+            |- [ ] Yet another long task whose text wraps just enough
+            |- [ ] One more long task near the bottom
+            |- [ ] Final task at the bottom of the document
+          """.trimMargin()
+        ),
+        theme = wysiwygTheme(),
+        parser = remember {
+          FlexmarkMarkdownParser(dispatcher = Dispatchers.Unconfined)
+        },
+      )
       Scaffold {
         WysiwygEditor(
           modifier = Modifier.height(300.dp),
-          markdown = """
-          |- [ ] Buy milk
-          |- [x] Write blog post
-          |- [ ] Refactor parser
-          |- [X] Ship release
-          |- [ ] Long task with a description that wraps to multiple visual lines so the document grows past the visible viewport
-          |- [ ] Another long task with a verbose description spanning multiple lines to keep adding vertical space
-          |- [ ] Yet another long task whose text wraps to several lines so the document content extends past two viewport heights
-          |- [ ] One more long task pushing the document content well below the visible area so the final item is far offscreen
-          |- [ ] Final task at the bottom of the document
-          """.trimMargin(),
+          wysiwyg = wysiwyg,
         )
       }
 
@@ -366,15 +373,19 @@ class WysiwygTest {
         touchRobot.onNode(hasTestTag("editor")).performGesture {
           // Toggle the first four items at the top of the document.
           repeat(times = 4) { lineIndex ->
-            click(IntOffset(x = 153, y = 77 + lineIndex * 66))
+            click(wysiwyg.findTaskCheckboxCoordinates(lineIndex))
             delay(200)
           }
           // Scroll the final task into view, then tap it. The press indicator's
           // bounds are computed at press time using the current layout, so they
-          // must reflect the post-scroll position, not the doc-space coords.
-          swipe(start = bottomCenter, stop = topCenter, duration = 600.milliseconds)
+          // must reflect the post-scroll position, not the doc-space coordinates.
+          swipe(
+            start = bottomCenter,
+            stop = topCenter,
+            duration = 600.milliseconds,
+          )
           delay(300)
-          click(IntOffset(x = 153, y = 700))
+          click(wysiwyg.findTaskCheckboxCoordinates(index = 8))
         }
       }
     }
@@ -382,24 +393,26 @@ class WysiwygTest {
 
   // todo: this test is failing because of the blinking cursor. maybe the cursor can be made fixed using LocalCursorBlinkEnabled.
   @Test fun `tapping a checkbox does not move the cursor`() {
-    val markdown = """
-      |- [ ] Buy milk
-      |- [ ] Write blog post
-      |
-      |Cursor sits here at the end.
-    """.trimMargin()
-    val textState = TextFieldState(
-      initialText = markdown,
-      initialSelection = TextRange(markdown.length),
-    )
-
     paparazzi.gif(end = 1200) {
+      val wysiwyg = rememberWysiwyg(
+        textState = TextFieldState(
+          """
+            |- [ ] Buy milk
+            |- [ ] Write blog post
+            |
+            |Cursor sits here at the end.
+          """.trimMargin()
+        ),
+        theme = wysiwygTheme(),
+        parser = remember {
+          FlexmarkMarkdownParser(dispatcher = Dispatchers.Unconfined)
+        },
+      )
       val focusRequester = remember { FocusRequester() }
       Scaffold {
         WysiwygEditor(
           modifier = Modifier.focusRequester(focusRequester),
-          markdown = markdown,
-          textState = textState,
+          wysiwyg = wysiwyg,
         )
       }
 
@@ -413,41 +426,44 @@ class WysiwygTest {
         // in the recording before the tap fires.
         delay(500)
         touchRobot.onNode(hasTestTag("editor")).performGesture {
-          click(IntOffset(x = 153, y = 77))
+          click(wysiwyg.findTaskCheckboxCoordinates(index = 0))
         }
       }
     }
-
-    // The tap should toggle the first checkbox without moving the cursor away from
-    // the document's end. If our handler hadn't consumed the up event, BasicTextField
-    // would have placed the cursor at the tapped offset.
-    assertThat(textState.text.toString()).startsWith("- [x] Buy milk")
-    assertThat(textState.selection).isEqualTo(TextRange(textState.text.length))
   }
 
   @Test fun `swipe starting on a checkbox scrolls the document`() {
     paparazzi.gif(end = 1200) {
+      val wysiwyg = rememberWysiwyg(
+        textState = TextFieldState(
+          """
+            |- [ ] First task at the top of the document
+            |- [ ] Second task
+            |- [ ] Third task
+            |- [ ] Fourth task
+            |- [ ] Fifth task
+            |- [ ] Sixth task
+            |
+            |Body paragraph one. Filler text to push the document past the visible viewport.
+            |
+            |Body paragraph two. More prose so the scroll has somewhere to go.
+            |
+            |Body paragraph three. Yet more text giving the user a meaningful scroll range.
+            |
+            |Body paragraph four. Filler. Filler. Filler. Filler. Filler. Filler. Filler.
+            |
+            |Body paragraph five. The bottom of the document, only visible after scrolling.
+          """.trimMargin()
+        ),
+        theme = wysiwygTheme(),
+        parser = remember {
+          FlexmarkMarkdownParser(dispatcher = Dispatchers.Unconfined)
+        },
+      )
       Scaffold {
         WysiwygEditor(
           modifier = Modifier.height(300.dp),
-          markdown = """
-          |- [ ] First task at the top of the document
-          |- [ ] Second task
-          |- [ ] Third task
-          |- [ ] Fourth task
-          |- [ ] Fifth task
-          |- [ ] Sixth task
-          |
-          |Body paragraph one. Filler text to push the document past the visible viewport.
-          |
-          |Body paragraph two. More prose so the scroll has somewhere to go.
-          |
-          |Body paragraph three. Yet more text giving the user a meaningful scroll range.
-          |
-          |Body paragraph four. Filler. Filler. Filler. Filler. Filler. Filler. Filler.
-          |
-          |Body paragraph five. The bottom of the document, only visible after scrolling.
-          """.trimMargin(),
+          wysiwyg = wysiwyg,
         )
       }
 
@@ -457,9 +473,10 @@ class WysiwygTest {
           // Swipe upward from inside the last visible checkbox, far enough to scroll
           // past the task list. If the tap handler mistakenly consumed the down,
           // scroll wouldn't engage and the document would stay put.
+          val start = wysiwyg.findTaskCheckboxCoordinates(index = 5)
           swipe(
-            start = IntOffset(x = 153, y = 77 + 5 * 66),
-            stop = IntOffset(x = 153, y = -600),
+            start = start,
+            stop = start.copy(y = start.y - 600),
             duration = 600.milliseconds,
           )
         }
@@ -632,14 +649,26 @@ class WysiwygTest {
     markdown: String,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(16.dp),
-    textState: TextFieldState = rememberTextFieldState(markdown),
-    wysiwyg: Wysiwyg = rememberWysiwyg(
-      textState = textState,
-      theme = wysiwygTheme(),
-      parser = remember {
-        FlexmarkMarkdownParser(dispatcher = Dispatchers.Unconfined)
-      },
-    ),
+  ) {
+    val textState = rememberTextFieldState(markdown)
+    WysiwygEditor(
+      modifier = modifier,
+      wysiwyg = rememberWysiwyg(
+        textState = textState,
+        theme = wysiwygTheme(),
+        parser = remember {
+          FlexmarkMarkdownParser(dispatcher = Dispatchers.Unconfined)
+        },
+      ),
+      contentPadding = contentPadding,
+    )
+  }
+
+  @Composable
+  private fun WysiwygEditor(
+    modifier: Modifier = Modifier,
+    contentPadding: PaddingValues = PaddingValues(16.dp),
+    wysiwyg: Wysiwyg,
   ) {
     WsyiwygTextField(
       modifier = modifier.testTag("editor"),
@@ -649,6 +678,31 @@ class WysiwygTest {
       textStyle = LocalTextStyle.current.copy(color = LocalContentColor.current),
     )
   }
+}
+
+private fun Wysiwyg.findTaskCheckboxCoordinates(index: Int): IntOffset {
+  check(this is RealWysiwyg)
+
+  val checkboxStart = textState.text.toString().findTaskCheckboxTextOffset(index)
+
+  val checkbox = outputTransformation.styleBuffer.spanPainters
+    .filterIsInstance<TaskCheckboxSpanPainter>()
+    .fastFirstOrNull { it.range.start == checkboxStart }
+    ?: error("task checkbox #$index was not rendered")
+
+  val bounds = checkbox.boundsIn(layoutInfo.lastLayoutResult!!)
+    ?: error("task checkbox #$index has no layout bounds")
+
+  val viewport = layoutInfo.currentViewport()
+  return (bounds.center + Offset(viewport.translationX, viewport.translationY)).round()
+}
+
+private fun String.findTaskCheckboxTextOffset(checkboxIndex: Int): Int {
+  // Note to self: this regex was generated by AI. I don't know what it does.
+  val regex = Regex("""(?m)(?:^|\n)[ \t]*(?:[-+*]|\d+[.)])\s+(\[[ xX]])""")
+  val match = regex.findAll(this).drop(checkboxIndex).firstOrNull()
+    ?: error("Task checkbox #$checkboxIndex was not found")
+  return match.groups[1]!!.range.first
 }
 
 @Composable

@@ -176,27 +176,42 @@ class FlexmarkMarkdownParser(
         )
       }
       is TaskListItem -> {
-        val body = firstChild?.chars ?: markerSuffix.subSequence(markerSuffix.length)
+        val content = firstChild?.chars
+        val contentStartOffset = content?.startOffset ?: markerSuffix.endOffset
+        val contentEndOffset = content?.endOffset ?: contentStartOffset
+        val markerEndOffset = markerSuffix.endOffset + if (content != null) {
+          baseSequence.subSequence(markerSuffix.endOffset).countLeadingSpace().coerceAtMost(1)
+        } else {
+          0
+        }
         TaskListItemNode(
           range = LocalTextRange.span(0, chars.length),
-          listItemMarkerRange = LocalTextRange.span(0, openingMarker.length),
-          taskMarkerRange = LocalTextRange(
+          markerRange = LocalTextRange(
+            startOffset = 0,
+            endOffset = markerEndOffset - chars.startOffset,
+          ),
+          checkboxRange = LocalTextRange(
             startOffset = markerSuffix.startOffset - chars.startOffset,
             endOffset = markerSuffix.endOffset - chars.startOffset,
           ),
-          childrenRange = LocalTextRange(
-            startOffset = body.startOffset - chars.startOffset,
-            endOffset = body.endOffset - chars.startOffset,
+          contentRange = LocalTextRange(
+            startOffset = contentStartOffset - chars.startOffset,
+            endOffset = contentEndOffset - chars.startOffset,
           ),
           isChecked = isItemDoneMarker,
-          children = this.walkSubtree { it.toWysiwygMarkdownNode() },
+          content = this.walkSubtree { it.toWysiwygMarkdownNode() },
         )
       }
       is ListItem -> {
+        val markerEndOffset = openingMarker.endOffset +
+            baseSequence.subSequence(openingMarker.endOffset).countLeadingSpace().coerceAtMost(1)
         ListItemNode(
           range = LocalTextRange.span(0, chars.length),
-          markerRange = LocalTextRange.span(0, openingMarker.length),
-          children = this.walkSubtree { it.toWysiwygMarkdownNode() },
+          markerRange = LocalTextRange(
+            startOffset = 0,
+            endOffset = markerEndOffset - chars.startOffset,
+          ),
+          content = this.walkSubtree { it.toWysiwygMarkdownNode() },
         )
       }
       is Heading -> {
