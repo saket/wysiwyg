@@ -59,6 +59,14 @@ class FlexmarkMarkdownParser(
 
       // List items should start with a space.
       set(FlexmarkParser.LISTS_ITEM_MARKER_SPACE, true)
+
+      // Let an empty list item interrupt the preceding paragraph. CommonMark's default
+      // requires non-empty content to break out, which causes a one-keystroke flicker
+      // while typing a fresh "- [ ] " right below a paragraph: the empty task body
+      // folds the line back into the paragraph until the user types content.
+      set(FlexmarkParser.LISTS_EMPTY_BULLET_ITEM_INTERRUPTS_PARAGRAPH, true)
+      set(FlexmarkParser.LISTS_EMPTY_ORDERED_ITEM_INTERRUPTS_PARAGRAPH, true)
+      set(FlexmarkParser.LISTS_EMPTY_ORDERED_NON_ONE_ITEM_INTERRUPTS_PARAGRAPH, true)
     }
     .extensions(listOf(StrikethroughExtension.create(), TaskListExtension.create()))
     .build()
