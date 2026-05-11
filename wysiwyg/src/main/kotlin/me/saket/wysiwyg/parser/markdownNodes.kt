@@ -128,7 +128,7 @@ class FencedCodeBlockNode(
       )
     )
     buffer.addStyle(textStyle, range)
-    buffer.addStyle(paragraphStyle, range, trimVerticalPadding = true)
+    buffer.addStyle(paragraphStyle, range)
     buffer.addSpanPainter(
       RoundedCornerSpanPainter(
         range = range,
@@ -216,7 +216,7 @@ class BlockQuoteNode(
     )
     buffer.addStyle(SpanStyle(color = theme.markerColor), markerRange)
     buffer.addStyle(textStyle, range)
-    buffer.addStyle(paragraphStyle, range, trimVerticalPadding = true)
+    buffer.addStyle(paragraphStyle, range)
 
     buffer.addSpanPainter(BlockQuoteSpanPainter(range = range, markerColor = theme.markerColor))
     buffer.addTestTag("blockquote", range)
@@ -349,11 +349,9 @@ abstract class BasicListItemNode : MarkdownNode {
         restLine = restLineIndent,
       )
     )
-
     addStyle(
       style = paragraphStyle,
       range = TextRange(range.start, maxOf(range.end, markerRange.end, lineEnd)),
-      trimVerticalPadding = true,
     )
   }
 
