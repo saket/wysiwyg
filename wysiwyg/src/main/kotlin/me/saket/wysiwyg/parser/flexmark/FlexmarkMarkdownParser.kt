@@ -67,6 +67,12 @@ class FlexmarkMarkdownParser(
       set(FlexmarkParser.LISTS_EMPTY_BULLET_ITEM_INTERRUPTS_PARAGRAPH, true)
       set(FlexmarkParser.LISTS_EMPTY_ORDERED_ITEM_INTERRUPTS_PARAGRAPH, true)
       set(FlexmarkParser.LISTS_EMPTY_ORDERED_NON_ONE_ITEM_INTERRUPTS_PARAGRAPH, true)
+
+      // Disable setext headings (e.g., `Foo\n---`). Without this, an empty bullet
+      // typed below a paragraph (`Foo\n- `) is swallowed as a setext H2 underline
+      // before the list parser gets a chance. The factory has no off switch, so set
+      // the required marker length above anything a user could plausibly type.
+      set(FlexmarkParser.HEADING_SETEXT_MARKER_LENGTH, Int.MAX_VALUE)
     }
     .extensions(listOf(StrikethroughExtension.create(), TaskListExtension.create()))
     .build()
@@ -188,9 +194,11 @@ class FlexmarkMarkdownParser(
           // `+1` over-extends the range by one phantom character so that a keystroke at the
           // cursor (which sits at end of text) gets absorbed by the overlay's range rebasing,
           // keeping the new character inside the list paragraph until the reparse arrives.
-          val ignoredTrailingSpaces = baseSequence.subSequence(lastItem.chars.endOffset)
-            .countLeadingSpace()
-            .let { if (it > 0) it + 1 else 0 }
+          // Skip the phantom char when a newline already follows, otherwise it gobbles the
+          // newline into the list.
+          val tail = baseSequence.subSequence(lastItem.chars.endOffset)
+          val ignoredTrailingSpaces = tail.countLeadingSpace()
+            .let { if (it > 0 && tail.length == it) it + 1 else it }
           val trailingNewlines = chars.countTrailing(CharPredicate.anyOf('\n'))
           chars.length + ignoredTrailingSpaces - trailingNewlines
         }
@@ -204,11 +212,8 @@ class FlexmarkMarkdownParser(
           val content = firstChild?.chars
           val contentStartOffset = content?.startOffset ?: markerSuffix.endOffset
           val contentEndOffset = content?.endOffset ?: contentStartOffset
-          val markerEndOffset = markerSuffix.endOffset + if (content != null) {
+          val markerEndOffset = markerSuffix.endOffset +
             baseSequence.subSequence(markerSuffix.endOffset).countLeadingSpace().coerceAtMost(1)
-          } else {
-            0
-          }
           TaskListItemNode(
             range = LocalTextRange.span(0, lazyContinuationTrimmedEnd()),
             markerRange = LocalTextRange(
@@ -239,13 +244,9 @@ class FlexmarkMarkdownParser(
             level = level,
           )
         } else {
-          // Setext headings aren't supported. They use underlines using "=" for H1 or "-" for H2.
-          //
-          // This is an H1
-          // =============
-          //
-          // This is an H2
-          // -------------
+          // Unreachable in theory: setext headings are disabled at the parser via
+          // HEADING_SETEXT_MARKER_LENGTH, and ATX headings always carry non-blank text
+          // because the ATX regex requires content after the `#`s. Kept as a defensive no-op.
           return null
         }
       }
