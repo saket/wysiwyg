@@ -72,7 +72,9 @@ class FlexmarkMarkdownParser(
       // typed below a paragraph (`Foo\n- `) is swallowed as a setext H2 underline
       // before the list parser gets a chance. The factory has no off switch, so set
       // the required marker length above anything a user could plausibly type.
-      set(FlexmarkParser.HEADING_SETEXT_MARKER_LENGTH, Int.MAX_VALUE)
+      // Flexmark interpolates this into a `{n,}` quantifier, so stay well below
+      // Int.MAX_VALUE: Android's ICU regex compiler rejects past ~10 digits.
+      set(FlexmarkParser.HEADING_SETEXT_MARKER_LENGTH, 1000)
     }
     .extensions(listOf(StrikethroughExtension.create(), TaskListExtension.create()))
     .build()
