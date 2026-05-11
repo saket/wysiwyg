@@ -29,7 +29,7 @@ interface MarkdownStyleBuffer {
    *   styled block sits flush against its neighbour, matching what a plain TextField would
    *   render. Author-intended blank-line separators are preserved because they contribute a
    *   *second* `\n` that we don't touch.
-   *   https://issuetracker.google.com/u/1/issues/241426911
+   *   https://issuetracker.google.com/issues/241426911
    */
   fun addStyle(
     style: ParagraphStyle,

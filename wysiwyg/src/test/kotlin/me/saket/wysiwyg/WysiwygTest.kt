@@ -31,6 +31,7 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalCursorBlinkEnabled
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.round
@@ -472,6 +473,38 @@ class WysiwygTest {
         touchRobot.onNode(hasTestTag("editor")).performGesture {
           click(wysiwyg.findTaskCheckboxCoordinates(index = 0))
         }
+      }
+    }
+  }
+
+  // todo: this can't be fixed until https://issuetracker.google.com/issues/241426911 is resolved.
+  @Test fun `cursor at end of task list item with trailing content`() {
+    val firstLine = "- [ ] cursor should be visible at end"
+    val textState = TextFieldState(
+      initialText = """
+        |$firstLine
+        |some text
+      """.trimMargin(),
+      initialSelection = TextRange(firstLine.length),
+    )
+
+    paparazzi.gif(end = 1200) {
+      val wysiwyg = rememberWysiwyg(
+        textState = textState,
+        theme = wysiwygTheme(),
+        parser = remember {
+          FlexmarkMarkdownParser(dispatcher = Dispatchers.Unconfined)
+        },
+      )
+      val focusRequester = remember { FocusRequester() }
+      Scaffold {
+        WysiwygEditor(
+          modifier = Modifier.focusRequester(focusRequester),
+          wysiwyg = wysiwyg,
+        )
+      }
+      LaunchedEffect(focusRequester) {
+        focusRequester.requestFocus()
       }
     }
   }
