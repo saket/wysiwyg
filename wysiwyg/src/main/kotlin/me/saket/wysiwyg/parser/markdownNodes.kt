@@ -291,6 +291,7 @@ class TaskListItemNode(
       SpanStyle(fontFamily = FontFamily.Monospace),
       markerRange,
     )
+    buffer.addTestTag("monospace", markerRange)
     buffer.addStyle(
       SpanStyle(markerColor),
       TextRange(markerRange.start, checkboxRange.start),

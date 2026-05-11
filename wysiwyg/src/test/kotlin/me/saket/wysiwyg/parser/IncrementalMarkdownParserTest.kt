@@ -440,7 +440,7 @@ class IncrementalMarkdownParserTest {
       )
       assertThat(awaitItem()).isEqualTo(
         """
-        |<list>- [ ] task item</list>
+        |<list><monospace>- [ ] </monospace>task item</list>
         |lazy continuation
         |""".trimMargin()
       )
@@ -458,8 +458,8 @@ class IncrementalMarkdownParserTest {
       )
       assertThat(awaitItem()).isEqualTo(
         """
-        |<list>- [ ] One
-        |- [ ] Two</list>
+        |<list><monospace>- [ ] </monospace>One
+        |<monospace>- [ ] </monospace>Two</list>
         |T""".trimMargin()
       )
       cancelAndIgnoreRemainingEvents()
@@ -509,7 +509,7 @@ class IncrementalMarkdownParserTest {
       )
       assertThat(awaitItem()).isEqualTo(
         """
-        |<list>- [ ] task item
+        |<list><monospace>- [ ] </monospace>task item
         |      properly indented</list>
         |""".trimMargin()
       )
@@ -547,6 +547,48 @@ class IncrementalMarkdownParserTest {
         """
         |<blockquote>> quote line 1
         |> quote line 2</blockquote>
+        |""".trimMargin()
+      )
+      cancelAndIgnoreRemainingEvents()
+    }
+  }
+
+  @Test fun `trailing space after empty task list marker stays monospace`() = runTest {
+    // For a non-empty task item the marker range extends one character past "]"
+    // so the gap before the body is monospaced and lines up with the marker
+    // column. The same gap on an empty task item should also be monospace,
+    // otherwise the cursor sits in a narrower proportional space and the
+    // indentation shifts by a sub-character width as soon as the user types.
+    parser().test {
+      sendInput(
+        """
+        |- [ ]${" "}
+        |""".trimMargin()
+      )
+      assertThat(awaitItem()).isEqualTo(
+        """
+        |<list><monospace>- [ ]${" "}</monospace></list>
+        |""".trimMargin()
+      )
+      cancelAndIgnoreRemainingEvents()
+    }
+  }
+
+  @Test fun `empty list item directly under a paragraph still renders as a list`() = runTest {
+    // No blank line separates "Foo" from the empty "- " marker. The empty bullet
+    // should still interrupt the paragraph so the user sees list styling as soon
+    // as they hit enter and type "- ", before adding any content.
+    parser().test {
+      sendInput(
+        """
+        |Foo
+        |-${" "}
+        |""".trimMargin()
+      )
+      assertThat(awaitItem()).isEqualTo(
+        """
+        |Foo
+        |<list>-${" "}</list>
         |""".trimMargin()
       )
       cancelAndIgnoreRemainingEvents()
