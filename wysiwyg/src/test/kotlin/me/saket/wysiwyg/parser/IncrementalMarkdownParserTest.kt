@@ -430,6 +430,151 @@ class IncrementalMarkdownParserTest {
     }
   }
 
+  @Test fun `lazy continuation under task list item is excluded from list block`() = runTest {
+    parser().test {
+      sendInput(
+        """
+        |- [ ] task item
+        |lazy continuation
+        |""".trimMargin()
+      )
+      assertThat(awaitItem()).isEqualTo(
+        """
+        |<list>- [ ] task item</list>
+        |lazy continuation
+        |""".trimMargin()
+      )
+      cancelAndIgnoreRemainingEvents()
+    }
+
+    // A single-character body counts as a lazy continuation too. Guards against
+    // re-introducing a length-based carve-out that keeps short lines inside the list.
+    parser().test {
+      sendInput(
+        """
+        |- [ ] One
+        |- [ ] Two
+        |T""".trimMargin()
+      )
+      assertThat(awaitItem()).isEqualTo(
+        """
+        |<list>- [ ] One
+        |- [ ] Two</list>
+        |T""".trimMargin()
+      )
+      cancelAndIgnoreRemainingEvents()
+    }
+  }
+
+  @Test fun `lazy continuation under list item is excluded from list block`() = runTest {
+    parser().test {
+      sendInput(
+        """
+        |- item
+        |lazy continuation
+        |""".trimMargin()
+      )
+      assertThat(awaitItem()).isEqualTo(
+        """
+        |<list>- item</list>
+        |lazy continuation
+        |""".trimMargin()
+      )
+
+      sendInput(
+        """
+        |1. ordered item
+        |lazy continuation
+        |""".trimMargin()
+      )
+      assertThat(awaitItem()).isEqualTo(
+        """
+        |<list>1. ordered item</list>
+        |lazy continuation
+        |""".trimMargin()
+      )
+      cancelAndIgnoreRemainingEvents()
+    }
+  }
+
+  @Test fun `properly indented continuation stays inside the list block`() = runTest {
+    // Six spaces match the content column of "- [ ] " so this is a non-lazy
+    // continuation per CommonMark and should remain part of the task item.
+    parser().test {
+      sendInput(
+        """
+        |- [ ] task item
+        |      properly indented
+        |""".trimMargin()
+      )
+      assertThat(awaitItem()).isEqualTo(
+        """
+        |<list>- [ ] task item
+        |      properly indented</list>
+        |""".trimMargin()
+      )
+      cancelAndIgnoreRemainingEvents()
+    }
+  }
+
+@Test fun `lazy continuation under blockquote is excluded from blockquote range`() = runTest {
+    parser().test {
+      sendInput(
+        """
+        |> quote
+        |lazy continuation
+        |""".trimMargin()
+      )
+      assertThat(awaitItem()).isEqualTo(
+        """
+        |<blockquote>> quote</blockquote>
+        |lazy continuation
+        |""".trimMargin()
+      )
+      cancelAndIgnoreRemainingEvents()
+    }
+  }
+
+  @Test fun `prefixed continuation stays inside the blockquote range`() = runTest {
+    parser().test {
+      sendInput(
+        """
+        |> quote line 1
+        |> quote line 2
+        |""".trimMargin()
+      )
+      assertThat(awaitItem()).isEqualTo(
+        """
+        |<blockquote>> quote line 1
+        |> quote line 2</blockquote>
+        |""".trimMargin()
+      )
+      cancelAndIgnoreRemainingEvents()
+    }
+  }
+
+  @Test fun `blank line still ends the list block`() = runTest {
+    // Regression check: the trim must not over-eagerly chop off the legitimate
+    // CommonMark list-terminating blank line.
+    parser().test {
+      sendInput(
+        """
+        |- item
+        |
+        |paragraph
+        |""".trimMargin()
+      )
+      assertThat(awaitItem()).isEqualTo(
+        """
+        |<list>- item</list>
+        |
+        |paragraph
+        |""".trimMargin()
+      )
+      cancelAndIgnoreRemainingEvents()
+    }
+  }
+
   @Test fun `overlay extends across cancelled reparses while user is typing fast`() = runTest {
     val parser = IncrementalMarkdownParser(
       OneShotMarkdownParser(

@@ -161,32 +161,48 @@ class FlexmarkMarkdownParser(
         } else return null
       }
       is BlockQuote -> {
-        val totalLength = chars.length - chars.countTrailing(CharPredicate.anyOf('\n'))
+        val trimmedEnd = lazyContinuationTrimmedEnd()
+        val rangeEnd = if (trimmedEnd < chars.length) {
+          // The blockquote ends with a lazy continuation that lacks `>`. Stop the range
+          // at the trim point so that line falls outside the quote's leading padding.
+          trimmedEnd
+        } else {
+          chars.length - chars.countTrailing(CharPredicate.anyOf('\n'))
+        }
         BlockQuoteNode(
-          range = LocalTextRange.span(0, totalLength),
+          range = LocalTextRange.span(0, rangeEnd),
           markerRange = LocalTextRange.span(0, openingMarker.length),
         )
       }
       is ListBlock -> {
-        // Workaround for https://github.com/vsch/flexmark-java/issues/519. Flexmark drops
-        // trailing spaces from an empty item's `chars`, so add them back explicitly. The
-        // `+1` over-extends the range by one phantom character so that a keystroke at the
-        // cursor (which sits at end of text) gets absorbed by the overlay's range rebasing,
-        // keeping the new character inside the list paragraph until the reparse arrives.
         val lastItem = lastChild as ListItem
-        val ignoredTrailingSpaces = baseSequence.subSequence(lastItem.chars.endOffset)
-          .countLeadingSpace()
-          .let { if (it > 0) it + 1 else 0 }
-        val trailingNewlines = chars.countTrailing(CharPredicate.anyOf('\n'))
+        val lastItemTrimmedEnd = lastItem.lazyContinuationTrimmedEnd()
+        val rangeEnd = if (lastItemTrimmedEnd < lastItem.chars.length) {
+          // The last item ends with a lazy continuation line. Stop the block at the trim
+          // point so the unindented continuation falls outside the list block's leading
+          // padding, matching what most non-CommonMark editors render.
+          lastItem.chars.startOffset + lastItemTrimmedEnd - chars.startOffset
+        } else {
+          // Workaround for https://github.com/vsch/flexmark-java/issues/519. Flexmark drops
+          // trailing spaces from an empty item's `chars`, so add them back explicitly. The
+          // `+1` over-extends the range by one phantom character so that a keystroke at the
+          // cursor (which sits at end of text) gets absorbed by the overlay's range rebasing,
+          // keeping the new character inside the list paragraph until the reparse arrives.
+          val ignoredTrailingSpaces = baseSequence.subSequence(lastItem.chars.endOffset)
+            .countLeadingSpace()
+            .let { if (it > 0) it + 1 else 0 }
+          val trailingNewlines = chars.countTrailing(CharPredicate.anyOf('\n'))
+          chars.length + ignoredTrailingSpaces - trailingNewlines
+        }
         ListBlockNode(
-          range = LocalTextRange.span(0, chars.length + ignoredTrailingSpaces - trailingNewlines),
+          range = LocalTextRange.span(0, rangeEnd),
           children = this.walkSubtree { it.toWysiwygMarkdownNode() },
         )
       }
       is TaskListItem -> {
         val body = firstChild?.chars ?: markerSuffix.subSequence(markerSuffix.length)
         TaskListItemNode(
-          range = LocalTextRange.span(0, chars.length),
+          range = LocalTextRange.span(0, lazyContinuationTrimmedEnd()),
           listItemMarkerRange = LocalTextRange.span(0, openingMarker.length),
           taskMarkerRange = LocalTextRange(
             startOffset = markerSuffix.startOffset - chars.startOffset,
@@ -202,7 +218,7 @@ class FlexmarkMarkdownParser(
       }
       is ListItem -> {
         ListItemNode(
-          range = LocalTextRange.span(0, chars.length),
+          range = LocalTextRange.span(0, lazyContinuationTrimmedEnd()),
           markerRange = LocalTextRange.span(0, openingMarker.length),
           children = this.walkSubtree { it.toWysiwygMarkdownNode() },
         )
@@ -233,6 +249,62 @@ class FlexmarkMarkdownParser(
       else -> null
     }
   }
+}
+
+private fun ListItem.lazyContinuationTrimmedEnd(): Int {
+  val text = chars
+  val contentColumn = openingMarker.length + 1
+  return text.endBeforeLazyContinuation { lineStart, lineEnd ->
+    var leadingSpaces = 0
+    while (lineStart + leadingSpaces < lineEnd && text[lineStart + leadingSpaces] == ' ') {
+      leadingSpaces++
+    }
+    leadingSpaces >= contentColumn
+  }
+}
+
+private fun BlockQuote.lazyContinuationTrimmedEnd(): Int {
+  val text = chars
+  return text.endBeforeLazyContinuation { lineStart, lineEnd ->
+    var probe = lineStart
+    // CommonMark allows 0-3 spaces of indent before `>`.
+    while (probe < lineEnd && probe - lineStart < 4 && text[probe] == ' ') {
+      probe++
+    }
+    probe < lineEnd && text[probe] == '>'
+  }
+}
+
+/**
+ * Returns the offset within this text after the last line where [isProperContinuation] holds.
+ *
+ * CommonMark folds an unprefixed/unindented line below a list item or blockquote into
+ * the containing block as a lazy continuation. Visually that line looks like it isn't
+ * part of the block (no marker, no indent), so we trim the range there and let the
+ * bytes past the trim render as plain text outside the block's leading padding. A
+ * blank line already terminates both blocks, so anything past it is left alone.
+ */
+private inline fun CharSequence.endBeforeLazyContinuation(
+  isProperContinuation: (lineStart: Int, lineEnd: Int) -> Boolean,
+): Int {
+  val firstNewline = indexOf('\n')
+  if (firstNewline < 0) return length
+
+  var cursor = firstNewline + 1
+  while (cursor < length) {
+    val nextNewline = indexOf('\n', cursor).let { if (it < 0) length else it }
+    if (nextNewline == cursor) {
+      // Blank line. CommonMark already terminates the block here, so anything past is
+      // a separate block, not a lazy continuation we need to trim.
+      break
+    }
+    if (!isProperContinuation(cursor, nextNewline)) {
+      // Drop the lazy line along with the `\n` that ties it to the previous line.
+      return cursor - 1
+    }
+    cursor = nextNewline + 1
+  }
+  return length
 }
 
 /**
