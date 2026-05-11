@@ -19,6 +19,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -27,6 +28,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalCursorBlinkEnabled
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.unit.IntOffset
@@ -712,13 +714,15 @@ class WysiwygTest {
     contentPadding: PaddingValues = PaddingValues(16.dp),
     wysiwyg: Wysiwyg,
   ) {
-    WsyiwygTextField(
-      modifier = modifier.testTag("editor"),
-      contentPadding = contentPadding,
-      wysiwyg = wysiwyg,
-      cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-      textStyle = LocalTextStyle.current.copy(color = LocalContentColor.current),
-    )
+    CompositionLocalProvider(LocalCursorBlinkEnabled provides false) {
+      WsyiwygTextField(
+        modifier = modifier.testTag("editor"),
+        contentPadding = contentPadding,
+        wysiwyg = wysiwyg,
+        cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+        textStyle = LocalTextStyle.current.copy(color = LocalContentColor.current),
+      )
+    }
   }
 }
 
