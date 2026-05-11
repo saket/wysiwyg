@@ -200,44 +200,37 @@ class FlexmarkMarkdownParser(
         )
       }
       is TaskListItem -> {
-        val content = firstChild?.chars
-        val contentStartOffset = content?.startOffset ?: markerSuffix.endOffset
-        val contentEndOffset = content?.endOffset ?: contentStartOffset
-        val markerEndOffset = markerSuffix.endOffset + if (content != null) {
-          baseSequence.subSequence(markerSuffix.endOffset).countLeadingSpace().coerceAtMost(1)
+        if (openingMarker.first() in unorderedItemMarkers) {
+          val content = firstChild?.chars
+          val contentStartOffset = content?.startOffset ?: markerSuffix.endOffset
+          val contentEndOffset = content?.endOffset ?: contentStartOffset
+          val markerEndOffset = markerSuffix.endOffset + if (content != null) {
+            baseSequence.subSequence(markerSuffix.endOffset).countLeadingSpace().coerceAtMost(1)
+          } else {
+            0
+          }
+          TaskListItemNode(
+            range = LocalTextRange.span(0, lazyContinuationTrimmedEnd()),
+            markerRange = LocalTextRange(
+              startOffset = 0,
+              endOffset = markerEndOffset - chars.startOffset,
+            ),
+            checkboxRange = LocalTextRange(
+              startOffset = markerSuffix.startOffset - chars.startOffset,
+              endOffset = markerSuffix.endOffset - chars.startOffset,
+            ),
+            contentRange = LocalTextRange(
+              startOffset = contentStartOffset - chars.startOffset,
+              endOffset = contentEndOffset - chars.startOffset,
+            ),
+            isChecked = isItemDoneMarker,
+            content = this.walkSubtree { it.toWysiwygMarkdownNode() },
+          )
         } else {
-          0
+          toListItemNode()
         }
-        TaskListItemNode(
-          range = LocalTextRange.span(0, lazyContinuationTrimmedEnd()),
-          markerRange = LocalTextRange(
-            startOffset = 0,
-            endOffset = markerEndOffset - chars.startOffset,
-          ),
-          checkboxRange = LocalTextRange(
-            startOffset = markerSuffix.startOffset - chars.startOffset,
-            endOffset = markerSuffix.endOffset - chars.startOffset,
-          ),
-          contentRange = LocalTextRange(
-            startOffset = contentStartOffset - chars.startOffset,
-            endOffset = contentEndOffset - chars.startOffset,
-          ),
-          isChecked = isItemDoneMarker,
-          content = this.walkSubtree { it.toWysiwygMarkdownNode() },
-        )
       }
-      is ListItem -> {
-        val markerEndOffset = openingMarker.endOffset +
-            baseSequence.subSequence(openingMarker.endOffset).countLeadingSpace().coerceAtMost(1)
-        ListItemNode(
-          range = LocalTextRange.span(0, lazyContinuationTrimmedEnd()),
-          markerRange = LocalTextRange(
-            startOffset = 0,
-            endOffset = markerEndOffset - chars.startOffset,
-          ),
-          content = this.walkSubtree { it.toWysiwygMarkdownNode() },
-        )
-      }
+      is ListItem -> toListItemNode()
       is Heading -> {
         if (isAtxHeading && text.isNotBlank) {
           HeadingNode(
@@ -263,6 +256,23 @@ class FlexmarkMarkdownParser(
       }
       else -> null
     }
+  }
+
+  private fun ListItem.toListItemNode(): ListItemNode {
+    val markerEndOffset = openingMarker.endOffset +
+        baseSequence.subSequence(openingMarker.endOffset).countLeadingSpace().coerceAtMost(1)
+    return ListItemNode(
+      range = LocalTextRange.span(0, lazyContinuationTrimmedEnd()),
+      markerRange = LocalTextRange(
+        startOffset = 0,
+        endOffset = markerEndOffset - chars.startOffset,
+      ),
+      content = this.walkSubtree { it.toWysiwygMarkdownNode() },
+    )
+  }
+
+  private companion object {
+    private const val unorderedItemMarkers = "-+*"
   }
 }
 
