@@ -232,13 +232,6 @@ class ListBlockNode(
   override fun MarkdownNodeRenderScope.render(buffer: MarkdownStyleBuffer) {
     val range = range.resolve()
     if (range != null) {
-      val paragraphStyle = ParagraphStyle(
-        textIndent = TextIndent(
-          firstLine = theme.listBlockLeadingPadding,
-          restLine = theme.listBlockLeadingPadding,
-        )
-      )
-      buffer.addStyle(paragraphStyle, range, trimVerticalPadding = true)
       buffer.addTestTag("list", range)
     }
     children.fastForEach { child ->
@@ -251,18 +244,23 @@ class ListBlockNode(
 class ListItemNode(
   override val range: LocalTextRange,
   val markerRange: LocalTextRange,
-  val children: List<MarkdownChildNode>,
-) : MarkdownNode {
+  val content: List<MarkdownChildNode>,
+) : BasicListItemNode() {
 
   override fun MarkdownNodeRenderScope.render(buffer: MarkdownStyleBuffer) {
+    val range = range.resolve() ?: return
     val markerRange = markerRange.resolve(dropOnEdit = true) ?: return
-    val prefixRange = TextRange(markerRange.start, markerRange.end + 1)
+
+    buffer.addParagraphStyleToContent(
+      range = range,
+      markerRange = markerRange,
+    )
     buffer.addStyle(
       SpanStyle(color = theme.markerColor, fontFamily = FontFamily.Monospace),
-      prefixRange,
+      markerRange,
     )
 
-    children.fastForEach { child ->
+    content.fastForEach { child ->
       child.render(buffer)
     }
   }
@@ -271,50 +269,105 @@ class ListItemNode(
 @Poko
 class TaskListItemNode(
   override val range: LocalTextRange,
-  val listItemMarkerRange: LocalTextRange,
-  val taskMarkerRange: LocalTextRange,
-  val childrenRange: LocalTextRange,
+  val markerRange: LocalTextRange,
+  val checkboxRange: LocalTextRange,
+  val contentRange: LocalTextRange,
   val isChecked: Boolean,
-  val children: List<MarkdownChildNode>,
-) : MarkdownNode {
+  val content: List<MarkdownChildNode>,
+) : BasicListItemNode() {
 
   override fun MarkdownNodeRenderScope.render(buffer: MarkdownStyleBuffer) {
-    val itemRange = range.resolve() ?: return
-    val listItemMarkerRange = listItemMarkerRange.resolve(dropOnEdit = true) ?: return
-    val taskMarkerRange = taskMarkerRange.resolve(dropOnEdit = true) ?: return
+    val range = range.resolve() ?: return
+    val markerRange = markerRange.resolve(dropOnEdit = true) ?: return
+    val checkboxRange = checkboxRange.resolve(dropOnEdit = true) ?: return
 
-    val prefixRange = TextRange(itemRange.start, itemRange.start + childrenRange.start)
-    buffer.addStyle(SpanStyle(fontFamily = FontFamily.Monospace), prefixRange)
+    buffer.addParagraphStyleToContent(
+      range = range,
+      markerRange = markerRange,
+    )
 
     val markerColor = if (isChecked) theme.struckThroughTextColor else theme.markerColor
     buffer.addStyle(
+      SpanStyle(fontFamily = FontFamily.Monospace),
+      markerRange,
+    )
+    buffer.addStyle(
       SpanStyle(markerColor),
-      listItemMarkerRange
+      TextRange(markerRange.start, checkboxRange.start),
     )
     buffer.addStyle(
       SpanStyle(color = markerColor),
-      taskMarkerRange,
+      checkboxRange,
     )
     if (isChecked) {
-      val textRange = childrenRange.resolve()
-      if (textRange != null) {
+      val contentRange = contentRange.resolve()
+      if (contentRange != null) {
         buffer.addStyle(
           SpanStyle(
             color = theme.struckThroughTextColor,
             textDecoration = TextDecoration.LineThrough,
           ),
-          textRange,
+          contentRange,
         )
       }
     }
 
     buffer.addSpanPainter(
-      TaskCheckboxSpanPainter(range = taskMarkerRange, isChecked = isChecked),
+      TaskCheckboxSpanPainter(range = checkboxRange, isChecked = isChecked),
     )
 
-    children.fastForEach { child ->
+    content.fastForEach { child ->
       child.render(buffer)
     }
+  }
+}
+
+abstract class BasicListItemNode : MarkdownNode {
+
+  context(scope: MarkdownNodeRenderScope)
+  protected fun MarkdownStyleBuffer.addParagraphStyleToContent(
+    range: TextRange,
+    markerRange: TextRange,
+  ) {
+    val lineEnd = unstyledText.lineEndAfter(range.start)
+
+    val hasContentAfterMarker = unstyledText.hasContentBetween(markerRange.end, lineEnd)
+    val restLineIndent = if (hasContentAfterMarker) {
+      // todo: compute this dynamically based on the TextLayoutResult.
+      // Compose asks for hanging indents in text units, but we only know the marker's
+      // source length. Treat each monospace marker character as roughly 2/3 of the
+      // base list padding, then add that to the first-line padding so wrapped lines
+      // start near the content column.
+      scope.theme.listBlockLeadingPadding * (1f + markerRange.length / 1.5f)
+    } else {
+      scope.theme.listBlockLeadingPadding
+    }
+    val paragraphStyle = ParagraphStyle(
+      textIndent = TextIndent(
+        firstLine = scope.theme.listBlockLeadingPadding,
+        restLine = restLineIndent,
+      )
+    )
+
+    addStyle(
+      style = paragraphStyle,
+      range = TextRange(range.start, maxOf(range.end, markerRange.end, lineEnd)),
+      trimVerticalPadding = true,
+    )
+  }
+
+  protected fun String.lineEndAfter(offset: Int): Int {
+    val newline = indexOf('\n', startIndex = offset)
+    return if (newline == -1) length else newline
+  }
+
+  protected fun String.hasContentBetween(start: Int, end: Int): Boolean {
+    for (index in start.coerceAtMost(length) until end.coerceAtMost(length)) {
+      if (!this[index].isWhitespace()) {
+        return true
+      }
+    }
+    return false
   }
 }
 

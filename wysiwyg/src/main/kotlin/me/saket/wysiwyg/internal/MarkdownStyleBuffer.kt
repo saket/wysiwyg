@@ -34,7 +34,7 @@ interface MarkdownStyleBuffer {
   fun addStyle(
     style: ParagraphStyle,
     range: TextRange,
-    trimVerticalPadding: Boolean = false,
+    trimVerticalPadding: Boolean = false, // todo: default to true?
   )
 
   fun addSpanPainter(
