@@ -243,19 +243,15 @@ class ListBlockNode(
 @Poko
 class ListItemNode(
   override val range: LocalTextRange,
-  val markerRange: LocalTextRange,
+  override val markerRange: LocalTextRange,
   val content: List<MarkdownChildNode>,
-) : BasicListItemNode() {
+) : AbstractListItemNode {
 
-  override fun MarkdownNodeRenderScope.render(buffer: MarkdownStyleBuffer) {
-    val range = range.resolve() ?: return
-    val markerRange = markerRange.resolve(dropOnEdit = true) ?: return
-
-    addParagraphStyleToContent(
-      buffer = buffer,
-      range = range,
-      markerRange = markerRange,
-    )
+  override fun MarkdownNodeRenderScope.renderContent(
+    buffer: MarkdownStyleBuffer,
+    range: TextRange,
+    markerRange: TextRange
+  ) {
     buffer.addStyle(
       SpanStyle(color = theme.markerColor, fontFamily = FontFamily.Monospace),
       markerRange,
@@ -270,30 +266,25 @@ class ListItemNode(
 @Poko
 class TaskListItemNode(
   override val range: LocalTextRange,
-  val markerRange: LocalTextRange,
+  override val markerRange: LocalTextRange,
   val checkboxRange: LocalTextRange,
   val contentRange: LocalTextRange,
   val isChecked: Boolean,
   val content: List<MarkdownChildNode>,
-) : BasicListItemNode() {
+) : AbstractListItemNode {
 
-  override fun MarkdownNodeRenderScope.render(buffer: MarkdownStyleBuffer) {
-    val range = range.resolve() ?: return
-    val markerRange = markerRange.resolve(dropOnEdit = true) ?: return
-    val checkboxRange = checkboxRange.resolve(dropOnEdit = true) ?: return
-
-    addParagraphStyleToContent(
-      buffer = buffer,
-      range = range,
-      markerRange = markerRange,
-    )
-
+  override fun MarkdownNodeRenderScope.renderContent(
+    buffer: MarkdownStyleBuffer,
+    range: TextRange,
+    markerRange: TextRange
+  ) {
     val markerColor = if (isChecked) theme.struckThroughTextColor else theme.markerColor
     buffer.addStyle(
       SpanStyle(fontFamily = FontFamily.Monospace),
       markerRange,
     )
-    buffer.addTestTag("monospace", markerRange)
+
+    val checkboxRange = checkboxRange.resolve(dropOnEdit = true) ?: return
     buffer.addStyle(
       SpanStyle(markerColor),
       TextRange(markerRange.start, checkboxRange.start),
@@ -318,6 +309,7 @@ class TaskListItemNode(
     buffer.addSpanPainter(
       TaskCheckboxSpanPainter(range = checkboxRange, isChecked = isChecked),
     )
+    buffer.addTestTag("monospace", markerRange)
 
     content.fastForEach { child ->
       child.render(buffer)
@@ -325,9 +317,30 @@ class TaskListItemNode(
   }
 }
 
-abstract class BasicListItemNode : MarkdownNode {
+interface AbstractListItemNode : MarkdownNode {
+  override val range: LocalTextRange
+  val markerRange: LocalTextRange
 
-  protected fun MarkdownNodeRenderScope.addParagraphStyleToContent(
+  fun MarkdownNodeRenderScope.renderContent(
+    buffer: MarkdownStyleBuffer,
+    range: TextRange,
+    markerRange: TextRange,
+  )
+
+  override fun MarkdownNodeRenderScope.render(buffer: MarkdownStyleBuffer) {
+    val range = range.resolve() ?: return
+    val markerRange = markerRange.resolve(dropOnEdit = true) ?: return
+
+    addParagraphStyleToContent(
+      buffer = buffer,
+      range = range,
+      markerRange = markerRange,
+    )
+
+    renderContent(buffer, range, markerRange)
+  }
+
+  private fun MarkdownNodeRenderScope.addParagraphStyleToContent(
     buffer: MarkdownStyleBuffer,
     range: TextRange,
     markerRange: TextRange,
