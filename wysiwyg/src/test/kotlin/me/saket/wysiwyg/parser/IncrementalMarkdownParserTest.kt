@@ -15,9 +15,9 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
+@Config(sdk = [35])
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [35])
 class IncrementalMarkdownParserTest {
 
   private fun parser(): IncrementalMarkdownParser =
@@ -572,7 +572,7 @@ class IncrementalMarkdownParserTest {
       )
       assertThat(awaitItem()).isEqualTo(
         """
-        |<list><monospace>- [ ]${" "}</monospace></list>
+        |<list><monospace>- [ ]${" "}</list></monospace>
         |""".trimMargin()
       )
       cancelAndIgnoreRemainingEvents()
