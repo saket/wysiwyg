@@ -22,26 +22,30 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
 import androidx.tracing.trace
 import me.saket.wysiwyg.extendedspans.toggleTaskCheckboxesOnClick
+import me.saket.wysiwyg.internal.RealMarkdownOutputTransformation
 import me.saket.wysiwyg.internal.RealWysiwyg
+import me.saket.wysiwyg.parser.AnnotatedStringMarkdownRendererFactory
+import me.saket.wysiwyg.parser.MarkdownRenderer
+import me.saket.wysiwyg.parser.rememberMarkdownRenderScope
 
 // todo: doc.
 @Composable
 fun WsyiwygTextField(
   wysiwyg: Wysiwyg,
+  theme: WysiwygTheme,
   modifier: Modifier = Modifier,
+  markdownRenderer: MarkdownRenderer.Factory = AnnotatedStringMarkdownRendererFactory,
   enabled: Boolean = true,
   readOnly: Boolean = false,
   inputTransformation: InputTransformation? = null,
@@ -58,8 +62,10 @@ fun WsyiwygTextField(
   contentPadding: PaddingValues = PaddingValues(0.dp),
 ) {
   check(wysiwyg is RealWysiwyg)
-  val spanPainters = remember(wysiwyg) {
-    MarkdownSpanPainters(wysiwyg)
+
+  val renderScope = rememberMarkdownRenderScope(theme, textStyle, wysiwyg.layoutInfo)
+  val markdownOutputTransformation = remember(wysiwyg, markdownRenderer, renderScope) {
+    RealMarkdownOutputTransformation(wysiwyg, markdownRenderer, renderScope)
   }
 
   // todo: i don't love this block. can it be offloaded into a rememberTextLayoutInfo()?
@@ -76,17 +82,12 @@ fun WsyiwygTextField(
     }
   }
 
-  // todo: threading these through the OutputTransformation smells bad.
-  wysiwyg.outputTransformation.textMeasurer = rememberTextMeasurer()
-  wysiwyg.outputTransformation.textStyle = textStyle
-  wysiwyg.outputTransformation.density = density
-
   BasicTextField(
     state = wysiwyg.textState,
     modifier = modifier
       .onSizeChanged { layoutInfo.viewportHeightPx = it.height.toFloat() }
-      .drawBehind { spanPainters.drawBehind() }
-      .toggleTaskCheckboxesOnClick(wysiwyg)
+      .drawSpanPainters(wysiwyg)
+      .toggleTaskCheckboxesOnClick(theme, wysiwyg)
       .padding(contentPadding),
     enabled = enabled,
     readOnly = readOnly,
@@ -97,7 +98,7 @@ fun WsyiwygTextField(
     interactionSource = interactionSource,
     cursorBrush = cursorBrush,
     inputTransformation = inputTransformation.maybeThen(wysiwyg.inputTransformation),
-    outputTransformation = outputTransformation.maybeThen(wysiwyg.outputTransformation),
+    outputTransformation = outputTransformation.maybeThen(markdownOutputTransformation),
     decorator = decorator,
     scrollState = scrollState,
     onTextLayout = { result ->
@@ -141,16 +142,14 @@ private object WsyiwygTextFieldDefaults {
   val CursorBrush = SolidColor(Color.Black)
 }
 
-@Stable
-private class MarkdownSpanPainters(val wysiwyg: RealWysiwyg) {
-  context(scope: DrawScope)
-  fun drawBehind() {
+private fun Modifier.drawSpanPainters(wysiwyg: RealWysiwyg): Modifier {
+  return this.drawBehind {
     trace("Wysiwyg:drawBehind") {
-      val layoutResult = wysiwyg.layoutInfo.lastLayoutResult ?: return
-      val painters = wysiwyg.outputTransformation.styleBuffer.spanPainters
+      val layoutResult = wysiwyg.layoutInfo.lastLayoutResult ?: return@trace
+      val painters = wysiwyg.currentRenderResult.spanPainters
       val viewport = wysiwyg.layoutInfo.currentViewport()
 
-      scope.translate(viewport.translationX, viewport.translationY) {
+      translate(viewport.translationX, viewport.translationY) {
         val translatedScope = this
         painters.fastForEach { painter ->
           if (viewport.intersects(painter.range)) {

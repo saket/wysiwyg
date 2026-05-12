@@ -52,7 +52,6 @@ fun WysiwygEditor(
 
   val wysiwyg = rememberWysiwyg(
     textState = textState,
-    theme = wysiwygTheme(),
     parser = remember { FlexmarkMarkdownParser() },
   )
 
@@ -68,6 +67,7 @@ fun WysiwygEditor(
         modifier = Modifier.focusRequester(focusRequester),
         contentPadding = PaddingValues(16.dp),
         wysiwyg = wysiwyg,
+        theme = wysiwygTheme(),
         cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
         textStyle = LocalTextStyle.current.copy(color = LocalContentColor.current),
       )

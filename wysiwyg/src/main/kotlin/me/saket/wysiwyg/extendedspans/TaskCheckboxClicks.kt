@@ -25,11 +25,17 @@ import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
+import me.saket.wysiwyg.WysiwygTheme
 import me.saket.wysiwyg.internal.RealWysiwyg
 
 @Composable
-internal fun Modifier.toggleTaskCheckboxesOnClick(wysiwyg: RealWysiwyg): Modifier {
-  val clicks = remember(wysiwyg) { TaskCheckboxClicks(wysiwyg) }
+internal fun Modifier.toggleTaskCheckboxesOnClick(
+  theme: WysiwygTheme,
+  wysiwyg: RealWysiwyg,
+): Modifier {
+  val clicks = remember(theme, wysiwyg) {
+    TaskCheckboxClicks(theme, wysiwyg)
+  }
   LaunchedEffect(clicks) {
     clicks.observe()
   }
@@ -46,13 +52,17 @@ internal fun Modifier.toggleTaskCheckboxesOnClick(wysiwyg: RealWysiwyg): Modifie
  * indicator on the tapped marker for the duration of the press.
  */
 @Stable
-internal class TaskCheckboxClicks(private val wysiwyg: RealWysiwyg) {
+internal class TaskCheckboxClicks(
+  private val theme: WysiwygTheme,
+  private val wysiwyg: RealWysiwyg,
+) {
   private val presses = MutableSharedFlow<CheckboxPressEvent>(
     // extraBufferCapacity = 1 covers the startup race window where the gesture
     // handler may emit before observe() first suspends in collect.
     extraBufferCapacity = 1,
     onBufferOverflow = BufferOverflow.DROP_OLDEST,
   )
+
   private val activePresses = mutableStateListOf<CheckboxPressEvent>()
 
   suspend fun observe() {
@@ -71,7 +81,7 @@ internal class TaskCheckboxClicks(private val wysiwyg: RealWysiwyg) {
 
   fun DrawScope.drawIndicators() {
     val viewport = wysiwyg.layoutInfo.currentViewport()
-    val color = wysiwyg.theme.markerColor
+    val color = theme.markerColor // todo: can this use the text color instead?
 
     translate(viewport.translationX, viewport.translationY) {
       activePresses.fastForEach { press ->
@@ -135,7 +145,7 @@ internal class TaskCheckboxClicks(private val wysiwyg: RealWysiwyg) {
     )
 
     val offsetUnderTouch = layoutResult.getOffsetForPosition(docPosition)
-    wysiwyg.outputTransformation.styleBuffer.spanPainters.fastForEach { painter ->
+    wysiwyg.currentRenderResult.spanPainters.fastForEach { painter ->
       if (painter is TaskCheckboxSpanPainter) {
         if (painter.range.start > offsetUnderTouch) {
           // This painter starts past the touch. Every later one starts even later, so bail.

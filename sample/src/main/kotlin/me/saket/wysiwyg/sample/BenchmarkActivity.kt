@@ -75,12 +75,12 @@ class BenchmarkActivity : AppCompatActivity() {
   ) {
     val wysiwyg = rememberWysiwyg(
       textState = rememberTextFieldState(initialText = markdown),
-      theme = wysiwygTheme(),
       parser = remember { FlexmarkMarkdownParser() },
     )
     WsyiwygTextField(
       modifier = modifier,
       wysiwyg = wysiwyg,
+      theme = wysiwygTheme(),
       cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
       textStyle = LocalTextStyle.current.copy(color = LocalContentColor.current),
       contentPadding = contentPadding,

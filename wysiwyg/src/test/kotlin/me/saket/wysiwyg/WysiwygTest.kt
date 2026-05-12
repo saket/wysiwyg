@@ -301,7 +301,6 @@ class WysiwygTest {
       }
       val wysiwyg = rememberWysiwyg(
         textState = textState,
-        theme = wysiwygTheme(),
         parser = parser,
       )
       val focusRequester = remember { FocusRequester() }
@@ -360,7 +359,6 @@ class WysiwygTest {
       val focusRequester = remember { FocusRequester() }
       val wysiwyg = rememberWysiwyg(
         textState = textState,
-        theme = wysiwygTheme(),
         parser = remember {
           FlexmarkMarkdownParser(dispatcher = Dispatchers.Unconfined)
         },
@@ -401,7 +399,6 @@ class WysiwygTest {
             |- [ ] Final task at the bottom of the document
           """.trimMargin()
         ),
-        theme = wysiwygTheme(),
         parser = remember {
           FlexmarkMarkdownParser(dispatcher = Dispatchers.Unconfined)
         },
@@ -448,7 +445,6 @@ class WysiwygTest {
             |Cursor sits here at the end.
           """.trimMargin()
         ),
-        theme = wysiwygTheme(),
         parser = remember {
           FlexmarkMarkdownParser(dispatcher = Dispatchers.Unconfined)
         },
@@ -491,7 +487,6 @@ class WysiwygTest {
     paparazzi.gif(end = 1200) {
       val wysiwyg = rememberWysiwyg(
         textState = textState,
-        theme = wysiwygTheme(),
         parser = remember {
           FlexmarkMarkdownParser(dispatcher = Dispatchers.Unconfined)
         },
@@ -532,7 +527,6 @@ class WysiwygTest {
             |Body paragraph five. The bottom of the document, only visible after scrolling.
           """.trimMargin()
         ),
-        theme = wysiwygTheme(),
         parser = remember {
           FlexmarkMarkdownParser(dispatcher = Dispatchers.Unconfined)
         },
@@ -732,7 +726,6 @@ class WysiwygTest {
       modifier = modifier,
       wysiwyg = rememberWysiwyg(
         textState = textState,
-        theme = wysiwygTheme(),
         parser = remember {
           FlexmarkMarkdownParser(dispatcher = Dispatchers.Unconfined)
         },
@@ -752,6 +745,7 @@ class WysiwygTest {
         modifier = modifier.testTag("editor"),
         contentPadding = contentPadding,
         wysiwyg = wysiwyg,
+        theme = wysiwygTheme(),
         cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
         textStyle = LocalTextStyle.current.copy(color = LocalContentColor.current),
       )
@@ -764,7 +758,7 @@ private fun Wysiwyg.findTaskCheckboxCoordinates(index: Int): IntOffset {
 
   val checkboxStart = textState.text.toString().findTaskCheckboxTextOffset(index)
 
-  val checkbox = outputTransformation.styleBuffer.spanPainters
+  val checkbox = currentRenderResult.spanPainters
     .filterIsInstance<TaskCheckboxSpanPainter>()
     .fastFirstOrNull { it.range.start == checkboxStart }
     ?: error("task checkbox #$index was not rendered")

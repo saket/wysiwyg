@@ -220,44 +220,45 @@ class IncrementalMarkdownParserTest {
     }
   }
 
-  @Test fun `editing a later list marker drops only that item while tail content stays aligned`() = runTest {
-    parser().test {
-      sendInput(
-        """
+  @Test fun `editing a later list marker drops only that item while tail content stays aligned`() =
+    runTest {
+      parser().test {
+        sendInput(
+          """
         |- first
         |- second
         |
         |tail
         |""".trimMargin()
-      )
-      assertThat(awaitItem()).isEqualTo(
-        """
+        )
+        assertThat(awaitItem()).isEqualTo(
+          """
         |<list>- first
         |- second</list>
         |
         |tail
         |""".trimMargin()
-      )
+        )
 
-      sendInput(
-        """
+        sendInput(
+          """
         |- first
         | second
         |
         |tail
         |""".trimMargin()
-      )
-      assertThat(awaitItem()).isEqualTo(
-        """
+        )
+        assertThat(awaitItem()).isEqualTo(
+          """
         |<list>- first
         | second</list>
         |
         |tail
         |""".trimMargin()
-      )
-      cancelAndIgnoreRemainingEvents()
+        )
+        cancelAndIgnoreRemainingEvents()
+      }
     }
-  }
 
   @Test fun `editing a nested list keeps unaffected siblings aligned`() = runTest {
     parser().test {
@@ -307,16 +308,17 @@ class IncrementalMarkdownParserTest {
     }
   }
 
-  @Test fun `editing a link marker drops only the link while preserving following content`() = runTest {
-    parser().test {
-      sendInput("[label](url) tail **bold**")
-      assertThat(awaitItem()).isEqualTo("<link>[label](url)</link> tail <b>**bold**</b>")
+  @Test fun `editing a link marker drops only the link while preserving following content`() =
+    runTest {
+      parser().test {
+        sendInput("[label](url) tail **bold**")
+        assertThat(awaitItem()).isEqualTo("<link>[label](url)</link> tail <b>**bold**</b>")
 
-      sendInput("[label]url) tail **bold**")
-      assertThat(awaitItem()).isEqualTo("[label]url) tail <b>**bold**</b>")
-      cancelAndIgnoreRemainingEvents()
+        sendInput("[label]url) tail **bold**")
+        assertThat(awaitItem()).isEqualTo("[label]url) tail <b>**bold**</b>")
+        cancelAndIgnoreRemainingEvents()
+      }
     }
-  }
 
   @Test fun `block quotes headings and inline spans survive overlay shifts together`() = runTest {
     parser().test {
@@ -361,40 +363,41 @@ class IncrementalMarkdownParserTest {
     }
   }
 
-  @Test fun `touching a heading marker drops only that heading while later nodes still render`() = runTest {
-    parser().test {
-      sendInput(
-        """
+  @Test fun `touching a heading marker drops only that heading while later nodes still render`() =
+    runTest {
+      parser().test {
+        sendInput(
+          """
         |# heading
         |
         |**bold**
         |""".trimMargin()
-      )
-      assertThat(awaitItem()).isEqualTo(
-        """
+        )
+        assertThat(awaitItem()).isEqualTo(
+          """
         |<h1># heading</h1>
         |
         |<b>**bold**</b>
         |""".trimMargin()
-      )
+        )
 
-      sendInput(
-        """
+        sendInput(
+          """
         |#heading
         |
         |**bold**
         |""".trimMargin()
-      )
-      assertThat(awaitItem()).isEqualTo(
-        """
+        )
+        assertThat(awaitItem()).isEqualTo(
+          """
         |#heading
         |
         |<b>**bold**</b>
         |""".trimMargin()
-      )
-      cancelAndIgnoreRemainingEvents()
+        )
+        cancelAndIgnoreRemainingEvents()
+      }
     }
-  }
 
   @Test fun `trailing plain text after a composite node stays aligned after edits`() = runTest {
     parser().test {
@@ -522,7 +525,7 @@ class IncrementalMarkdownParserTest {
     }
   }
 
-@Test fun `lazy continuation under blockquote is excluded from blockquote range`() = runTest {
+  @Test fun `lazy continuation under blockquote is excluded from blockquote range`() = runTest {
     parser().test {
       sendInput(
         """

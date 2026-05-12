@@ -231,7 +231,7 @@ class FlexmarkMarkdownParser(
               endOffset = contentEndOffset - chars.startOffset,
             ),
             isChecked = isItemDoneMarker,
-            content = this.walkSubtree { it.toWysiwygMarkdownNode() },
+            children = this.walkSubtree { it.toWysiwygMarkdownNode() },
           )
         } else {
           toListItemNode()
@@ -270,7 +270,7 @@ class FlexmarkMarkdownParser(
         startOffset = 0,
         endOffset = markerEndOffset - chars.startOffset,
       ),
-      content = this.walkSubtree { it.toWysiwygMarkdownNode() },
+      children = this.walkSubtree { it.toWysiwygMarkdownNode() },
     )
   }
 
