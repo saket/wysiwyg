@@ -20,34 +20,30 @@ internal class HtmlMarkdownRenderer(
   private val changes: List<TextChangeListSnapshot>,
 ) : MarkdownRenderer {
   private val tags = mutableListOf<TagInsertion>()
-  private var offsetInRoot: Int = 0
 
   override fun MarkdownRenderScope.render(node: MarkdownNode): RenderResult {
-    when (node) {
-      is BoldNode -> {
-        emit("b", node.range, listOf(node.openingMarkerRange, node.closingMarkerRange))
+    walkMarkdownNodes(node, changes) { node ->
+      when (node) {
+        is BoldNode -> {
+          emitTag("b", node.range, listOf(node.openingMarkerRange, node.closingMarkerRange))
+        }
+        is StrikeThroughNode -> {
+          emitTag("s", node.range, listOf(node.openingMarkerRange, node.closingMarkerRange))
+        }
+        is LinkNode -> emitTag(
+          tag = "link",
+          range = node.range,
+          markers = listOf(
+            node.textOpeningMarkerRange, node.textClosingMarkerRange,
+            node.urlOpeningMarkerRange, node.urlClosingMarkerRange,
+          ),
+        )
+        is BlockQuoteNode -> emitTag("blockquote", node.range, listOf(node.markerRange))
+        is ListBlockNode -> emitTag("list", node.range)
+        is TaskListItemNode -> emitTaskListItem(node)
+        is HeadingNode -> emitHeading(node)
+        else -> {}
       }
-      is StrikeThroughNode -> {
-        emit("s", node.range, listOf(node.openingMarkerRange, node.closingMarkerRange))
-      }
-      is LinkNode -> emit(
-        tag = "link",
-        range = node.range,
-        markers = listOf(
-          node.textOpeningMarkerRange, node.textClosingMarkerRange,
-          node.urlOpeningMarkerRange, node.urlClosingMarkerRange,
-        ),
-      )
-      is BlockQuoteNode -> emit("blockquote", node.range, listOf(node.markerRange))
-      is ListBlockNode -> emit("list", node.range)
-      is TaskListItemNode -> emitTaskListItem(node)
-      is HeadingNode -> emitHeading(node)
-      else -> {}
-    }
-    for (child in node.children) {
-      offsetInRoot += child.offsetInParent
-      this.render(child.node)
-      offsetInRoot -= child.offsetInParent
     }
     return RenderResult.Empty
   }
@@ -65,7 +61,7 @@ internal class HtmlMarkdownRenderer(
     }
   }
 
-  private fun emit(
+  private fun MarkdownNodeWalkScope.emitTag(
     tag: String,
     range: LocalTextRange,
     markers: List<LocalTextRange> = emptyList()
@@ -78,30 +74,18 @@ internal class HtmlMarkdownRenderer(
     tags += TagInsertion(resolved.end, "</$tag>")
   }
 
-  private fun emitTaskListItem(node: TaskListItemNode) {
+  private fun MarkdownNodeWalkScope.emitTaskListItem(node: TaskListItemNode) {
     val markerRange = node.markerRange.resolve(dropOnEdit = true) ?: return
     tags += TagInsertion(markerRange.start, "<monospace>")
     tags += TagInsertion(markerRange.end, "</monospace>")
   }
 
-  private fun emitHeading(node: HeadingNode) {
+  private fun MarkdownNodeWalkScope.emitHeading(node: HeadingNode) {
     val range = node.range.resolve() ?: return
     val openingMarkerRange = node.openingMarkerRange.resolve() ?: return
     if (source.isAtxHeadingMarker(openingMarkerRange)) {
       tags += TagInsertion(range.start, "<h${node.level}>")
       tags += TagInsertion(range.end, "</h${node.level}>")
-    }
-  }
-
-  private fun LocalTextRange.resolve(dropOnEdit: Boolean = false): TextRange? {
-    val rangeInRoot = TextRange(
-      start = localStart + offsetInRoot,
-      end = localEnd + offsetInRoot,
-    )
-    return if (dropOnEdit && changes.editsOverlap(rangeInRoot)) {
-      null
-    } else {
-      rangeInRoot.rebased(changes)
     }
   }
 }

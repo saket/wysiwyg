@@ -29,8 +29,8 @@ import me.saket.wysiwyg.parser.ItalicNode
 import me.saket.wysiwyg.parser.LinkNode
 import me.saket.wysiwyg.parser.ListBlockNode
 import me.saket.wysiwyg.parser.ListItemNode
-import me.saket.wysiwyg.parser.LocalTextRange
 import me.saket.wysiwyg.parser.MarkdownNode
+import me.saket.wysiwyg.parser.MarkdownNodeWalkScope
 import me.saket.wysiwyg.parser.MarkdownRenderScope
 import me.saket.wysiwyg.parser.MarkdownRenderer
 import me.saket.wysiwyg.parser.RenderResult
@@ -38,69 +38,36 @@ import me.saket.wysiwyg.parser.StrikeThroughNode
 import me.saket.wysiwyg.parser.TaskListItemNode
 import me.saket.wysiwyg.parser.TextChangeListSnapshot
 import me.saket.wysiwyg.parser.ThematicBreakNode
-import me.saket.wysiwyg.parser.editsOverlap
-import me.saket.wysiwyg.parser.rebased
+import me.saket.wysiwyg.parser.walkMarkdownNodes
 
 internal class AnnotatedStringMarkdownRenderer(
   private val buffer: TextFieldBuffer,
   private val unstyledText: String,
   private val changes: List<TextChangeListSnapshot>,
 ) : MarkdownRenderer {
-  private var offsetInRoot: Int = 0
   private val spanPainters = mutableListOf<MarkdownSpanPainter>()
 
   override fun MarkdownRenderScope.render(node: MarkdownNode): RenderResult {
-    when (node) {
-      is BoldNode -> renderBold(node)
-      is ItalicNode -> renderItalic(node)
-      is InlineCodeNode -> renderInlineCode(node)
-      is FencedCodeBlockNode -> renderFencedCodeBlock(node)
-      is StrikeThroughNode -> renderStrikeThrough(node)
-      is LinkNode -> renderLink(node)
-      is BlockQuoteNode -> renderBlockQuote(node)
-      is ListBlockNode -> renderListBlock(node)
-      is ListItemNode -> renderListItem(node)
-      is TaskListItemNode -> renderTaskListItem(node)
-      is HeadingNode -> renderHeading(node)
-      is ThematicBreakNode -> renderThematicBreak(node)
-    }
-    for (child in node.children) {
-      offsetInRoot += child.offsetInParent
-      this.render(child.node)
-      offsetInRoot -= child.offsetInParent
+    walkMarkdownNodes(node, changes) { node ->
+      when (node) {
+        is BoldNode -> renderBold(node)
+        is ItalicNode -> renderItalic(node)
+        is InlineCodeNode -> renderInlineCode(node)
+        is FencedCodeBlockNode -> renderFencedCodeBlock(node)
+        is StrikeThroughNode -> renderStrikeThrough(node)
+        is LinkNode -> renderLink(node)
+        is BlockQuoteNode -> renderBlockQuote(node)
+        is ListBlockNode -> renderListBlock(node)
+        is ListItemNode -> renderListItem(node)
+        is TaskListItemNode -> renderTaskListItem(node)
+        is HeadingNode -> renderHeading(node)
+        is ThematicBreakNode -> renderThematicBreak(node)
+      }
     }
     return RenderResult(spanPainters = spanPainters)
   }
 
-  /**
-   * Resolves this local range to its absolute position in the rendered text.
-   *
-   * When [dropOnEdit] is true, returns `null` if any edit overlaps this range. The caller's
-   * `?: return` then drops the node's styling for one frame until the reparse arrives. Use
-   * it for fixed-shape markers (emphasis's `**`, a link's `]`, a list item's `-`, a
-   * blockquote's `>`) where any edit invalidates the syntax. Skip it for repeatable markers
-   * like a heading's `#`s.
-   */
-  context(scope: MarkdownRenderScope)
-  private fun LocalTextRange.resolve(dropOnEdit: Boolean = false): TextRange? {
-    val rangeInRoot = TextRange(
-      start = localStart + offsetInRoot,
-      end = localEnd + offsetInRoot,
-    )
-    val rebased = if (dropOnEdit && changes.editsOverlap(rangeInRoot)) {
-      null
-    } else {
-      rangeInRoot.rebased(changes)
-    }
-    // Skip nodes whose absolute range falls outside the visible viewport.
-    return if (rebased == null || scope.isInsideViewport(rebased)) {
-      rebased
-    } else {
-      null
-    }
-  }
-
-  private fun MarkdownRenderScope.renderDelimitedMarkers(node: DelimitedMarkdownNode): TextRange? {
+  private fun MarkdownNodeWalkScope.renderDelimitedMarkers(node: DelimitedMarkdownNode): TextRange? {
     // Note to self: resolve the ranges before adding any style/span objects to avoid
     // allocating objects that aren't needed, and more importantly to avoid adding partial styles.
     val textRange = node.range.resolve() ?: return null
@@ -113,17 +80,17 @@ internal class AnnotatedStringMarkdownRenderer(
     return textRange
   }
 
-  private fun MarkdownRenderScope.renderBold(node: BoldNode) {
+  private fun MarkdownNodeWalkScope.renderBold(node: BoldNode) {
     val range = renderDelimitedMarkers(node) ?: return
     addSpanStyle(SpanStyle(fontWeight = FontWeight.Bold), range)
   }
 
-  private fun MarkdownRenderScope.renderItalic(node: ItalicNode) {
+  private fun MarkdownNodeWalkScope.renderItalic(node: ItalicNode) {
     val range = renderDelimitedMarkers(node) ?: return
     addSpanStyle(SpanStyle(fontStyle = FontStyle.Italic), range)
   }
 
-  private fun MarkdownRenderScope.renderInlineCode(node: InlineCodeNode) {
+  private fun MarkdownNodeWalkScope.renderInlineCode(node: InlineCodeNode) {
     val range = renderDelimitedMarkers(node) ?: return
     addSpanStyle(
       SpanStyle(fontFamily = FontFamily.Monospace),
@@ -141,7 +108,7 @@ internal class AnnotatedStringMarkdownRenderer(
     )
   }
 
-  private fun MarkdownRenderScope.renderFencedCodeBlock(node: FencedCodeBlockNode) {
+  private fun MarkdownNodeWalkScope.renderFencedCodeBlock(node: FencedCodeBlockNode) {
     val range = renderDelimitedMarkers(node) ?: return
     val textStyle = SpanStyle(fontFamily = FontFamily.Monospace)
     val paragraphStyle = ParagraphStyle(
@@ -164,7 +131,7 @@ internal class AnnotatedStringMarkdownRenderer(
     )
   }
 
-  private fun MarkdownRenderScope.renderStrikeThrough(node: StrikeThroughNode) {
+  private fun MarkdownNodeWalkScope.renderStrikeThrough(node: StrikeThroughNode) {
     val range = node.range.resolve() ?: return
     node.openingMarkerRange.resolve(dropOnEdit = true) ?: return
     node.closingMarkerRange.resolve(dropOnEdit = true) ?: return
@@ -176,7 +143,7 @@ internal class AnnotatedStringMarkdownRenderer(
     addSpanStyle(style, range)
   }
 
-  private fun MarkdownRenderScope.renderLink(node: LinkNode) {
+  private fun MarkdownNodeWalkScope.renderLink(node: LinkNode) {
     node.range.resolve() ?: return
     val textRange = node.textRange.resolve() ?: return
     val textOpeningMarkerRange = node.textOpeningMarkerRange.resolve(dropOnEdit = true) ?: return
@@ -196,7 +163,7 @@ internal class AnnotatedStringMarkdownRenderer(
     addSpanStyle(markerStyle, urlClosingMarkerRange)
   }
 
-  private fun MarkdownRenderScope.renderBlockQuote(node: BlockQuoteNode) {
+  private fun MarkdownNodeWalkScope.renderBlockQuote(node: BlockQuoteNode) {
     val range = node.range.resolve() ?: return
     val markerRange = node.markerRange.resolve(dropOnEdit = true) ?: return
 
@@ -214,11 +181,11 @@ internal class AnnotatedStringMarkdownRenderer(
     spanPainters.add(BlockQuoteSpanPainter(range = range, markerColor = theme.markerColor))
   }
 
-  private fun MarkdownRenderScope.renderListBlock(node: ListBlockNode) {
+  private fun MarkdownNodeWalkScope.renderListBlock(node: ListBlockNode) {
     node.range.resolve()
   }
 
-  private fun MarkdownRenderScope.renderListItem(node: ListItemNode) {
+  private fun MarkdownNodeWalkScope.renderListItem(node: ListItemNode) {
     val range = node.range.resolve() ?: return
     val markerRange = node.markerRange.resolve(dropOnEdit = true) ?: return
 
@@ -233,7 +200,7 @@ internal class AnnotatedStringMarkdownRenderer(
     )
   }
 
-  private fun MarkdownRenderScope.renderTaskListItem(node: TaskListItemNode) {
+  private fun MarkdownNodeWalkScope.renderTaskListItem(node: TaskListItemNode) {
     val range = node.range.resolve() ?: return
     val markerRange = node.markerRange.resolve(dropOnEdit = true) ?: return
 
@@ -275,7 +242,7 @@ internal class AnnotatedStringMarkdownRenderer(
     )
   }
 
-  private fun MarkdownRenderScope.addParagraphStyleToContent(
+  private fun MarkdownNodeWalkScope.addParagraphStyleToContent(
     range: TextRange,
     markerRange: TextRange,
   ) {
@@ -305,7 +272,7 @@ internal class AnnotatedStringMarkdownRenderer(
     )
   }
 
-  private fun MarkdownRenderScope.renderHeading(node: HeadingNode) {
+  private fun MarkdownNodeWalkScope.renderHeading(node: HeadingNode) {
     val range = node.range.resolve() ?: return
     val openingMarkerRange = node.openingMarkerRange.resolve() ?: return
 
@@ -345,7 +312,7 @@ internal class AnnotatedStringMarkdownRenderer(
     )
   }
 
-  private fun MarkdownRenderScope.renderThematicBreak(node: ThematicBreakNode) {
+  private fun MarkdownNodeWalkScope.renderThematicBreak(node: ThematicBreakNode) {
     val range = node.range.resolve() ?: return
     addSpanStyle(
       SpanStyle(color = theme.markerColor),
