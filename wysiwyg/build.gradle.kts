@@ -65,4 +65,5 @@ dependencies {
   testImplementation(libs.turbine)
   testImplementation(libs.androidx.compose.material3)
   testImplementation(libs.touchrobot)
+  testImplementation(libs.robolectric)
 }

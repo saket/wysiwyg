@@ -15,7 +15,7 @@ import androidx.compose.ui.text.TextRange
 /**
  * The layout-time state needed to compute the visible-text band of the underlying text field.
  *
- * Name inspired by Compose UI's `LayoutListLayoutInfo`.
+ * Name inspired by Compose UI's `LazyListLayoutInfo`.
  */
 @Stable
 internal class TextFieldLayoutInfo {

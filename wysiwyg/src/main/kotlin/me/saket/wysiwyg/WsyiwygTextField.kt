@@ -29,6 +29,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
@@ -74,6 +75,11 @@ fun WsyiwygTextField(
       contentPadding.calculateLeftPadding(layoutDirection).toPx()
     }
   }
+
+  // todo: threading these through the OutputTransformation smells bad.
+  wysiwyg.outputTransformation.textMeasurer = rememberTextMeasurer()
+  wysiwyg.outputTransformation.textStyle = textStyle
+  wysiwyg.outputTransformation.density = density
 
   BasicTextField(
     state = wysiwyg.textState,

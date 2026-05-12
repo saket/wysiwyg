@@ -1,17 +1,29 @@
 package me.saket.wysiwyg.parser
 
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.createFontFamilyResolver
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.sp
 import me.saket.wysiwyg.WysiwygTheme
 import me.saket.wysiwyg.internal.MarkdownRenderer
 import me.saket.wysiwyg.internal.MarkdownStyleBuffer
 import me.saket.wysiwyg.internal.TextFieldLayoutInfo
+import org.robolectric.RuntimeEnvironment
 
 internal fun MarkdownDocument.renderHtml(source: String): String {
   val markdownRenderer = MarkdownRenderer(FakeWysiwygTheme, TextFieldLayoutInfo())
   val buffer = TestTagRecordingBuffer(source)
-  markdownRenderer.render(document = this, buffer)
+  markdownRenderer.render(
+    document = this,
+    buffer = buffer,
+    textMeasurer = TestTextMeasurer,
+    textStyle = TextStyle.Default,
+    density = Density(1f),
+  )
 
   val tags = buffer.testTags
     .flatMap { listOf(it.range.start to "<${it.tag}>", it.range.end to "</${it.tag}>") }
@@ -41,6 +53,12 @@ private class TestTagRecordingBuffer(
 private data class TestTag(
   val tag: String,
   val range: TextRange,
+)
+
+private val TestTextMeasurer = TextMeasurer(
+  defaultFontFamilyResolver = createFontFamilyResolver(RuntimeEnvironment.getApplication()),
+  defaultDensity = Density(1f),
+  defaultLayoutDirection = LayoutDirection.Ltr,
 )
 
 private val FakeWysiwygTheme = WysiwygTheme(

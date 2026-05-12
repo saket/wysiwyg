@@ -10,6 +10,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.text.TextMeasurer
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.Density
 import androidx.tracing.trace
 import kotlinx.coroutines.flow.collectLatest
 import me.saket.wysiwyg.BuildConfig
@@ -40,8 +43,7 @@ internal class RealWysiwyg internal constructor(
   // In those cases, the highlighter will do a full re-scan even if it supported incremental highlighting.
   private var pendingChangeList: TextChangeListSnapshot = TextChangeListSnapshot.Empty
 
-  private val realOutputTransformation = RealMarkdownOutputTransformation(markdownRenderer)
-  override val outputTransformation: MarkdownOutputTransformation = realOutputTransformation
+  override val outputTransformation = RealMarkdownOutputTransformation(markdownRenderer)
 
   @OptIn(ExperimentalFoundationApi::class)
   override val inputTransformation: InputTransformation = run {
@@ -62,7 +64,7 @@ internal class RealWysiwyg internal constructor(
           .also { this.pendingChangeList = TextChangeListSnapshot.Empty }
 
         parser.parse(text.toString(), changes).collect { document ->
-          realOutputTransformation.document = document
+          outputTransformation.document = document
         }
       } catch (e: Throwable) {
         if (BuildConfig.DEBUG) {
@@ -82,9 +84,12 @@ internal class RealWysiwyg internal constructor(
  * input/output pipeline. In practice that dropped typed characters and interrupted long-press
  * backspace deletion, so parsed markdown is swapped through [document] instead.
  */
-private class RealMarkdownOutputTransformation(
+internal class RealMarkdownOutputTransformation(
   private val markdownRenderer: MarkdownRenderer,
 ) : MarkdownOutputTransformation {
+  lateinit var textMeasurer: TextMeasurer
+  lateinit var textStyle: TextStyle
+  lateinit var density: Density
 
   // This is not backed by snapshot state because transformOutput() can run inside
   // a read-only snapshot, and Compose will throw an IllegalStateException if snapshot
@@ -114,7 +119,7 @@ private class RealMarkdownOutputTransformation(
         },
       )
       trace("Wysiwyg:render") {
-        markdownRenderer.render(document, styleBuffer)
+        markdownRenderer.render(document, styleBuffer, textMeasurer, textStyle, density)
       }
       this@RealMarkdownOutputTransformation.styleBuffer = styleBuffer
     }

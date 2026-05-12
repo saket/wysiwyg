@@ -1,6 +1,9 @@
 package me.saket.wysiwyg.internal
 
+import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.Density
 import me.saket.wysiwyg.WysiwygTheme
 import me.saket.wysiwyg.parser.LocalTextRange
 import me.saket.wysiwyg.parser.MarkdownChildNode
@@ -16,9 +19,15 @@ internal class MarkdownRenderer(
   fun render(
     document: MarkdownDocument,
     buffer: MarkdownStyleBuffer,
+    textMeasurer: TextMeasurer,
+    textStyle: TextStyle,
+    density: Density,
   ) {
     val scope = RealMarkdownNodeRenderScope(
       theme = theme,
+      textMeasurer = textMeasurer,
+      textStyle = textStyle,
+      densityContext = density,
       changes = document.changes,
       offsetInRoot = 0,
       viewport = layoutInfo.currentViewport(),
@@ -31,8 +40,10 @@ internal class MarkdownRenderer(
 
 // todo: kdoc
 // todo: move to its own file
-interface MarkdownNodeRenderScope {
+interface MarkdownNodeRenderScope : Density {
   val theme: WysiwygTheme
+  val textMeasurer: TextMeasurer
+  val textStyle: TextStyle
 
   // todo: kdoc
   val changes: List<TextChangeListSnapshot>
@@ -63,12 +74,16 @@ interface MarkdownNodeRenderScope {
   }
 }
 
+// todo: this doesn't have to be a data class.
 private data class RealMarkdownNodeRenderScope(
   override val theme: WysiwygTheme,
+  override val textMeasurer: TextMeasurer,
+  override val textStyle: TextStyle,
+  private val densityContext: Density,
   override val changes: List<TextChangeListSnapshot>,
   override val offsetInRoot: Int,
   private val viewport: TextFieldViewport,
-) : MarkdownNodeRenderScope {
+) : MarkdownNodeRenderScope, Density by densityContext {
 
   override fun childScope(child: MarkdownChildNode): MarkdownNodeRenderScope {
     return copy(

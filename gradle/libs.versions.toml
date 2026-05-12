@@ -17,6 +17,7 @@ truth = "1.4.5"
 assertk = "0.28.1"
 turbine = "1.2.1" # https://github.com/cashapp/turbine/releases
 paparazzi = "2.0.0-alpha02" # https://github.com/cashapp/paparazzi/releases
+robolectric = "4.16.1" # https://github.com/robolectric/robolectric/releases
 dropshots = "0.6.0" # https://github.com/dropbox/dropshots/releases
 androidx-benchmark = "1.4.1" # https://developer.android.com/jetpack/androidx/releases/benchmark
 androidx-test = "1.7.0" # https://developer.android.com/jetpack/androidx/releases/test
@@ -63,6 +64,7 @@ androidx-compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-mani
 errorprone-annotations = { module = "com.google.errorprone:error_prone_annotations", version.ref = "errorprone" }
 poko-annotations = { module = "dev.drewhamilton.poko:poko-annotations", version.ref = "poko" }
 touchrobot = { module = "me.saket.touchrobot:touchrobot-paparazzi", version.ref = "touchrobot" }
+robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

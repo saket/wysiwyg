@@ -11,8 +11,13 @@ import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.test.runTest
 import me.saket.wysiwyg.parser.flexmark.FlexmarkMarkdownParser
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
 @OptIn(ExperimentalCoroutinesApi::class)
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [35])
 class IncrementalMarkdownParserTest {
 
   private fun parser(): IncrementalMarkdownParser =
