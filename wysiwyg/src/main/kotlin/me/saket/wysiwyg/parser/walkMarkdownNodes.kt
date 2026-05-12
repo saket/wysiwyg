@@ -32,6 +32,10 @@ private class WalkState(
   private var offsetInRoot = 0
 
   fun walk(node: MarkdownNode, visit: MarkdownNodeWalkScope.(MarkdownNode) -> Unit) {
+    if (node.range.resolve() == null) {
+      // Skip the entire subtree if its range is outside the viewport.
+      return
+    }
     visit(node)
     for (child in node.children) {
       offsetInRoot += child.offsetInParent
