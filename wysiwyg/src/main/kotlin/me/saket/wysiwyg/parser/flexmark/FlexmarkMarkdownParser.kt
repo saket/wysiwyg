@@ -122,23 +122,23 @@ class FlexmarkMarkdownParser(
           length = textOpeningMarker.length,
         )
         val textRange = LocalTextRange.span(
-          startOffset = textOpeningMarkerRange.end,
+          startOffset = textOpeningMarkerRange.localEnd,
           length = text.length,
         )
         val textClosingMarkerRange = LocalTextRange.span(
-          startOffset = textRange.end,
+          startOffset = textRange.localEnd,
           length = textClosingMarker.length,
         )
         val linkOpeningMarkerRange = LocalTextRange.span(
-          startOffset = textClosingMarkerRange.end,
+          startOffset = textClosingMarkerRange.localEnd,
           length = linkOpeningMarker.length,
         )
         val urlRange = LocalTextRange.span(
-          startOffset = linkOpeningMarkerRange.end,
+          startOffset = linkOpeningMarkerRange.localEnd,
           length = linkClosingMarker.startOffset - linkOpeningMarker.endOffset,
         )
         val urlClosingMarkerRange = LocalTextRange(
-          startOffset = urlRange.end,
+          startOffset = urlRange.localEnd,
           endOffset = chars.length,
         )
 

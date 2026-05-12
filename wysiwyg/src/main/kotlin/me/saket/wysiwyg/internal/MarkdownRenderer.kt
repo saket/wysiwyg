@@ -93,8 +93,8 @@ private data class RealMarkdownNodeRenderScope(
 
   override fun LocalTextRange.resolve(dropOnEdit: Boolean): TextRange? {
     val rangeInRoot = TextRange(
-      start = textRange.start + offsetInRoot,
-      end = textRange.end + offsetInRoot,
+      start = localStart + offsetInRoot,
+      end = localEnd + offsetInRoot,
     )
     val rebased = if (dropOnEdit && changes.editsOverlap(rangeInRoot)) {
       null

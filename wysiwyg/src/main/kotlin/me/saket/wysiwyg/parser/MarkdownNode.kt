@@ -1,7 +1,6 @@
 package me.saket.wysiwyg.parser
 
 import androidx.compose.ui.text.TextRange
-import androidx.compose.ui.util.fastForEach
 import dev.drewhamilton.poko.Poko
 import me.saket.wysiwyg.internal.MarkdownNodeRenderScope
 import me.saket.wysiwyg.internal.MarkdownStyleBuffer
@@ -20,10 +19,10 @@ class MarkdownChildNode(
 
 @JvmInline
 value class LocalTextRange private constructor(
-  val textRange: TextRange,
+  private val textRange: TextRange,
 ) {
-  val start: Int get() = textRange.start
-  val end: Int get() = textRange.end
+  val localStart: Int get() = textRange.start
+  val localEnd: Int get() = textRange.end
 
   constructor(startOffset: Int, endOffset: Int) : this(
     TextRange(startOffset, endOffset)
