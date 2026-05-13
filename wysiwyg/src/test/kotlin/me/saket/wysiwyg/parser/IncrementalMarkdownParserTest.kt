@@ -11,8 +11,13 @@ import kotlinx.coroutines.flow.transformLatest
 import kotlinx.coroutines.test.runTest
 import me.saket.wysiwyg.parser.flexmark.FlexmarkMarkdownParser
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
+@Config(sdk = [34])
 @OptIn(ExperimentalCoroutinesApi::class)
+@RunWith(RobolectricTestRunner::class)
 class IncrementalMarkdownParserTest {
 
   private fun parser(): IncrementalMarkdownParser =
@@ -184,36 +189,39 @@ class IncrementalMarkdownParserTest {
     }
   }
 
-  @Test fun `deleting one list item marker keeps the list block for surviving items`() = runTest {
-    parser().test {
-      sendInput(
-        """
-        |- first
-        |- second
-        |""".trimMargin()
-      )
-      assertThat(awaitItem()).isEqualTo(
-        """
-        |<list>- first
-        |- second</list>
-        |""".trimMargin()
-      )
+  @Test fun `deleting one list item marker drops that item and keeps surviving items styled`() =
+    runTest {
+      parser().test {
+        sendInput(
+          """
+          |- first
+          |- second
+          |""".trimMargin()
+        )
+        assertThat(awaitItem()).isEqualTo(
+          """
+          |<list>- first
+          |- second
+          |</list>
+          """.trimMargin()
+        )
 
-      sendInput(
-        """
-        | first
-        |- second
-        |""".trimMargin()
-      )
-      assertThat(awaitItem()).isEqualTo(
-        """
-        |<list> first
-        |- second</list>
-        |""".trimMargin()
-      )
-      cancelAndIgnoreRemainingEvents()
+        sendInput(
+          """
+          | first
+          |- second
+          |""".trimMargin()
+        )
+        assertThat(awaitItem()).isEqualTo(
+          """
+          | first
+          |<list>- second
+          |</list>
+          """.trimMargin()
+        )
+        cancelAndIgnoreRemainingEvents()
+      }
     }
-  }
 
   @Test fun `editing a later list marker drops only that item while tail content stays aligned`() =
     runTest {
@@ -229,8 +237,8 @@ class IncrementalMarkdownParserTest {
         assertThat(awaitItem()).isEqualTo(
           """
         |<list>- first
-        |- second</list>
-        |
+        |- second
+        |</list>
         |tail
         |""".trimMargin()
         )
@@ -246,7 +254,7 @@ class IncrementalMarkdownParserTest {
         assertThat(awaitItem()).isEqualTo(
           """
         |<list>- first
-        | second</list>
+        |</list> second
         |
         |tail
         |""".trimMargin()
@@ -268,8 +276,9 @@ class IncrementalMarkdownParserTest {
         """
           |<list>- parent
           |  - child
-          |- sibling</list>
-          |""".trimMargin()
+          |- sibling
+          |</list>
+          """.trimMargin()
       )
 
       sendInput(
@@ -283,8 +292,9 @@ class IncrementalMarkdownParserTest {
         """
           |<list>- parent
           |  - ch!ild
-          |- sibling</list>
-          |""".trimMargin()
+          |- sibling
+          |</list>
+          """.trimMargin()
       )
       cancelAndIgnoreRemainingEvents()
     }
@@ -407,8 +417,8 @@ class IncrementalMarkdownParserTest {
       assertThat(awaitItem()).isEqualTo(
         """
           |<list>- first
-          |- second</list>
-          |
+          |- second
+          |</list>
           |tail
           |""".trimMargin()
       )
@@ -424,8 +434,8 @@ class IncrementalMarkdownParserTest {
       assertThat(awaitItem()).isEqualTo(
         """
           |<list>- fir!st
-          |- second</list>
-          |
+          |- second
+          |</list>
           |tail
           |""".trimMargin()
       )
@@ -443,7 +453,7 @@ class IncrementalMarkdownParserTest {
       )
       assertThat(awaitItem()).isEqualTo(
         """
-        |<list><monospace>- [ ] </monospace>task item</list>
+        |<list>- [ ] task item</list>
         |lazy continuation
         |""".trimMargin()
       )
@@ -461,8 +471,8 @@ class IncrementalMarkdownParserTest {
       )
       assertThat(awaitItem()).isEqualTo(
         """
-        |<list><monospace>- [ ] </monospace>One
-        |<monospace>- [ ] </monospace>Two</list>
+        |<list>- [ ] One
+        |- [ ] Two</list>
         |T""".trimMargin()
       )
       cancelAndIgnoreRemainingEvents()
@@ -483,7 +493,10 @@ class IncrementalMarkdownParserTest {
         |lazy continuation
         |""".trimMargin()
       )
+      cancelAndIgnoreRemainingEvents()
+    }
 
+    parser().test {
       sendInput(
         """
         |1. ordered item
@@ -512,9 +525,10 @@ class IncrementalMarkdownParserTest {
       )
       assertThat(awaitItem()).isEqualTo(
         """
-        |<list><monospace>- [ ] </monospace>task item
-        |      properly indented</list>
-        |""".trimMargin()
+        |<list>- [ ] task item
+        |      properly indented
+        |</list>
+        """.trimMargin()
       )
       cancelAndIgnoreRemainingEvents()
     }
@@ -566,7 +580,8 @@ class IncrementalMarkdownParserTest {
       sendInput(
         """
         |- [ ]${" "}
-        |""".trimMargin()
+        |""".trimMargin(),
+        includeMonospaceTags = true,
       )
       assertThat(awaitItem()).isEqualTo(
         """
@@ -611,8 +626,8 @@ class IncrementalMarkdownParserTest {
       )
       assertThat(awaitItem()).isEqualTo(
         """
-        |<list>- item</list>
-        |
+        |<list>- item
+        |</list>
         |paragraph
         |""".trimMargin()
       )
@@ -653,7 +668,7 @@ private suspend fun IncrementalMarkdownParser.test(test: suspend ParserTester.()
   val inputs = MutableSharedFlow<ParserTester.Input>(replay = 1, extraBufferCapacity = 1)
   val highlights = inputs.transformLatest { input ->
     parse(input.text, input.changes).collect { document ->
-      emit(document.renderHtml(input.text))
+      emit(document.renderHtml(input.text, includeMonospaceTags = input.includeMonospaceTags))
     }
   }
   highlights.test {
@@ -668,20 +683,25 @@ private class ParserTester(
 
   private var lastInput: String? = null
 
-  fun sendInput(text: String, changes: TextChangeListSnapshot? = null) {
+  fun sendInput(
+    text: String,
+    changes: TextChangeListSnapshot? = null,
+    includeMonospaceTags: Boolean = false,
+  ) {
     val changes = changes
       ?: lastInput?.let { changeListSnapshot(it, text) }
       ?: TextChangeListSnapshot.Empty
     lastInput = text
 
     inputs.tryEmit(
-      Input(text, changes)
+      Input(text, changes, includeMonospaceTags)
     )
   }
 
   class Input(
     val text: String,
     val changes: TextChangeListSnapshot,
+    val includeMonospaceTags: Boolean,
   )
 }
 

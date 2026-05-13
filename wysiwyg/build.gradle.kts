@@ -62,6 +62,7 @@ dependencies {
   testImplementation(libs.truth)
   testImplementation(libs.assertk)
   testImplementation(libs.kotlinx.coroutines.test)
+  testImplementation(libs.robolectric)
   testImplementation(libs.turbine)
   testImplementation(libs.touchrobot)
 }
