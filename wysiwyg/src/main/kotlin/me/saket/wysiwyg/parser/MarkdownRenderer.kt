@@ -1,6 +1,7 @@
 package me.saket.wysiwyg.parser
 
 import androidx.compose.foundation.text.input.TextFieldBuffer
+import dev.drewhamilton.poko.Poko
 import me.saket.wysiwyg.MarkdownSpanPainter
 import me.saket.wysiwyg.internal.AnnotatedStringMarkdownRenderer
 import me.saket.wysiwyg.internal.AnnotatedStringMarkdownRenderer as Impl
@@ -20,7 +21,7 @@ fun interface MarkdownRenderer {
 }
 
 // todo: kdoc
-class RenderResult(
+@Poko class RenderResult(
   val spanPainters: List<MarkdownSpanPainter>,
 ) {
   companion object {
