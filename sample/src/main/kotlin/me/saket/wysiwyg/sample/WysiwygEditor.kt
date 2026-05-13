@@ -21,10 +21,8 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.WindowInsetsRulers
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
 import me.saket.wysiwyg.WsyiwygTextField
-import me.saket.wysiwyg.WysiwygTheme
 import me.saket.wysiwyg.parser.flexmark.FlexmarkMarkdownParser
 import me.saket.wysiwyg.rememberWysiwyg
 
@@ -67,7 +65,6 @@ fun WysiwygEditor(
         modifier = Modifier.focusRequester(focusRequester),
         contentPadding = PaddingValues(16.dp),
         wysiwyg = wysiwyg,
-        theme = wysiwygTheme(),
         cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
         textStyle = LocalTextStyle.current.copy(color = LocalContentColor.current),
       )
@@ -78,20 +75,4 @@ fun WysiwygEditor(
       state = textState,
     )
   }
-}
-
-@Composable
-internal fun wysiwygTheme(): WysiwygTheme {
-  return WysiwygTheme(
-    markerColor = MaterialTheme.colorScheme.tertiary,
-    headingColor = MaterialTheme.colorScheme.primary,
-    linkTextColor = MaterialTheme.colorScheme.primary,
-    linkUrlColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
-    struckThroughTextColor = LocalContentColor.current.copy(alpha = 0.5f),
-    codeBackground = LocalContentColor.current.copy(alpha = 0.1f),
-    codeBlockLeadingPadding = 16.sp,
-    blockQuoteTextColor = LocalContentColor.current.copy(alpha = 0.9f),
-    blockQuoteLeadingPadding = 16.sp,
-    listBlockLeadingPadding = 16.sp,
-  )
 }

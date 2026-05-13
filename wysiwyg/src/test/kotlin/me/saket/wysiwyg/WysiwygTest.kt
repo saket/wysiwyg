@@ -17,7 +17,6 @@ import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.VerticalDivider
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -37,7 +36,6 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.round
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastFirstOrNull
 import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
@@ -761,7 +759,6 @@ class WysiwygTest {
         modifier = modifier.testTag("editor"),
         contentPadding = contentPadding,
         wysiwyg = wysiwyg,
-        theme = wysiwygTheme(),
         cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
         textStyle = textStyle,
       )
@@ -792,22 +789,6 @@ private fun String.findTaskCheckboxTextOffset(checkboxIndex: Int): Int {
   val match = regex.findAll(this).drop(checkboxIndex).firstOrNull()
     ?: error("Task checkbox #$checkboxIndex was not found")
   return match.groups[1]!!.range.first
-}
-
-@Composable
-private fun wysiwygTheme(): WysiwygTheme {
-  return WysiwygTheme(
-    markerColor = MaterialTheme.colorScheme.tertiary,
-    headingColor = MaterialTheme.colorScheme.primary,
-    linkTextColor = MaterialTheme.colorScheme.primary,
-    linkUrlColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
-    struckThroughTextColor = LocalContentColor.current.copy(alpha = 0.5f),
-    codeBackground = MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp),
-    codeBlockLeadingPadding = 16.sp,
-    blockQuoteTextColor = LocalContentColor.current.copy(alpha = 0.9f),
-    blockQuoteLeadingPadding = 16.sp,
-    listBlockLeadingPadding = 16.sp,
-  )
 }
 
 private class GatedMarkdownParser(

@@ -80,7 +80,6 @@ class BenchmarkActivity : AppCompatActivity() {
     WsyiwygTextField(
       modifier = modifier,
       wysiwyg = wysiwyg,
-      theme = wysiwygTheme(),
       cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
       textStyle = LocalTextStyle.current.copy(color = LocalContentColor.current),
       contentPadding = contentPadding,

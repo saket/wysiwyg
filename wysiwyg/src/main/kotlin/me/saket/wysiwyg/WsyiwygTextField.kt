@@ -2,6 +2,7 @@ package me.saket.wysiwyg
 
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -45,8 +46,8 @@ import me.saket.wysiwyg.parser.rememberMarkdownRenderScope
 @Composable
 fun WsyiwygTextField(
   wysiwyg: Wysiwyg,
-  theme: WysiwygTheme,
   modifier: Modifier = Modifier,
+  theme: WysiwygTheme = if (isSystemInDarkTheme()) WysiwygTheme.GithubDark else WysiwygTheme.GithubLight,
   markdownRenderer: MarkdownRenderer.Factory = AnnotatedStringMarkdownRendererFactory,
   enabled: Boolean = true,
   readOnly: Boolean = false,
