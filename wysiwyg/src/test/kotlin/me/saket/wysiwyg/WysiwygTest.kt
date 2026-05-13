@@ -46,7 +46,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.sync.Semaphore
 import me.saket.touchrobot.onNode
 import me.saket.touchrobot.rememberTouchRobot
-import me.saket.wysiwyg.extendedspans.TaskCheckboxSpanPainter
+import me.saket.wysiwyg.spans.TaskCheckboxSpanPainter
 import me.saket.wysiwyg.internal.RealWysiwyg
 import me.saket.wysiwyg.parser.MarkdownDocument
 import me.saket.wysiwyg.parser.MarkdownParser

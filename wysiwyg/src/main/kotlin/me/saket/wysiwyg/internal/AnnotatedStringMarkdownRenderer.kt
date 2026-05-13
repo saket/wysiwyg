@@ -14,11 +14,11 @@ import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.tracing.trace
 import me.saket.wysiwyg.MarkdownSpanPainter
-import me.saket.wysiwyg.extendedspans.BlockQuoteSpanPainter
-import me.saket.wysiwyg.extendedspans.RoundedCornerSpanPainter
-import me.saket.wysiwyg.extendedspans.RoundedCornerSpanPainter.TextPaddingValues
-import me.saket.wysiwyg.extendedspans.TaskCheckboxSpanPainter
-import me.saket.wysiwyg.extendedspans.ThematicBreakSpanPainter
+import me.saket.wysiwyg.spans.BlockQuoteSpanPainter
+import me.saket.wysiwyg.spans.RoundedCornerSpanPainter
+import me.saket.wysiwyg.spans.RoundedCornerSpanPainter.TextPaddingValues
+import me.saket.wysiwyg.spans.TaskCheckboxSpanPainter
+import me.saket.wysiwyg.spans.ThematicBreakSpanPainter
 import me.saket.wysiwyg.parser.BlockQuoteNode
 import me.saket.wysiwyg.parser.BoldNode
 import me.saket.wysiwyg.parser.DelimitedMarkdownNode

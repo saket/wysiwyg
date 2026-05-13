@@ -1,4 +1,4 @@
-package me.saket.wysiwyg.extendedspans
+package me.saket.wysiwyg.spans
 
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.text.TextLayoutResult
