@@ -1,22 +1,21 @@
 package me.saket.wysiwyg
 
 import android.view.ViewGroup.LayoutParams
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.placeCursorAtEnd
 import androidx.compose.foundation.text.input.rememberTextFieldState
-import androidx.compose.material3.LocalContentColor
-import androidx.compose.material3.LocalTextStyle
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -25,7 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalCursorBlinkEnabled
 import androidx.compose.ui.platform.testTag
@@ -36,6 +35,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.round
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastFirstOrNull
 import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
@@ -147,15 +147,18 @@ class WysiwygTest {
             contentPadding = contentPadding,
           )
 
-          VerticalDivider()
+          Box(
+            Modifier
+              .fillMaxHeight()
+              .width(1.dp)
+              .background(Color(0xFFE0E0E0))
+          )
 
           BasicTextField(
             modifier = Modifier
               .weight(1f)
               .padding(contentPadding),
             state = rememberTextFieldState(markdown),
-            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-            textStyle = LocalTextStyle.current.copy(color = LocalContentColor.current),
           )
         }
       }
@@ -715,14 +718,13 @@ class WysiwygTest {
   private fun Scaffold(
     content: @Composable () -> Unit,
   ) {
-    MaterialTheme {
-      Surface(
-        Modifier
-          .fillMaxWidth()
-          .heightIn(min = 300.dp)
-      ) {
-        content()
-      }
+    Box(
+      Modifier
+        .fillMaxWidth()
+        .heightIn(min = 300.dp)
+        .background(Color.White)
+    ) {
+      content()
     }
   }
 
@@ -731,7 +733,7 @@ class WysiwygTest {
     markdown: String,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(16.dp),
-    textStyle: TextStyle = LocalTextStyle.current.copy(color = LocalContentColor.current),
+    textStyle: TextStyle = DefaultTextStyle,
   ) {
     val textState = rememberTextFieldState(markdown)
     WysiwygEditor(
@@ -752,17 +754,24 @@ class WysiwygTest {
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(16.dp),
     wysiwyg: Wysiwyg,
-    textStyle: TextStyle = LocalTextStyle.current.copy(color = LocalContentColor.current),
+    textStyle: TextStyle = DefaultTextStyle,
   ) {
     CompositionLocalProvider(LocalCursorBlinkEnabled provides false) {
       WsyiwygTextField(
         modifier = modifier.testTag("editor"),
         contentPadding = contentPadding,
         wysiwyg = wysiwyg,
-        cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
         textStyle = textStyle,
       )
     }
+  }
+
+  companion object {
+    val DefaultTextStyle = TextStyle(
+      fontSize = 16.sp,
+      lineHeight = 24.sp,
+      letterSpacing = 0.5.sp,
+    )
   }
 }
 
