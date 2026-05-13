@@ -6,15 +6,13 @@ import androidx.compose.foundation.text.input.TextFieldBuffer
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.then
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.tracing.trace
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.collectLatest
 import me.saket.wysiwyg.BuildConfig
 import me.saket.wysiwyg.MarkdownOutputTransformation
 import me.saket.wysiwyg.Wysiwyg
@@ -33,28 +31,12 @@ internal class RealWysiwyg internal constructor(
   override val textState: TextFieldState,
   parser: MarkdownParser,
   onEnterFormatters: OnEnterMarkdownFormatters,
-  coroutineScope: CoroutineScope,
 ) : Wysiwyg {
   private val parser = IncrementalMarkdownParser(parser)
   internal val layoutInfo = TextFieldLayoutInfo()
 
   @OptIn(ExperimentalCoroutinesApi::class)
-  override val documents: StateFlow<MarkdownDocument> = snapshotFlow { textState.text }
-    .flatMapLatest { text ->
-      val changes = this.pendingChangeList
-        .also { this.pendingChangeList = TextChangeListSnapshot.Empty }
-
-      this.parser.parse(text.toString(), changes)
-        .catch { e ->
-          if (BuildConfig.DEBUG) {
-            throw e
-          } else {
-            // todo: swallow errors in non-debug builds, and expose them to consumers
-            TODO()
-          }
-        }
-    }
-    .stateIn(coroutineScope, SharingStarted.Lazily, MarkdownDocument.Empty)
+  override var document by mutableStateOf(MarkdownDocument.Empty)
 
   // todo: i don't love it that the recent render result is exposed through Wysiwyg.
   // This is not backed by snapshot state because transformOutput() can run inside
@@ -81,6 +63,25 @@ internal class RealWysiwyg internal constructor(
       }
     }
   }
+
+  suspend fun startParsingMarkdown() {
+    snapshotFlow { textState.text }.collectLatest { text ->
+      try {
+        val changes = this.pendingChangeList
+          .also { this.pendingChangeList = TextChangeListSnapshot.Empty }
+
+        parser.parse(text.toString(), changes).collect { document ->
+          this.document = document
+        }
+      } catch (e: Throwable) {
+        if (BuildConfig.DEBUG) {
+          throw e
+        } else {
+          // todo: expose errors to consumers
+        }
+      }
+    }
+  }
 }
 
 /**
@@ -96,7 +97,7 @@ internal class RealMarkdownOutputTransformation(
 
   override fun TextFieldBuffer.transformOutput() {
     trace("Wysiwyg:transformOutput") {
-      val document = wysiwyg.documents.value
+      val document = wysiwyg.document
       val renderer = renderer.create(
         buffer = this,
         unstyledText = run {
