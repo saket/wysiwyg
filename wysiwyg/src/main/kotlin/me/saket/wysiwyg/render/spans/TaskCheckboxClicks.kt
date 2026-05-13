@@ -1,4 +1,4 @@
-package me.saket.wysiwyg.spans
+package me.saket.wysiwyg.render.spans
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween

@@ -1,4 +1,4 @@
-package me.saket.wysiwyg.parser
+package me.saket.wysiwyg.render
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember

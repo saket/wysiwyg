@@ -1,6 +1,11 @@
-package me.saket.wysiwyg.parser
+package me.saket.wysiwyg.render
 
 import androidx.compose.ui.text.TextRange
+import me.saket.wysiwyg.parser.LocalTextRange
+import me.saket.wysiwyg.parser.MarkdownNode
+import me.saket.wysiwyg.parser.TextChangeListSnapshot
+import me.saket.wysiwyg.parser.editsOverlap
+import me.saket.wysiwyg.parser.rebased
 
 // todo: kdoc
 interface MarkdownNodeWalkScope : MarkdownRenderScope {

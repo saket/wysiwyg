@@ -21,7 +21,8 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import me.saket.wysiwyg.WysiwygTheme
-import me.saket.wysiwyg.internal.AnnotatedStringMarkdownRenderer
+import me.saket.wysiwyg.render.AnnotatedStringMarkdownRenderer
+import me.saket.wysiwyg.render.MarkdownRenderScope
 import org.robolectric.RuntimeEnvironment
 
 internal fun MarkdownDocument.renderHtml(

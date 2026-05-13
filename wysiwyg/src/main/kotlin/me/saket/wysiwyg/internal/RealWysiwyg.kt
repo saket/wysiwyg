@@ -20,9 +20,9 @@ import me.saket.wysiwyg.format.OnEnterMarkdownFormatters
 import me.saket.wysiwyg.parser.IncrementalMarkdownParser
 import me.saket.wysiwyg.parser.MarkdownDocument
 import me.saket.wysiwyg.parser.MarkdownParser
-import me.saket.wysiwyg.parser.MarkdownRenderer
-import me.saket.wysiwyg.parser.RealMarkdownRenderScope
-import me.saket.wysiwyg.parser.RenderResult
+import me.saket.wysiwyg.render.MarkdownRenderer
+import me.saket.wysiwyg.render.RealMarkdownRenderScope
+import me.saket.wysiwyg.render.RenderResult
 import me.saket.wysiwyg.parser.TextChangeListSnapshot
 import me.saket.wysiwyg.parser.snapshot
 

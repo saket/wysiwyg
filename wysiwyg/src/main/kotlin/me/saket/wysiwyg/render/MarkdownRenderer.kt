@@ -1,10 +1,10 @@
-package me.saket.wysiwyg.parser
+package me.saket.wysiwyg.render
 
 import androidx.compose.foundation.text.input.TextFieldBuffer
 import dev.drewhamilton.poko.Poko
 import me.saket.wysiwyg.MarkdownSpanPainter
-import me.saket.wysiwyg.internal.AnnotatedStringMarkdownRenderer
-import me.saket.wysiwyg.internal.AnnotatedStringMarkdownRenderer as Impl
+import me.saket.wysiwyg.parser.MarkdownNode
+import me.saket.wysiwyg.parser.TextChangeListSnapshot
 
 // todo: kdoc
 fun interface MarkdownRenderer {

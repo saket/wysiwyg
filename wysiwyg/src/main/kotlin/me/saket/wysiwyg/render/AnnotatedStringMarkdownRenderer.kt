@@ -1,4 +1,4 @@
-package me.saket.wysiwyg.internal
+package me.saket.wysiwyg.render
 
 import androidx.compose.foundation.text.input.TextFieldBuffer
 import androidx.compose.ui.text.ParagraphStyle
@@ -14,11 +14,11 @@ import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.tracing.trace
 import me.saket.wysiwyg.MarkdownSpanPainter
-import me.saket.wysiwyg.spans.BlockQuoteSpanPainter
-import me.saket.wysiwyg.spans.RoundedCornerSpanPainter
-import me.saket.wysiwyg.spans.RoundedCornerSpanPainter.TextPaddingValues
-import me.saket.wysiwyg.spans.TaskCheckboxSpanPainter
-import me.saket.wysiwyg.spans.ThematicBreakSpanPainter
+import me.saket.wysiwyg.render.spans.BlockQuoteSpanPainter
+import me.saket.wysiwyg.render.spans.RoundedCornerSpanPainter
+import me.saket.wysiwyg.render.spans.RoundedCornerSpanPainter.TextPaddingValues
+import me.saket.wysiwyg.render.spans.TaskCheckboxSpanPainter
+import me.saket.wysiwyg.render.spans.ThematicBreakSpanPainter
 import me.saket.wysiwyg.parser.BlockQuoteNode
 import me.saket.wysiwyg.parser.BoldNode
 import me.saket.wysiwyg.parser.DelimitedMarkdownNode
@@ -30,15 +30,10 @@ import me.saket.wysiwyg.parser.LinkNode
 import me.saket.wysiwyg.parser.ListBlockNode
 import me.saket.wysiwyg.parser.ListItemNode
 import me.saket.wysiwyg.parser.MarkdownNode
-import me.saket.wysiwyg.parser.MarkdownNodeWalkScope
-import me.saket.wysiwyg.parser.MarkdownRenderScope
-import me.saket.wysiwyg.parser.MarkdownRenderer
-import me.saket.wysiwyg.parser.RenderResult
 import me.saket.wysiwyg.parser.StrikeThroughNode
 import me.saket.wysiwyg.parser.TaskListItemNode
 import me.saket.wysiwyg.parser.TextChangeListSnapshot
 import me.saket.wysiwyg.parser.ThematicBreakNode
-import me.saket.wysiwyg.parser.walkMarkdownNodes
 
 internal class AnnotatedStringMarkdownRenderer(
   private val buffer: TextFieldBuffer,

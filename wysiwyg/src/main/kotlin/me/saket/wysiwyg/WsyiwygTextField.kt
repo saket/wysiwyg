@@ -35,12 +35,12 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.takeOrElse
 import androidx.compose.ui.util.fastForEach
 import androidx.tracing.trace
-import me.saket.wysiwyg.spans.toggleTaskCheckboxesOnClick
+import me.saket.wysiwyg.render.spans.toggleTaskCheckboxesOnClick
 import me.saket.wysiwyg.internal.RealMarkdownOutputTransformation
 import me.saket.wysiwyg.internal.RealWysiwyg
-import me.saket.wysiwyg.parser.AnnotatedStringMarkdownRendererFactory
-import me.saket.wysiwyg.parser.MarkdownRenderer
-import me.saket.wysiwyg.parser.rememberMarkdownRenderScope
+import me.saket.wysiwyg.render.AnnotatedStringMarkdownRendererFactory
+import me.saket.wysiwyg.render.MarkdownRenderer
+import me.saket.wysiwyg.render.rememberMarkdownRenderScope
 
 // todo: doc.
 @Composable

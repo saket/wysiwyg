@@ -1,4 +1,3 @@
-// todo: change package back to parser
 package me.saket.wysiwyg.parser
 
 fun interface MarkdownParser {
