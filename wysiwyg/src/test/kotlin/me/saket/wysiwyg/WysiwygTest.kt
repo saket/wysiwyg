@@ -32,7 +32,9 @@ import androidx.compose.ui.platform.LocalCursorBlinkEnabled
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.round
 import androidx.compose.ui.unit.sp
@@ -61,6 +63,17 @@ class WysiwygTest {
     deviceConfig = DeviceConfig.PIXEL_5,
     renderingMode = SessionParams.RenderingMode.SHRINK,
   )
+
+  @Test fun `do not crash when font size is unspecified`() {
+    paparazzi.snapshot {
+      Scaffold {
+        WysiwygEditor(
+          markdown = "Some text with `inline code` here.",
+          textStyle = TextStyle(fontSize = TextUnit.Unspecified),
+        )
+      }
+    }
+  }
 
   @Test fun canary() {
     paparazzi.snapshot {
@@ -720,6 +733,7 @@ class WysiwygTest {
     markdown: String,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(16.dp),
+    textStyle: TextStyle = LocalTextStyle.current.copy(color = LocalContentColor.current),
   ) {
     val textState = rememberTextFieldState(markdown)
     WysiwygEditor(
@@ -731,6 +745,7 @@ class WysiwygTest {
         },
       ),
       contentPadding = contentPadding,
+      textStyle = textStyle,
     )
   }
 
@@ -739,6 +754,7 @@ class WysiwygTest {
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(16.dp),
     wysiwyg: Wysiwyg,
+    textStyle: TextStyle = LocalTextStyle.current.copy(color = LocalContentColor.current),
   ) {
     CompositionLocalProvider(LocalCursorBlinkEnabled provides false) {
       WsyiwygTextField(
@@ -747,7 +763,7 @@ class WysiwygTest {
         wysiwyg = wysiwyg,
         theme = wysiwygTheme(),
         cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-        textStyle = LocalTextStyle.current.copy(color = LocalContentColor.current),
+        textStyle = textStyle,
       )
     }
   }

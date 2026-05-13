@@ -30,6 +30,8 @@ import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.takeOrElse
 import androidx.compose.ui.util.fastForEach
 import androidx.tracing.trace
 import me.saket.wysiwyg.extendedspans.toggleTaskCheckboxesOnClick
@@ -55,7 +57,7 @@ fun WsyiwygTextField(
   lineLimits: TextFieldLineLimits = TextFieldLineLimits.Default,
   onTextLayout: (Density.(getResult: () -> TextLayoutResult?) -> Unit)? = null,
   interactionSource: MutableInteractionSource? = null,
-  cursorBrush: Brush = WsyiwygTextFieldDefaults.CursorBrush,
+  cursorBrush: Brush = WsyiwygDefaults.CursorBrush,
   outputTransformation: OutputTransformation? = null,
   decorator: TextFieldDecorator? = null,
   scrollState: ScrollState = rememberScrollState(),
@@ -63,6 +65,10 @@ fun WsyiwygTextField(
 ) {
   check(wysiwyg is RealWysiwyg)
 
+  val textStyle = textStyle.copy(
+    // Drawing of rounded corner backgrounds is incompatible with unspecified font sizes.
+    fontSize = textStyle.fontSize.takeOrElse { WsyiwygDefaults.FontSize },
+  )
   val renderScope = rememberMarkdownRenderScope(theme, textStyle, wysiwyg.layoutInfo)
   val markdownOutputTransformation = remember(wysiwyg, markdownRenderer, renderScope) {
     RealMarkdownOutputTransformation(wysiwyg, markdownRenderer, renderScope)
@@ -138,8 +144,12 @@ private fun OutputTransformation?.maybeThen(next: OutputTransformation): OutputT
   }
 }
 
-private object WsyiwygTextFieldDefaults {
+private object WsyiwygDefaults {
   val CursorBrush = SolidColor(Color.Black)
+
+  // Copied from:
+  // https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:compose/ui/ui-text/src/androidHostTest/kotlin/androidx/compose/ui/text/TextStyleResolveDefaultsTest.kt;l=46;drc=0cec77f52e06e6b548e76ca0ab161c42feebe371
+  val FontSize = 14.sp
 }
 
 private fun Modifier.drawSpanPainters(wysiwyg: RealWysiwyg): Modifier {
