@@ -90,7 +90,7 @@ internal fun wysiwygTheme(): WysiwygTheme {
     struckThroughTextColor = LocalContentColor.current.copy(alpha = 0.5f),
     codeBackground = LocalContentColor.current.copy(alpha = 0.1f),
     codeBlockLeadingPadding = 16.sp,
-    blockQuoteText = LocalContentColor.current.copy(alpha = 0.9f),
+    blockQuoteTextColor = LocalContentColor.current.copy(alpha = 0.9f),
     blockQuoteLeadingPadding = 16.sp,
     listBlockLeadingPadding = 16.sp,
   )

@@ -167,7 +167,7 @@ internal class AnnotatedStringMarkdownRenderer(
     val range = node.range.resolve() ?: return
     val markerRange = node.markerRange.resolve(dropOnEdit = true) ?: return
 
-    val textStyle = SpanStyle(color = theme.blockQuoteText)
+    val textStyle = SpanStyle(color = theme.blockQuoteTextColor)
     val paragraphStyle = ParagraphStyle(
       textIndent = TextIndent(
         firstLine = theme.blockQuoteLeadingPadding,

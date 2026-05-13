@@ -788,7 +788,7 @@ private fun wysiwygTheme(): WysiwygTheme {
     struckThroughTextColor = LocalContentColor.current.copy(alpha = 0.5f),
     codeBackground = MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp),
     codeBlockLeadingPadding = 16.sp,
-    blockQuoteText = LocalContentColor.current.copy(alpha = 0.9f),
+    blockQuoteTextColor = LocalContentColor.current.copy(alpha = 0.9f),
     blockQuoteLeadingPadding = 16.sp,
     listBlockLeadingPadding = 16.sp,
   )

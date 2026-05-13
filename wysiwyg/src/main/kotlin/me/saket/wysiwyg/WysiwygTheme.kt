@@ -12,7 +12,7 @@ class WysiwygTheme(
   val struckThroughTextColor: Color,
   val codeBackground: Color,
   val codeBlockLeadingPadding: TextUnit,
-  val blockQuoteText: Color,
+  val blockQuoteTextColor: Color,
   val blockQuoteLeadingPadding: TextUnit,
   val listBlockLeadingPadding: TextUnit,
   val headingColor: Color,
