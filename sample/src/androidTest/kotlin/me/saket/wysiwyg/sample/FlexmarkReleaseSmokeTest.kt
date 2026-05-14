@@ -4,8 +4,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import assertk.assertThat
 import assertk.assertions.isNotEmpty
 import kotlinx.coroutines.runBlocking
-import me.saket.wysiwyg.highlight.ChangeListSnapshot
-import me.saket.wysiwyg.highlight.flexmark.FlexmarkMarkdownParser
+import me.saket.wysiwyg.parser.TextChangeListSnapshot
+import me.saket.wysiwyg.parser.flexmark.FlexmarkMarkdownParser
 import org.junit.Test
 import org.junit.runner.RunWith
 import kotlin.coroutines.EmptyCoroutineContext
@@ -20,8 +20,8 @@ class FlexmarkReleaseSmokeTest {
         |
         |Markdown is a **lightweight** and easy-to-use `syntax` for styling all forms of ~~web~~ writing.
       """.trimMargin(),
-      changes = ChangeListSnapshot.Empty,
+      changes = TextChangeListSnapshot.Empty,
     )
-    assertThat(result.render()).isNotEmpty()
+    assertThat(result.children).isNotEmpty()
   }
 }
