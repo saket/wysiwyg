@@ -253,8 +253,9 @@ class FlexmarkMarkdownParser(
         }
       }
       is ThematicBreak -> {
+        val markerStart = chars.countLeadingSpaceTab()
         ThematicBreakNode(
-          range = LocalTextRange.span(0, chars.length),
+          range = LocalTextRange.span(markerStart, chars.length - markerStart),
         )
       }
       else -> null
