@@ -11,9 +11,7 @@ internal class TaskCheckboxSpanPainter(
   val isChecked: Boolean,
 ) : MarkdownSpanPainter {
 
-  override fun DrawScope.draw(layoutResult: TextLayoutResult) {
-    // Phase 3 will draw a real checkbox using boundsIn(layoutResult).
-  }
+  override fun DrawScope.draw(layoutResult: TextLayoutResult) = Unit
 
   fun boundsIn(layoutResult: TextLayoutResult): Rect? {
     return layoutResult.getBoundingBoxes(
