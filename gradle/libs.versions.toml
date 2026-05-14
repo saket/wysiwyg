@@ -10,7 +10,6 @@ androidx-compose-ui-material-icons = "1.7.8"  # https://developer.android.com/je
 androidx-activity = "1.13.0"  # https://developer.android.com/jetpack/androidx/releases/activity
 androidx-appcompat = "1.7.1"
 flexmark = "0.64.8"
-extendedspans = "1.4.0"
 kotlinx-coroutines = "1.10.2"
 kotlin-codepoints = "0.11.0"   # https://github.com/cketti/kotlin-codepoints/releases
 junit = "4.13.2"
@@ -43,7 +42,6 @@ androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "a
 flexmark-java = { module = "com.vladsch.flexmark:flexmark-java", version.ref = "flexmark" }
 flexmark-ext-gfm-strikethrough = { module = "com.vladsch.flexmark:flexmark-ext-gfm-strikethrough", version.ref = "flexmark" }
 flexmark-ext-gfm-tasklist = { module = "com.vladsch.flexmark:flexmark-ext-gfm-tasklist", version.ref = "flexmark" }
-extendedspans = { module = "me.saket.extendedspans:extendedspans", version.ref = "extendedspans" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
 kotlin-codepoints-deluxe = { module = "de.cketti.unicode:kotlin-codepoints-deluxe", version.ref = "kotlin-codepoints" }

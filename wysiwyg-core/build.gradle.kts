@@ -1,5 +1,5 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
   alias(libs.plugins.android.library)
@@ -47,7 +47,6 @@ dependencies {
   api(libs.androidx.compose.ui)
   api(libs.androidx.compose.foundation)
 
-  implementation(libs.extendedspans)
   implementation(libs.androidx.compose.material.ripple)
   implementation(libs.androidx.tracing.ktx)
   implementation(libs.poko.annotations)
