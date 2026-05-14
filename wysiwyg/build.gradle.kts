@@ -1,6 +1,5 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
   alias(libs.plugins.android.library)
@@ -54,22 +53,4 @@ dependencies {
   testImplementation(libs.robolectric)
   testImplementation(libs.turbine)
   testImplementation(libs.touchrobot)
-}
-
-fun KotlinCompile.friendCoreVariant(variant: String) {
-  val capitalizedVariant = variant.replaceFirstChar { it.uppercaseChar() }
-  val coreClasses = projects.wysiwygCore.dependencyProject.layout.buildDirectory
-    .file("intermediates/compile_library_classes_jar/$variant/bundleLibCompileToJar$capitalizedVariant/classes.jar")
-    .get()
-    .asFile
-  compilerOptions.freeCompilerArgs.add(
-    "-Xfriend-paths=${coreClasses.absolutePath}"
-  )
-}
-
-tasks.withType<KotlinCompile>().configureEach {
-  when (name) {
-    "compileDebugUnitTestKotlin" -> friendCoreVariant("debug")
-    "compileReleaseUnitTestKotlin" -> friendCoreVariant("release")
-  }
 }

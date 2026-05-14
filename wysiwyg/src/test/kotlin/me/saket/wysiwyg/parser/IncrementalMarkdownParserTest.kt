@@ -1,3 +1,5 @@
+@file:Suppress("INVISIBLE_MEMBER", "INVISIBLE_REFERENCE")
+
 package me.saket.wysiwyg.parser
 
 import androidx.compose.ui.text.TextRange
@@ -24,7 +26,7 @@ class IncrementalMarkdownParserTest {
     IncrementalMarkdownParser(FlexmarkMarkdownParser())
 
   @Test fun `edit inside a span extends the span's end`() = runTest {
-    parser().test {
+    parser().testRender {
       sendInput("**Beginnings** are such **delicate** times")
       assertThat(awaitItem()).isEqualTo("<b>**Beginnings**</b> are such <b>**delicate**</b> times")
 
@@ -35,7 +37,7 @@ class IncrementalMarkdownParserTest {
   }
 
   @Test fun `edit before all spans shifts both endpoints`() = runTest {
-    parser().test {
+    parser().testRender {
       sendInput("**Beginnings** are such **delicate** times")
       assertThat(awaitItem()).isEqualTo("<b>**Beginnings**</b> are such <b>**delicate**</b> times")
 
@@ -46,7 +48,7 @@ class IncrementalMarkdownParserTest {
   }
 
   @Test fun `edit after all spans leaves them alone`() = runTest {
-    parser().test {
+    parser().testRender {
       sendInput("**Beginnings** are such **delicate** times")
       assertThat(awaitItem()).isEqualTo("<b>**Beginnings**</b> are such <b>**delicate**</b> times")
 
@@ -57,7 +59,7 @@ class IncrementalMarkdownParserTest {
   }
 
   @Test fun `edit crossing a span boundary drops that span only`() = runTest {
-    parser().test {
+    parser().testRender {
       sendInput("**Beginnings** are such **delicate** times")
       assertThat(awaitItem()).isEqualTo("<b>**Beginnings**</b> are such <b>**delicate**</b> times")
 
@@ -69,7 +71,7 @@ class IncrementalMarkdownParserTest {
   }
 
   @Test fun `deletion inside a span shrinks its end`() = runTest {
-    parser().test {
+    parser().testRender {
       sendInput("**Beginnings** are such **delicate** times")
       assertThat(awaitItem()).isEqualTo("<b>**Beginnings**</b> are such <b>**delicate**</b> times")
 
@@ -80,7 +82,7 @@ class IncrementalMarkdownParserTest {
   }
 
   @Test fun `edit between two spans shifts only the later span`() = runTest {
-    parser().test {
+    parser().testRender {
       sendInput("**Beginnings** are such **delicate** times")
       assertThat(awaitItem()).isEqualTo("<b>**Beginnings**</b> are such <b>**delicate**</b> times")
 
@@ -94,7 +96,7 @@ class IncrementalMarkdownParserTest {
   @Test fun `adding or removing hashes in a heading marker keeps it styled`() = runTest {
     // Adding a `#` (h1 to h2). The marker shape stays `#+\s`, so the cached heading
     // stays styled in the overlay. Level stays h1 until the reparse upgrades it.
-    parser().test {
+    parser().testRender {
       sendInput("# heading")
       assertThat(awaitItem()).isEqualTo("<h1># heading</h1>")
       sendInput("## heading")
@@ -102,7 +104,7 @@ class IncrementalMarkdownParserTest {
       cancelAndIgnoreRemainingEvents()
     }
     // Removing a `#` (h2 to h1). Same idea in the other direction.
-    parser().test {
+    parser().testRender {
       sendInput("## heading")
       assertThat(awaitItem()).isEqualTo("<h2>## heading</h2>")
       sendInput("# heading")
@@ -112,7 +114,7 @@ class IncrementalMarkdownParserTest {
   }
 
   @Test fun `replacing a hash with a non-hash drops the heading`() = runTest {
-    parser().test {
+    parser().testRender {
       sendInput("## heading")
       assertThat(awaitItem()).isEqualTo("<h2>## heading</h2>")
 
@@ -125,7 +127,7 @@ class IncrementalMarkdownParserTest {
   }
 
   @Test fun `deleting one closing tilde of a strikethrough drops the styling`() = runTest {
-    parser().test {
+    parser().testRender {
       sendInput("~~foo~~")
       assertThat(awaitItem()).isEqualTo("<s>~~foo~~</s>")
 
@@ -138,7 +140,7 @@ class IncrementalMarkdownParserTest {
   }
 
   @Test fun `edit inside a heading extends the heading span`() = runTest {
-    parser().test {
+    parser().testRender {
       sendInput("# First heading\n\n# Second heading")
       assertThat(awaitItem()).isEqualTo("<h1># First heading</h1>\n\n<h1># Second heading</h1>")
 
@@ -153,7 +155,7 @@ class IncrementalMarkdownParserTest {
     val text = "**Beginnings** are such **delicate** times"
     val expected = "<b>**Beginnings**</b> are such <b>**delicate**</b> times"
 
-    parser().test {
+    parser().testRender {
       sendInput(text)
       assertThat(awaitItem()).isEqualTo(expected)
 
@@ -176,7 +178,7 @@ class IncrementalMarkdownParserTest {
     val staleChanges = changeListSnapshot(seedText, "$seedText!")
 
     val expected = "<b>**Beginnings**</b> are such <b>**delicate**</b> times!!!!!"
-    parser().test {
+    parser().testRender {
       sendInput(seedText) // seed a 42-char text
       assertThat(awaitItem()).isEqualTo(
         "<b>**Beginnings**</b> are such <b>**delicate**</b> times"
@@ -191,7 +193,7 @@ class IncrementalMarkdownParserTest {
 
   @Test fun `deleting one list item marker drops that item and keeps surviving items styled`() =
     runTest {
-      parser().test {
+      parser().testRender {
         sendInput(
           """
           |- first
@@ -225,7 +227,7 @@ class IncrementalMarkdownParserTest {
 
   @Test fun `editing a later list marker drops only that item while tail content stays aligned`() =
     runTest {
-      parser().test {
+      parser().testRender {
         sendInput(
           """
         |- first
@@ -264,7 +266,7 @@ class IncrementalMarkdownParserTest {
     }
 
   @Test fun `editing a nested list keeps unaffected siblings aligned`() = runTest {
-    parser().test {
+    parser().testRender {
       sendInput(
         """
         |- parent
@@ -303,7 +305,7 @@ class IncrementalMarkdownParserTest {
   @Test fun `editing inside a link preserves link rendering`() = runTest {
     val editedExpected = "<link>[label](https://exa!mple.com)</link>"
 
-    parser().test {
+    parser().testRender {
       sendInput("[label](https://example.com)")
       assertThat(awaitItem()).isEqualTo("<link>[label](https://example.com)</link>")
 
@@ -315,7 +317,7 @@ class IncrementalMarkdownParserTest {
 
   @Test fun `editing a link marker drops only the link while preserving following content`() =
     runTest {
-      parser().test {
+      parser().testRender {
         sendInput("[label](url) tail **bold**")
         assertThat(awaitItem()).isEqualTo("<link>[label](url)</link> tail <b>**bold**</b>")
 
@@ -326,7 +328,7 @@ class IncrementalMarkdownParserTest {
     }
 
   @Test fun `block quotes headings and inline spans survive overlay shifts together`() = runTest {
-    parser().test {
+    parser().testRender {
       sendInput(
         """
         |> quote
@@ -370,7 +372,7 @@ class IncrementalMarkdownParserTest {
 
   @Test fun `touching a heading marker drops only that heading while later nodes still render`() =
     runTest {
-      parser().test {
+      parser().testRender {
         sendInput(
           """
         |# heading
@@ -405,7 +407,7 @@ class IncrementalMarkdownParserTest {
     }
 
   @Test fun `trailing plain text after a composite node stays aligned after edits`() = runTest {
-    parser().test {
+    parser().testRender {
       sendInput(
         """
         |- first
@@ -444,7 +446,7 @@ class IncrementalMarkdownParserTest {
   }
 
   @Test fun `lazy continuation under task list item is excluded from list block`() = runTest {
-    parser().test {
+    parser().testRender {
       sendInput(
         """
         |- [ ] task item
@@ -462,7 +464,7 @@ class IncrementalMarkdownParserTest {
 
     // A single-character body counts as a lazy continuation too. Guards against
     // re-introducing a length-based carve-out that keeps short lines inside the list.
-    parser().test {
+    parser().testRender {
       sendInput(
         """
         |- [ ] One
@@ -480,7 +482,7 @@ class IncrementalMarkdownParserTest {
   }
 
   @Test fun `lazy continuation under list item is excluded from list block`() = runTest {
-    parser().test {
+    parser().testRender {
       sendInput(
         """
         |- item
@@ -496,7 +498,7 @@ class IncrementalMarkdownParserTest {
       cancelAndIgnoreRemainingEvents()
     }
 
-    parser().test {
+    parser().testRender {
       sendInput(
         """
         |1. ordered item
@@ -516,7 +518,7 @@ class IncrementalMarkdownParserTest {
   @Test fun `properly indented continuation stays inside the list block`() = runTest {
     // Six spaces match the content column of "- [ ] " so this is a non-lazy
     // continuation per CommonMark and should remain part of the task item.
-    parser().test {
+    parser().testRender {
       sendInput(
         """
         |- [ ] task item
@@ -535,7 +537,7 @@ class IncrementalMarkdownParserTest {
   }
 
   @Test fun `lazy continuation under blockquote is excluded from blockquote range`() = runTest {
-    parser().test {
+    parser().testRender {
       sendInput(
         """
         |> quote
@@ -553,7 +555,7 @@ class IncrementalMarkdownParserTest {
   }
 
   @Test fun `prefixed continuation stays inside the blockquote range`() = runTest {
-    parser().test {
+    parser().testRender {
       sendInput(
         """
         |> quote line 1
@@ -576,7 +578,7 @@ class IncrementalMarkdownParserTest {
     // column. The same gap on an empty task item should also be monospace,
     // otherwise the cursor sits in a narrower proportional space and the
     // indentation shifts by a sub-character width as soon as the user types.
-    parser().test {
+    parser().testRender {
       sendInput(
         """
         |- [ ]${" "}
@@ -596,7 +598,7 @@ class IncrementalMarkdownParserTest {
     // No blank line separates "Foo" from the empty "- " marker. The empty bullet
     // should still interrupt the paragraph so the user sees list styling as soon
     // as they hit enter and type "- ", before adding any content.
-    parser().test {
+    parser().testRender {
       sendInput(
         """
         |Foo
@@ -616,7 +618,7 @@ class IncrementalMarkdownParserTest {
   @Test fun `blank line still ends the list block`() = runTest {
     // Regression check: the trim must not over-eagerly chop off the legitimate
     // CommonMark list-terminating blank line.
-    parser().test {
+    parser().testRender {
       sendInput(
         """
         |- item
@@ -641,7 +643,7 @@ class IncrementalMarkdownParserTest {
         FlexmarkMarkdownParser()
       )
     )
-    parser.test {
+    parser.testRender {
       // Seed parse: the delegate's first call goes through and populates the cache.
       sendInput("**bold** tail")
       assertThat(awaitItem()).isEqualTo("<b>**bold**</b> tail")
@@ -664,7 +666,7 @@ class IncrementalMarkdownParserTest {
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
-private suspend fun IncrementalMarkdownParser.test(test: suspend ParserTester.() -> Unit) {
+private suspend fun IncrementalMarkdownParser.testRender(test: suspend ParserTester.() -> Unit) {
   val inputs = MutableSharedFlow<ParserTester.Input>(replay = 1, extraBufferCapacity = 1)
   val highlights = inputs.transformLatest { input ->
     parse(input.text, input.changes).collect { document ->
