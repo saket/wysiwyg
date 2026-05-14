@@ -64,17 +64,6 @@ class WysiwygTest {
     renderingMode = SessionParams.RenderingMode.SHRINK,
   )
 
-  @Test fun `do not crash when font size is unspecified`() {
-    paparazzi.snapshot {
-      Scaffold {
-        WysiwygEditor(
-          markdown = "Some text with `inline code` here.",
-          textStyle = TextStyle(fontSize = TextUnit.Unspecified),
-        )
-      }
-    }
-  }
-
   @Test fun canary() {
     paparazzi.snapshot {
       Scaffold {
@@ -87,6 +76,17 @@ class WysiwygTest {
           |---
           |Markdown was originally developed by [John Gruber](daringfireball.net/markdown).
           """.trimMargin(),
+        )
+      }
+    }
+  }
+
+  @Test fun `do not crash when font size is unspecified`() {
+    paparazzi.snapshot {
+      Scaffold {
+        WysiwygEditor(
+          markdown = "Some text with `inline code` here.",
+          textStyle = TextStyle(fontSize = TextUnit.Unspecified),
         )
       }
     }
