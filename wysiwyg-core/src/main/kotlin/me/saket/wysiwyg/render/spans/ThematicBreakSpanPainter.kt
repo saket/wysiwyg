@@ -1,5 +1,6 @@
 package me.saket.wysiwyg.render.spans
 
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.text.TextLayoutResult
@@ -14,10 +15,11 @@ internal class ThematicBreakSpanPainter(
 
   override fun DrawScope.draw(layoutResult: TextLayoutResult) {
     val box = layoutResult.getParagraphBox(range.start, range.end)
+    val centerY = layoutResult.getInkCenterY(range.start) ?: box.center.y
     drawLine(
       color = markerColor.copy(alpha = 0.4f),
-      start = box.centerLeft,
-      end = box.centerRight,
+      start = Offset(box.left, centerY),
+      end = Offset(box.right, centerY),
       strokeWidth = 4.dp.toPx(),
     )
   }
