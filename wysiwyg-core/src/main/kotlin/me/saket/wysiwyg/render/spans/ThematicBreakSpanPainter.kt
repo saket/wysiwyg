@@ -20,7 +20,7 @@ internal class ThematicBreakSpanPainter(
       color = markerColor.copy(alpha = 0.4f),
       start = Offset(box.left, centerY),
       end = Offset(box.right, centerY),
-      strokeWidth = 4.dp.toPx(),
+      strokeWidth = 2.dp.toPx(),
     )
   }
 }

@@ -791,6 +791,9 @@ class WysiwygTest {
           |
           |Spaced underscores
           |_ _ _
+          |
+          |Indented hyphens
+          |   ---
           """.trimMargin(),
         )
       }
