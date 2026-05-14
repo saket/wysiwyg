@@ -23,12 +23,14 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.toSize
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -81,18 +83,15 @@ fun WsyiwygTextField(
   val layoutDirection = LocalLayoutDirection.current
   SideEffect {
     layoutInfo.scrollState = scrollState
-    layoutInfo.contentPaddingTopPx = with(density) {
-      contentPadding.calculateTopPadding().toPx()
-    }
-    layoutInfo.contentPaddingLeftPx = with(density) {
-      contentPadding.calculateLeftPadding(layoutDirection).toPx()
-    }
+    layoutInfo.updateContentPadding(contentPadding, density, layoutDirection)
   }
 
   BasicTextField(
     state = wysiwyg.textState,
     modifier = modifier
-      .onSizeChanged { layoutInfo.viewportHeightPx = it.height.toFloat() }
+      .onSizeChanged {
+        layoutInfo.viewportSize = it.toSize()
+      }
       .drawSpanPainters(wysiwyg)
       .toggleTaskCheckboxesOnClick(theme, wysiwyg)
       .padding(contentPadding),
@@ -159,13 +158,21 @@ private fun Modifier.drawSpanPainters(wysiwyg: RealWysiwyg): Modifier {
       val layoutResult = wysiwyg.layoutInfo.lastLayoutResult ?: return@trace
       val painters = wysiwyg.currentRenderResult.spanPainters
       val viewport = wysiwyg.layoutInfo.currentViewport()
+      val contentBounds = wysiwyg.layoutInfo.contentBounds
 
-      translate(viewport.translationX, viewport.translationY) {
-        val translatedScope = this
-        painters.fastForEach { painter ->
-          if (viewport.intersects(painter.range)) {
-            with(painter) {
-              translatedScope.draw(layoutResult)
+      clipRect(
+        left = contentBounds.left,
+        top = contentBounds.top,
+        right = contentBounds.right,
+        bottom = contentBounds.bottom,
+      ) {
+        translate(viewport.translationX, viewport.translationY) {
+          val translatedScope = this
+          painters.fastForEach { painter ->
+            if (viewport.intersects(painter.range)) {
+              with(painter) {
+                translatedScope.draw(layoutResult)
+              }
             }
           }
         }

@@ -1,16 +1,20 @@
 package me.saket.wysiwyg.internal
 
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.runtime.structuralEqualityPolicy
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.LayoutDirection
 
 /**
  * The layout-time state needed to compute the visible-text band of the underlying text field.
@@ -21,9 +25,30 @@ import androidx.compose.ui.text.TextRange
 internal class TextFieldLayoutInfo {
   internal var lastLayoutResult: TextLayoutResult? by mutableStateOf(null)
   internal var scrollState: ScrollState? by mutableStateOf(null)
-  internal var viewportHeightPx: Float by mutableFloatStateOf(0f)
-  internal var contentPaddingTopPx: Float by mutableFloatStateOf(0f)
-  internal var contentPaddingLeftPx: Float by mutableFloatStateOf(0f)
+  internal var viewportSize: Size by mutableStateOf(Size.Zero)
+  private var contentPadding: Rect by mutableStateOf(Rect.Zero)
+
+  internal val contentBounds: Rect by derivedStateOf(structuralEqualityPolicy()) {
+    Rect(
+      left = contentPadding.left,
+      top = contentPadding.top,
+      right = viewportSize.width - contentPadding.right,
+      bottom = viewportSize.height - contentPadding.bottom,
+    )
+  }
+
+  fun updateContentPadding(
+    padding: PaddingValues,
+    density: Density,
+    layoutDirection: LayoutDirection,
+  ) = with(density) {
+    contentPadding = Rect(
+      left = padding.calculateLeftPadding(layoutDirection).toPx(),
+      top = padding.calculateTopPadding().toPx(),
+      right = padding.calculateRightPadding(layoutDirection).toPx(),
+      bottom = padding.calculateBottomPadding().toPx(),
+    )
+  }
 
   /**
    * Whether the rendered document fits within the visible viewport.
@@ -38,7 +63,7 @@ internal class TextFieldLayoutInfo {
    */
   private val documentFitsInViewport by derivedStateOf(structuralEqualityPolicy()) {
     val layout = lastLayoutResult ?: return@derivedStateOf true
-    val height = viewportHeightPx
+    val height = viewportSize.height
     height == 0f || layout.size.height <= height
   }
 
@@ -47,22 +72,22 @@ internal class TextFieldLayoutInfo {
       return TextFieldViewport(
         topPx = 0f,
         bottomPx = 0f,
-        beyondViewportPx = viewportHeightPx,
-        translationX = contentPaddingLeftPx,
-        translationY = contentPaddingTopPx,
+        beyondViewportPx = viewportSize.height,
+        translationX = contentBounds.left,
+        translationY = contentBounds.top,
         layout = null,
       )
     }
 
     val scrollPosition = scrollState?.value ?: 0
-    val visibleTop = scrollPosition.toFloat() - contentPaddingTopPx
+    val visibleTop = scrollPosition.toFloat() - contentBounds.top
 
     return TextFieldViewport(
       topPx = visibleTop,
-      bottomPx = visibleTop + viewportHeightPx,
-      beyondViewportPx = viewportHeightPx,
-      translationX = contentPaddingLeftPx,
-      translationY = contentPaddingTopPx - scrollPosition.toFloat(),
+      bottomPx = visibleTop + viewportSize.height,
+      beyondViewportPx = viewportSize.height,
+      translationX = contentBounds.left,
+      translationY = contentBounds.top - scrollPosition.toFloat(),
       layout = Snapshot.withoutReadObservation {
         // The layout result is read outside snapshot tracking. It changes per keystroke, but the
         // visible pixel band depends only on scroll and padding. Without [withoutReadObservation],
