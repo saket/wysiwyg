@@ -631,6 +631,22 @@ class WysiwygTest {
     }
   }
 
+  @Test fun `spacing below heading`() {
+    paparazzi.snapshot {
+      Scaffold {
+        WysiwygEditor(
+          markdown = """
+          |# The quiet morning
+          |Sunlight spilled through the curtains, painting soft gold across the floor.
+          |
+          |## A longer chapter title that drifts onto a second line
+          |The kettle whistled while the cat stretched in the patch of warm light.
+          """.trimMargin()
+        )
+      }
+    }
+  }
+
   @Test fun `valid headings`() {
     paparazzi.snapshot {
       Scaffold {
