@@ -3,7 +3,9 @@
 package me.saket.wysiwyg
 
 import android.view.ViewGroup.LayoutParams
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
@@ -29,6 +31,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalCursorBlinkEnabled
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.text.TextRange
@@ -716,6 +719,40 @@ class WysiwygTest {
     }
   }
 
+  @Test fun `span painters are clipped to content padding while scrolling`() {
+    paparazzi.snapshot {
+      val scrollState = rememberScrollState(
+        initial = with(LocalDensity.current) { 72.dp.toPx().toInt() },
+      )
+
+      Scaffold {
+        WysiwygEditor(
+          modifier = Modifier.height(280.dp),
+          markdown = """
+          |> This quote starts at the top so its painter moves under the top padding first.
+          |> Its marker should disappear with the quoted text instead of bleeding into padding.
+          |
+          |A paragraph below the quote keeps the field scrollable.
+          |
+          |```
+          |A code block gives another full-width span painter.
+          |It should also stay clipped to the visible text content.
+          |```
+          |
+          |Final paragraph after the painted spans.
+          |""".trimMargin(),
+          contentPadding = PaddingValues(
+            start = 24.dp,
+            top = 96.dp,
+            end = 24.dp,
+            bottom = 24.dp,
+          ),
+          scrollState = scrollState,
+        )
+      }
+    }
+  }
+
   @Composable
   private fun Scaffold(
     content: @Composable () -> Unit,
@@ -735,6 +772,7 @@ class WysiwygTest {
     markdown: String,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(16.dp),
+    scrollState: ScrollState = rememberScrollState(),
     textStyle: TextStyle = DefaultTextStyle,
   ) {
     val textState = rememberTextFieldState(markdown)
@@ -747,6 +785,7 @@ class WysiwygTest {
         },
       ),
       contentPadding = contentPadding,
+      scrollState = scrollState,
       textStyle = textStyle,
     )
   }
@@ -755,6 +794,7 @@ class WysiwygTest {
   private fun WysiwygEditor(
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(16.dp),
+    scrollState: ScrollState = rememberScrollState(),
     wysiwyg: Wysiwyg,
     textStyle: TextStyle = DefaultTextStyle,
   ) {
@@ -762,6 +802,7 @@ class WysiwygTest {
       WsyiwygTextField(
         modifier = modifier.testTag("editor"),
         contentPadding = contentPadding,
+        scrollState = scrollState,
         wysiwyg = wysiwyg,
         textStyle = textStyle,
       )
