@@ -18,7 +18,6 @@ import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
@@ -27,7 +26,6 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.unit.dp
 import me.saket.wysiwyg.WsyiwygTextField
-import me.saket.wysiwyg.parser.flexmark.FlexmarkMarkdownParser
 import me.saket.wysiwyg.rememberWysiwyg
 
 /** Driven by `:benchmarks` via UiAutomator. */
@@ -75,7 +73,6 @@ class BenchmarkActivity : AppCompatActivity() {
   ) {
     val wysiwyg = rememberWysiwyg(
       textState = rememberTextFieldState(initialText = markdown),
-      parser = remember { FlexmarkMarkdownParser() },
     )
     WsyiwygTextField(
       modifier = modifier,

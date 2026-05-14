@@ -23,7 +23,6 @@ import androidx.compose.ui.layout.WindowInsetsRulers
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import me.saket.wysiwyg.WsyiwygTextField
-import me.saket.wysiwyg.parser.flexmark.FlexmarkMarkdownParser
 import me.saket.wysiwyg.rememberWysiwyg
 
 @Composable
@@ -50,7 +49,6 @@ fun WysiwygEditor(
 
   val wysiwyg = rememberWysiwyg(
     textState = textState,
-    parser = remember { FlexmarkMarkdownParser() },
   )
 
   Column(modifier) {

@@ -1,3 +1,5 @@
+@file:Suppress("INVISIBLE_MEMBER", "INVISIBLE_REFERENCE")
+
 package me.saket.wysiwyg
 
 import android.view.ViewGroup.LayoutParams

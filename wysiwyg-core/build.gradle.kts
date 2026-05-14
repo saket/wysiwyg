@@ -1,6 +1,5 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
   alias(libs.plugins.android.library)
@@ -8,10 +7,11 @@ plugins {
   alias(libs.plugins.kotlin.compose)
   alias(libs.plugins.vanniktech.maven.publish)
   alias(libs.plugins.paparazzi)
+  alias(libs.plugins.poko)
 }
 
 android {
-  namespace = "me.saket.wysiwyg.defaultparser"
+  namespace = "me.saket.wysiwyg"
   resourcePrefix = "wysiwyg_"
 
   compileSdk = libs.versions.compileSdk.get().toInt()
@@ -22,6 +22,7 @@ android {
 
   buildFeatures {
     compose = true
+    buildConfig = true
   }
 
   kotlin {
@@ -42,10 +43,16 @@ android {
 }
 
 dependencies {
-  api(projects.wysiwygCore)
-  api(projects.wysiwygParserFlexmark)
+  api(libs.kotlinx.coroutines.core)
+  api(libs.androidx.compose.ui)
+  api(libs.androidx.compose.foundation)
 
-  implementation(libs.androidx.compose.foundation)
+  implementation(libs.extendedspans)
+  implementation(libs.androidx.compose.material.ripple)
+  implementation(libs.androidx.tracing.ktx)
+  implementation(libs.poko.annotations)
+
+  lintChecks(libs.composeLintChecks)
 
   testImplementation(libs.junit)
   testImplementation(libs.truth)
@@ -54,22 +61,4 @@ dependencies {
   testImplementation(libs.robolectric)
   testImplementation(libs.turbine)
   testImplementation(libs.touchrobot)
-}
-
-fun KotlinCompile.friendCoreVariant(variant: String) {
-  val capitalizedVariant = variant.replaceFirstChar { it.uppercaseChar() }
-  val coreClasses = projects.wysiwygCore.dependencyProject.layout.buildDirectory
-    .file("intermediates/compile_library_classes_jar/$variant/bundleLibCompileToJar$capitalizedVariant/classes.jar")
-    .get()
-    .asFile
-  compilerOptions.freeCompilerArgs.add(
-    "-Xfriend-paths=${coreClasses.absolutePath}"
-  )
-}
-
-tasks.withType<KotlinCompile>().configureEach {
-  when (name) {
-    "compileDebugUnitTestKotlin" -> friendCoreVariant("debug")
-    "compileReleaseUnitTestKotlin" -> friendCoreVariant("release")
-  }
 }

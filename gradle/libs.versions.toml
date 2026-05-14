@@ -2,6 +2,7 @@
 kotlin = "2.3.10"
 agp = "8.13.2"  # https://maven.google.com/web/index.html?q=gradle.plugin#com.android.library:com.android.library.gradle.plugin
 compileSdk = "36"
+minSdk = "23"
 androidx-compose-ui = "1.11.0-rc01"   # https://developer.android.com/jetpack/androidx/releases/compose-ui
 androidx-compose-ui-material3 = "1.5.0-alpha17"  # https://developer.android.com/jetpack/androidx/releases/compose-material3
 androidx-compose-ui-material-ripple = "1.7.8"  # https://developer.android.com/jetpack/androidx/releases/compose-material
