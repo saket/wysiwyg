@@ -160,18 +160,18 @@ private fun Modifier.drawSpanPainters(wysiwyg: RealWysiwyg): Modifier {
       val viewport = wysiwyg.layoutInfo.currentViewport()
       val contentBounds = wysiwyg.layoutInfo.contentBounds
 
-      clipRect(
-        left = contentBounds.left,
-        top = contentBounds.top,
-        right = contentBounds.right,
-        bottom = contentBounds.bottom,
-      ) {
-        translate(viewport.translationX, viewport.translationY) {
-          val translatedScope = this
-          painters.fastForEach { painter ->
-            if (viewport.intersects(painter.range)) {
+      painters.fastForEach { painter ->
+        if (viewport.intersects(painter.range)) {
+          val drawSlop = with(painter) { drawSlop() }
+          clipRect(
+            left = contentBounds.left - drawSlop.left,
+            top = contentBounds.top - drawSlop.top,
+            right = contentBounds.right + drawSlop.right,
+            bottom = contentBounds.bottom + drawSlop.bottom,
+          ) {
+            translate(viewport.translationX, viewport.translationY) {
               with(painter) {
-                translatedScope.draw(layoutResult)
+                draw(layoutResult)
               }
             }
           }

@@ -63,15 +63,15 @@ internal class TextFieldLayoutInfo {
    */
   private val documentFitsInViewport by derivedStateOf(structuralEqualityPolicy()) {
     val layout = lastLayoutResult ?: return@derivedStateOf true
-    val height = viewportSize.height
+    val height = contentBounds.height
     height == 0f || layout.size.height <= height
   }
 
   fun currentViewport(): TextFieldViewport {
     if (documentFitsInViewport) {
       return TextFieldViewport(
-        topPx = 0f,
-        bottomPx = 0f,
+        visibleTopPx = 0f,
+        visibleBottomPx = viewportSize.height,
         beyondViewportPx = viewportSize.height,
         translationX = contentBounds.left,
         translationY = contentBounds.top,
@@ -80,11 +80,10 @@ internal class TextFieldLayoutInfo {
     }
 
     val scrollPosition = scrollState?.value ?: 0
-    val visibleTop = scrollPosition.toFloat() - contentBounds.top
 
     return TextFieldViewport(
-      topPx = visibleTop,
-      bottomPx = visibleTop + viewportSize.height,
+      visibleTopPx = scrollPosition.toFloat(),
+      visibleBottomPx = scrollPosition.toFloat() + contentBounds.height,
       beyondViewportPx = viewportSize.height,
       translationX = contentBounds.left,
       translationY = contentBounds.top - scrollPosition.toFloat(),
@@ -104,18 +103,18 @@ internal class TextFieldLayoutInfo {
  * ranges are scrolled out of view, and to short-circuit the render walk over
  * offscreen markdown nodes.
  *
- * The band is in pixel coordinates ([topPx], [bottomPx]) so it doesn't shift
- * when text is typed; only scroll, padding, and viewport size move it. Range
- * lookups go through [layout], which is captured outside snapshot tracking so
- * its per-char churn doesn't dirty downstream readers.
+ * The band is in pixel coordinates ([visibleTopPx], [visibleBottomPx]) so it
+ * doesn't shift when text is typed; only scroll, padding, and viewport size move
+ * it. Range lookups go through [layout], which is captured outside snapshot
+ * tracking so its per-char churn doesn't dirty downstream readers.
  *
  * [translationX] and [translationY] are the canvas translation needed to map
  * text-content coordinates onto the visible viewport, baking together content
  * padding and scroll offset for callers that draw under the text field.
  */
 internal class TextFieldViewport(
-  private val topPx: Float,
-  private val bottomPx: Float,
+  private val visibleTopPx: Float,
+  private val visibleBottomPx: Float,
   private val beyondViewportPx: Float,
   private val layout: TextLayoutResult?,
   val translationX: Float,
@@ -133,7 +132,7 @@ internal class TextFieldViewport(
     val firstLine = layout.getLineForOffset(range.start)
     val lastLine = layout.getLineForOffset(range.end)
     val slack = if (includeBeyondViewport) beyondViewportPx else 0f
-    return layout.getLineTop(firstLine) <= bottomPx + slack &&
-        layout.getLineBottom(lastLine) >= topPx - slack
+    return layout.getLineTop(firstLine) <= visibleBottomPx + slack &&
+        layout.getLineBottom(lastLine) >= visibleTopPx - slack
   }
 }

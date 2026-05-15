@@ -13,4 +13,17 @@ interface MarkdownSpanPainter {
   val range: TextRange
 
   fun DrawScope.draw(layoutResult: TextLayoutResult)
+
+  fun DrawScope.drawSlop(): DrawSlop = DrawSlop.Zero
+
+  class DrawSlop(
+    val left: Float,
+    val top: Float,
+    val right: Float,
+    val bottom: Float,
+  ) {
+    companion object {
+      val Zero = DrawSlop(left = 0f, top = 0f, right = 0f, bottom = 0f)
+    }
+  }
 }

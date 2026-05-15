@@ -62,6 +62,15 @@ class RoundedCornerSpanPainter(
     }
   }
 
+  override fun DrawScope.drawSlop(): MarkdownSpanPainter.DrawSlop {
+    return MarkdownSpanPainter.DrawSlop(
+      left = padding.horizontal.toPx(),
+      top = (padding.vertical.toPx() - topMargin.toPx()).coerceAtLeast(0f),
+      right = padding.horizontal.toPx(),
+      bottom = (padding.vertical.toPx() - bottomMargin.toPx()).coerceAtLeast(0f),
+    )
+  }
+
   @Poko
   class TextPaddingValues(
     val horizontal: TextUnit = 0.sp,
