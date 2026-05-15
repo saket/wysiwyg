@@ -66,9 +66,7 @@ class RoundedCornerSpanPainter(
   class TextPaddingValues(
     val horizontal: TextUnit = 0.sp,
     val vertical: TextUnit = 0.sp,
-  ) {
-    constructor(all: TextUnit) : this(horizontal = all, vertical = all)
-  }
+  )
 
   companion object {
     // Shared across painter instances. Safe because Compose draws happen sequentially

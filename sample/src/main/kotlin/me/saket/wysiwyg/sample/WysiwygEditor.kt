@@ -9,8 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.fitInside
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.LocalContentColor
-import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -20,7 +18,10 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.WindowInsetsRulers
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
+import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
 import me.saket.wysiwyg.WsyiwygTextField
 import me.saket.wysiwyg.rememberWysiwyg
@@ -64,7 +65,11 @@ fun WysiwygEditor(
         contentPadding = PaddingValues(16.dp),
         wysiwyg = wysiwyg,
         cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-        textStyle = LocalTextStyle.current.copy(color = LocalContentColor.current),
+        textStyle = TextStyle(
+          fontSize = 16.sp,
+          lineHeight = 1.5.em,
+          letterSpacing = 0.5.sp,
+        ),
       )
     }
 

@@ -96,7 +96,7 @@ internal class AnnotatedStringMarkdownRenderer(
         range = range,
         backgroundColor = theme.codeBackground,
         cornerRadius = 4.sp,
-        padding = TextPaddingValues(2.sp),
+        padding = TextPaddingValues(horizontal = 0.sp, vertical = 2.sp),
         topMargin = 0.sp,
         bottomMargin = 0.sp,
       )
