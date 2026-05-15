@@ -25,10 +25,12 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalCursorBlinkEnabled
 import androidx.compose.ui.platform.LocalDensity
@@ -766,6 +768,50 @@ class WysiwygTest {
           scrollState = scrollState,
         )
       }
+    }
+  }
+
+  @Test fun `code span painters respect content boundaries`() {
+    paparazzi.snapshot {
+      val markdown = """
+        |`Top left`
+        |
+        |```kotlin
+        |fun greet(name: String) {
+        |  println("Hello, ${'$'}name!")
+        |}
+        |```
+        """.trimMargin()
+      val wysiwyg = rememberWysiwyg(
+        textState = rememberTextFieldState(
+          initialText = markdown,
+          initialSelection = TextRange(0),
+        ),
+        parser = remember {
+          FlexmarkMarkdownParser(dispatcher = Dispatchers.Unconfined)
+        },
+      )
+
+      WsyiwygTextField(
+        modifier = Modifier
+          .background(Color.DarkGray)
+          .width(360.dp)
+          .height(216.dp)
+          .drawWithContent {
+            drawContent()
+            val contentBounds = (wysiwyg as RealWysiwyg).layoutInfo.contentBounds
+            this.drawRect(
+              color = Color.Yellow,
+              topLeft = contentBounds.topLeft,
+              size = contentBounds.size,
+              style = Stroke(1f),
+            )
+          },
+        wysiwyg = wysiwyg,
+        contentPadding = PaddingValues(48.dp),
+        theme = WysiwygTheme.GithubDark.copy(codeBackground = Color(0xFF538815)),
+        textStyle = TextStyle(color = Color.White)
+      )
     }
   }
 

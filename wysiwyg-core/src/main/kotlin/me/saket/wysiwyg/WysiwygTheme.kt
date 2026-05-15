@@ -29,6 +29,34 @@ class WysiwygTheme(
     val h6: Float = 1f,
   )
 
+  fun copy(
+    markerColor: Color = this.markerColor,
+    linkTextColor: Color = this.linkTextColor,
+    linkUrlColor: Color = this.linkUrlColor,
+    struckThroughTextColor: Color = this.struckThroughTextColor,
+    codeBackground: Color = this.codeBackground,
+    codeBlockLeadingPadding: TextUnit = this.codeBlockLeadingPadding,
+    blockQuoteTextColor: Color = this.blockQuoteTextColor,
+    blockQuoteLeadingPadding: TextUnit = this.blockQuoteLeadingPadding,
+    listBlockLeadingPadding: TextUnit = this.listBlockLeadingPadding,
+    headingColor: Color = this.headingColor,
+    headingFontSizes: HeadingFontSizeMultipliers = this.headingFontSizes,
+  ): WysiwygTheme {
+    return WysiwygTheme(
+      markerColor = markerColor,
+      linkTextColor = linkTextColor,
+      linkUrlColor = linkUrlColor,
+      struckThroughTextColor = struckThroughTextColor,
+      codeBackground = codeBackground,
+      codeBlockLeadingPadding = codeBlockLeadingPadding,
+      blockQuoteTextColor = blockQuoteTextColor,
+      blockQuoteLeadingPadding = blockQuoteLeadingPadding,
+      listBlockLeadingPadding = listBlockLeadingPadding,
+      headingColor = headingColor,
+      headingFontSizes = headingFontSizes,
+    )
+  }
+
   companion object {
     val GithubLight: WysiwygTheme = WysiwygTheme(
       markerColor = Color(0xFF57606A),
