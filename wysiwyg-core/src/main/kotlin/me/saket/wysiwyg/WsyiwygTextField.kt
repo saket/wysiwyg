@@ -45,6 +45,8 @@ import me.saket.wysiwyg.render.MarkdownRenderer
 import me.saket.wysiwyg.render.rememberMarkdownRenderScope
 
 // todo: doc.
+//  @param contentPadding is used so that span painters can draw outside the bounds. in the future
+//   it should also support https://issuetracker.google.com/issues/302599627
 @Composable
 fun WsyiwygTextField(
   wysiwyg: Wysiwyg,

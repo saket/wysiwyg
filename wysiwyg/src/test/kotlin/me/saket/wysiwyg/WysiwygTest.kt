@@ -771,6 +771,16 @@ class WysiwygTest {
     }
   }
 
+  @Test fun `inline code span wrapped across multiple lines`() {
+    paparazzi.snapshot {
+      Scaffold {
+        WysiwygEditor(
+          markdown = "Some prose before `a long stretch of inline code that is wide enough to wrap onto a third visual line` and some prose after.",
+        )
+      }
+    }
+  }
+
   @Test fun `code span painters respect content boundaries`() {
     paparazzi.snapshot {
       val markdown = """

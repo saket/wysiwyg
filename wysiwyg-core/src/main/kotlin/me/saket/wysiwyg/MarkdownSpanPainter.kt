@@ -14,6 +14,7 @@ interface MarkdownSpanPainter {
 
   fun DrawScope.draw(layoutResult: TextLayoutResult)
 
+  // todo: kdoc.
   fun DrawScope.drawSlop(): DrawSlop = DrawSlop.Zero
 
   class DrawSlop(
