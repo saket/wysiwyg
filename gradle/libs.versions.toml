@@ -16,6 +16,7 @@ junit = "4.13.2"
 truth = "1.4.5"
 assertk = "0.28.1"
 turbine = "1.2.1" # https://github.com/cashapp/turbine/releases
+testparameterinjector = "1.22" # https://github.com/google/TestParameterInjector/releases
 paparazzi = "2.0.0-alpha02" # https://github.com/cashapp/paparazzi/releases
 robolectric = "4.16.1" # https://github.com/robolectric/robolectric/releases
 dropshots = "0.6.0" # https://github.com/dropbox/dropshots/releases
@@ -49,6 +50,7 @@ junit = { module = "junit:junit", version.ref = "junit" }
 truth = { module = "com.google.truth:truth", version.ref = "truth" }
 assertk = { module = "com.willowtreeapps.assertk:assertk", version.ref = "assertk" }
 turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
+testparameterinjector = { module = "com.google.testparameterinjector:test-parameter-injector", version.ref = "testparameterinjector" }
 composeLintChecks = { module = "com.slack.lint.compose:compose-lint-checks", version.ref = "composeLintChecks" }
 dropshots = { module = "com.dropbox.dropshots:dropshots", version.ref = "dropshots" }
 androidx-benchmark-junit4 = { module = "androidx.benchmark:benchmark-junit4", version.ref = "androidx-benchmark" }

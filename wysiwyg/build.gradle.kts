@@ -53,4 +53,5 @@ dependencies {
   testImplementation(libs.robolectric)
   testImplementation(libs.turbine)
   testImplementation(libs.touchrobot)
+  testImplementation(libs.testparameterinjector)
 }

@@ -48,6 +48,8 @@ import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
 import app.cash.turbine.Turbine
 import com.android.ide.common.rendering.api.SessionParams
+import com.google.testing.junit.testparameterinjector.TestParameter
+import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.sync.Semaphore
@@ -61,17 +63,19 @@ import me.saket.wysiwyg.parser.flexmark.FlexmarkMarkdownParser
 import me.saket.wysiwyg.render.spans.TaskCheckboxSpanPainter
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
 import kotlin.time.Duration.Companion.milliseconds
 
+@RunWith(TestParameterInjector::class)
 class WysiwygTest {
   @get:Rule val paparazzi = Paparazzi(
     deviceConfig = DeviceConfig.PIXEL_5,
     renderingMode = SessionParams.RenderingMode.SHRINK,
   )
 
-  @Test fun canary() {
+  @Test fun canary(@TestParameter theme: WysiwygThemeParam) {
     paparazzi.snapshot {
-      Scaffold {
+      Scaffold(background = theme.background) {
         WysiwygEditor(
           markdown = """
           |# Wysiwyg
@@ -81,6 +85,8 @@ class WysiwygTest {
           |---
           |Markdown was originally developed by [John Gruber](daringfireball.net/markdown).
           """.trimMargin(),
+          theme = theme.theme,
+          textStyle = DefaultTextStyle.copy(color = theme.textColor),
         )
       }
     }
@@ -858,13 +864,14 @@ class WysiwygTest {
 
   @Composable
   private fun Scaffold(
+    background: Color = Color.White,
     content: @Composable () -> Unit,
   ) {
     Box(
       Modifier
         .fillMaxWidth()
         .heightIn(min = 300.dp)
-        .background(Color.White)
+        .background(background)
     ) {
       content()
     }
@@ -877,6 +884,7 @@ class WysiwygTest {
     contentPadding: PaddingValues = PaddingValues(16.dp),
     scrollState: ScrollState = rememberScrollState(),
     textStyle: TextStyle = DefaultTextStyle,
+    theme: WysiwygTheme = WysiwygTheme.GithubLight,
   ) {
     val textState = rememberTextFieldState(markdown)
     WysiwygEditor(
@@ -890,6 +898,7 @@ class WysiwygTest {
       contentPadding = contentPadding,
       scrollState = scrollState,
       textStyle = textStyle,
+      theme = theme,
     )
   }
 
@@ -900,6 +909,7 @@ class WysiwygTest {
     scrollState: ScrollState = rememberScrollState(),
     wysiwyg: Wysiwyg,
     textStyle: TextStyle = DefaultTextStyle,
+    theme: WysiwygTheme = WysiwygTheme.GithubLight,
   ) {
     CompositionLocalProvider(LocalCursorBlinkEnabled provides false) {
       WsyiwygTextField(
@@ -910,8 +920,26 @@ class WysiwygTest {
         scrollState = scrollState,
         wysiwyg = wysiwyg,
         textStyle = textStyle,
+        theme = theme,
       )
     }
+  }
+
+  enum class WysiwygThemeParam(
+    val theme: WysiwygTheme,
+    val background: Color,
+    val textColor: Color,
+  ) {
+    Light(
+      theme = WysiwygTheme.GithubLight,
+      background = Color.White,
+      textColor = Color(0xFF1F2328),
+    ),
+    Dark(
+      theme = WysiwygTheme.GithubDark,
+      background = Color(0xFF0D1117),
+      textColor = Color(0xFFE6EDF3),
+    ),
   }
 
   companion object {
