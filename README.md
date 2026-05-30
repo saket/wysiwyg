@@ -4,6 +4,8 @@ An experimental markdown editor for Compose UI that highlights markers in real t
 TODO: upload to maven
 ```
 
+![demo](wysiwyg/src/test/snapshots/images/me.saket.wysiwyg_WysiwygTest_canary%5BLight%5D.png)
+
 ### Usage
 
 ```kotlin
