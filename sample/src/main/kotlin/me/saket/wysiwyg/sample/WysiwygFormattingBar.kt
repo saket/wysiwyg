@@ -106,7 +106,7 @@ fun FormatButton(
         onClick = onClick
       )
       .padding(12.dp)
-      .size(24.dp)
+      .size(30.dp, 24.dp)
   ) {
     Image(
       modifier = Modifier.matchParentSize(),

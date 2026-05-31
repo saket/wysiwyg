@@ -60,10 +60,11 @@ private fun WysiwygEditor(
       """
         |# Wysiwyg
         |
-        |Markdown is a **lightweight** and easy-to-use `syntax` for styling all forms of ~~web~~ writing.
-        |> The overriding design goal for Markdown's formatting syntax is to make it as readable as possible.
-        |---
-        |Markdown was originally developed by [John Gruber](daringfireball.net/markdown), with help from Aaron Swartz.
+        |A markdown editor that styles text *as you type*, so you never have to guess what your **bold** and `code` will look like.
+        |
+        |> The single biggest source of inspiration for Markdown's syntax is the format of plain text email.
+        |
+        |That's how [John Gruber](daringfireball.net/markdown) described his goal when he created Markdown in ~~2003~~ 2004, with help from Aaron Swartz.
         """.trimMargin(),
   )
 
@@ -87,7 +88,7 @@ private fun WysiwygEditor(
     ) {
       WsyiwygTextField(
         modifier = Modifier.focusRequester(focusRequester),
-        contentPadding = PaddingValues(16.dp),
+        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 16.dp),
         wysiwyg = wysiwyg,
         cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
         textStyle = TextStyle(

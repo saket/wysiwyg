@@ -1,12 +1,14 @@
-An experimental markdown editor for Compose UI that highlights markers in real time.
+# Wysiwyg
 
-```
-TODO: upload to maven
-```
+<img src="screenshots/sample.png" width="400" />
 
-![demo](wysiwyg/src/test/snapshots/images/me.saket.wysiwyg_WysiwygTest_canary%5BLight%5D.png)
+An **experimental** markdown editor for Compose UI that styles markdown syntax in real time. Edits are applied incrementally on every keystroke for instant feedback, while the full re-parse runs off the main thread. Uses [Flexmark](https://github.com/vsch/flexmark-java/) by default, but can be replaced with any other parser.
 
 ### Usage
+
+```groovy
+TODO: upload to maven
+```
 
 ```kotlin
 WsyiwygTextField(
@@ -18,10 +20,14 @@ WsyiwygTextField(
 )
 ```
 
+TODO: document
+- Marker inserters
+- Customization?
+
 ### License
 
 ```
-Copyright 2019 Saket Narayan.
+Copyright 2026 Saket Narayan.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
