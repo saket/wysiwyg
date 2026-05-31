@@ -20,7 +20,7 @@ internal class ThematicBreakSpanPainter(
     val strokeWidth = 2.dp.toPx()
     val capRadius = strokeWidth / 2f
     drawLine(
-      color = markerColor.copy(alpha = 0.4f),
+      color = markerColor,
       start = Offset(box.left + capRadius, centerY),
       end = Offset(box.right - capRadius, centerY),
       strokeWidth = strokeWidth,
