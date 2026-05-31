@@ -92,7 +92,7 @@ private fun WysiwygEditor(
         cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
         textStyle = TextStyle(
           fontSize = 16.sp,
-          lineHeight = 1.5.em,
+          lineHeight = 1.7.em,
           letterSpacing = 0.5.sp,
           color = LocalContentColor.current,
         ),
