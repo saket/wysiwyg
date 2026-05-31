@@ -2,7 +2,7 @@
 
 <img src="screenshots/sample.png" width="400" />
 
-An **experimental** markdown editor for Compose UI that styles markdown syntax in real time. Edits are applied incrementally on every keystroke for instant feedback, while the full re-parse runs off the main thread. Uses [Flexmark](https://github.com/vsch/flexmark-java/) by default, but can be replaced with any other parser.
+An **experimental** markdown editor for Compose UI that styles markdown syntax in real time. Edits are applied incrementally on every keystroke for instant feedback, while the full re-parse runs off the main thread. Uses [flexmark](https://github.com/vsch/flexmark-java/) by default, but can be replaced with any other parser.
 
 ### Usage
 
@@ -21,8 +21,12 @@ WsyiwygTextField(
 ```
 
 TODO: document
-- Marker inserters
-- Customization?
+- Markdown parser
+- Checkboxes
+- Formatting actions
+- Auto-format on enter
+- Customization
+  - theme
 
 ### License
 

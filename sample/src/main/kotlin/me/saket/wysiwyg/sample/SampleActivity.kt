@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
 import me.saket.wysiwyg.WsyiwygTextField
+import me.saket.wysiwyg.WysiwygTheme
 import me.saket.wysiwyg.rememberWysiwyg
 
 class SampleActivity : AppCompatActivity() {
@@ -86,6 +87,14 @@ private fun WysiwygEditor(
         .fitInside(WindowInsetsRulers.SystemBars.current)
         .fitInside(WindowInsetsRulers.Ime.current),
     ) {
+      val wysiwygTheme = if (isSystemInDarkTheme()) {
+        WysiwygTheme.GithubDark
+      } else {
+        WysiwygTheme.GithubLight
+      }.copy(
+        markerColor = MaterialTheme.colorScheme.tertiary,
+      )
+
       WsyiwygTextField(
         modifier = Modifier.focusRequester(focusRequester),
         contentPadding = PaddingValues(horizontal = 24.dp, vertical = 16.dp),
@@ -97,6 +106,7 @@ private fun WysiwygEditor(
           letterSpacing = 0.5.sp,
           color = LocalContentColor.current,
         ),
+        theme = wysiwygTheme,
       )
     }
 
