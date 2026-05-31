@@ -15,9 +15,12 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.twotone.Code
+import androidx.compose.material.icons.twotone.DataObject
 import androidx.compose.material.icons.twotone.FormatBold
 import androidx.compose.material.icons.twotone.FormatItalic
 import androidx.compose.material.icons.twotone.FormatQuote
+import androidx.compose.material.icons.twotone.FormatStrikethrough
 import androidx.compose.material.icons.twotone.Tag
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
@@ -32,8 +35,11 @@ import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.unit.dp
 import me.saket.wysiwyg.format.insertBlockQuoteMarker
 import me.saket.wysiwyg.format.insertBoldMarker
+import me.saket.wysiwyg.format.insertCodeBlockMarker
 import me.saket.wysiwyg.format.insertHeadingMarker
+import me.saket.wysiwyg.format.insertInlineCodeMarker
 import me.saket.wysiwyg.format.insertItalicMarker
+import me.saket.wysiwyg.format.insertStrikethroughMarker
 
 @Composable
 fun MarkdownFormattingBar(
@@ -59,14 +65,29 @@ fun MarkdownFormattingBar(
       onClick = { state.insertItalicMarker() }
     )
     FormatButton(
-      icon = Icons.TwoTone.FormatQuote,
-      contentDescription = "Insert block quote",
-      onClick = { state.insertBlockQuoteMarker() }
+      icon = Icons.TwoTone.FormatStrikethrough,
+      contentDescription = "Insert strikethrough markdown",
+      onClick = { state.insertStrikethroughMarker() }
+    )
+    FormatButton(
+      icon = Icons.TwoTone.Code,
+      contentDescription = "Insert inline code markdown",
+      onClick = { state.insertInlineCodeMarker() }
     )
     FormatButton(
       icon = Icons.TwoTone.Tag,
       contentDescription = "Insert heading markdown",
       onClick = { state.insertHeadingMarker() }
+    )
+    FormatButton(
+      icon = Icons.TwoTone.FormatQuote,
+      contentDescription = "Insert block quote",
+      onClick = { state.insertBlockQuoteMarker() }
+    )
+    FormatButton(
+      icon = Icons.TwoTone.DataObject,
+      contentDescription = "Insert code block markdown",
+      onClick = { state.insertCodeBlockMarker() }
     )
   }
 }
