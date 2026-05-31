@@ -25,7 +25,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.unit.dp
-import me.saket.wysiwyg.WsyiwygTextField
+import me.saket.wysiwyg.WysiwygTextField
 import me.saket.wysiwyg.rememberWysiwyg
 
 /** Driven by `:benchmarks` via UiAutomator. */
@@ -74,7 +74,7 @@ class BenchmarkActivity : AppCompatActivity() {
     val wysiwyg = rememberWysiwyg(
       textState = rememberTextFieldState(initialText = markdown),
     )
-    WsyiwygTextField(
+    WysiwygTextField(
       modifier = modifier,
       wysiwyg = wysiwyg,
       cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),

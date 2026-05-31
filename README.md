@@ -11,7 +11,7 @@ TODO: upload to maven
 ```
 
 ```kotlin
-WsyiwygTextField(
+WysiwygTextField(
   wysiwyg = rememberWysiwyg(
     textState = rememberTextFieldState(),
   ),

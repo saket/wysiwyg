@@ -31,7 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
-import me.saket.wysiwyg.WsyiwygTextField
+import me.saket.wysiwyg.WysiwygTextField
 import me.saket.wysiwyg.WysiwygTheme
 import me.saket.wysiwyg.rememberWysiwyg
 
@@ -60,7 +60,6 @@ private fun WysiwygEditor(
     initialText =
       """
         |# Wysiwyg
-        |
         |A markdown editor that styles text *as you type*, so you never have to guess what your **bold** and `code` will look like.
         |
         |> The single biggest source of inspiration for Markdown's syntax is the format of plain text email.
@@ -95,7 +94,7 @@ private fun WysiwygEditor(
         markerColor = MaterialTheme.colorScheme.tertiary,
       )
 
-      WsyiwygTextField(
+      WysiwygTextField(
         modifier = Modifier.focusRequester(focusRequester),
         contentPadding = PaddingValues(horizontal = 24.dp, vertical = 16.dp),
         wysiwyg = wysiwyg,

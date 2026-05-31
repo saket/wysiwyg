@@ -9,7 +9,7 @@ Two fixtures: the first 50,000 characters of the CommonMark spec (long document)
 
 **Frame timing during the typing burst** (lower is better; 8.3 ms is the 120 Hz frame budget):
 
-|                   | Plain `BasicTextField` | `WsyiwygTextField` | Ratio |
+|                   | Plain `BasicTextField` | `WysiwygTextField` | Ratio |
 |-------------------|------------------------|--------------------|-------|
 | P50 frame CPU     | 4.1 ms                 | 4.3 ms             | 1.0×  |
 | P90 frame CPU     | 13.5 ms                | 32.9 ms            | 2.4×  |
@@ -39,7 +39,7 @@ Two signals stand out under the granular traces. **Render scales with the visibl
 
 **Frame timing during the typing burst:**
 
-|                   | Plain `BasicTextField` | `WsyiwygTextField` | Ratio |
+|                   | Plain `BasicTextField` | `WysiwygTextField` | Ratio |
 |-------------------|-----------------------:|-------------------:|------:|
 | P50 frame CPU     |                 3.4 ms |             3.5 ms |  1.0× |
 | P90 frame CPU     |                 5.2 ms |             5.6 ms |  1.1× |

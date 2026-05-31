@@ -48,7 +48,7 @@ import me.saket.wysiwyg.render.rememberMarkdownRenderScope
 //  @param contentPadding is used so that span painters can draw outside the bounds. in the future
 //   it should also support https://issuetracker.google.com/issues/302599627
 @Composable
-fun WsyiwygTextField(
+fun WysiwygTextField(
   wysiwyg: Wysiwyg,
   modifier: Modifier = Modifier,
   theme: WysiwygTheme = if (isSystemInDarkTheme()) WysiwygTheme.GithubDark else WysiwygTheme.GithubLight,
@@ -62,7 +62,7 @@ fun WsyiwygTextField(
   lineLimits: TextFieldLineLimits = TextFieldLineLimits.Default,
   onTextLayout: (Density.(getResult: () -> TextLayoutResult?) -> Unit)? = null,
   interactionSource: MutableInteractionSource? = null,
-  cursorBrush: Brush = WsyiwygDefaults.CursorBrush,
+  cursorBrush: Brush = WysiwygDefaults.CursorBrush,
   outputTransformation: OutputTransformation? = null,
   decorator: TextFieldDecorator? = null,
   scrollState: ScrollState = rememberScrollState(),
@@ -72,7 +72,7 @@ fun WsyiwygTextField(
 
   val textStyle = textStyle.copy(
     // Drawing of rounded corner backgrounds is incompatible with unspecified font sizes.
-    fontSize = textStyle.fontSize.takeOrElse { WsyiwygDefaults.FontSize },
+    fontSize = textStyle.fontSize.takeOrElse { WysiwygDefaults.FontSize },
   )
   val renderScope = rememberMarkdownRenderScope(theme, textStyle, wysiwyg.layoutInfo)
   val markdownOutputTransformation = remember(wysiwyg, markdownRenderer, renderScope) {
@@ -146,7 +146,7 @@ private fun OutputTransformation?.maybeThen(next: OutputTransformation): OutputT
   }
 }
 
-private object WsyiwygDefaults {
+private object WysiwygDefaults {
   val CursorBrush = SolidColor(Color.Black)
 
   // Copied from:

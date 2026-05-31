@@ -808,7 +808,7 @@ class WysiwygTest {
         },
       )
 
-      WsyiwygTextField(
+      WysiwygTextField(
         modifier = Modifier
           .background(Color.DarkGray)
           .width(360.dp)
@@ -912,7 +912,7 @@ class WysiwygTest {
     theme: WysiwygTheme = WysiwygTheme.GithubLight,
   ) {
     CompositionLocalProvider(LocalCursorBlinkEnabled provides false) {
-      WsyiwygTextField(
+      WysiwygTextField(
         modifier = modifier
           .fillMaxWidth()
           .testTag("editor"),
