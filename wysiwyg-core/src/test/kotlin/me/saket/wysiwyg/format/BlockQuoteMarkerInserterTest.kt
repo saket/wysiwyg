@@ -14,7 +14,6 @@ class BlockQuoteMarkerInserterTest {
               """.trimMargin(),
       expect = """
               |> Alfred: Shall you be taking the Batpod sir?▮
-              |
               |Batman/Bruce Wayne: In the middle of the day Alfred?
               |Alfred: The Lamborghini then? Much more subtle.
               """.trimMargin(),
@@ -30,9 +29,7 @@ class BlockQuoteMarkerInserterTest {
               """.trimMargin(),
       expect = """
               |Alfred: Shall you be taking the Batpod sir?
-              |
               |> Batman/Bruce Wayne: In the middle of the day Alfred?▮
-              |
               |Alfred: The Lamborghini then? Much more subtle.
               """.trimMargin(),
     )
@@ -48,7 +45,6 @@ class BlockQuoteMarkerInserterTest {
       expect = """
               |Alfred: Shall you be taking the Batpod sir?
               |Batman/Bruce Wayne: In the middle of the day Alfred?
-              |
               |> Alfred: The Lamborghini then? Much more subtle.▮
               """.trimMargin(),
     )
@@ -64,7 +60,6 @@ class BlockQuoteMarkerInserterTest {
               """.trimMargin(),
       expect = """
               |Alfred: Shall you be taking the Batpod sir?
-              |
               |> Batman/Bruce Wayne: In the middle of the day Alfred?▮
               |
               |Alfred: The Lamborghini then? Much more subtle.
@@ -81,7 +76,6 @@ class BlockQuoteMarkerInserterTest {
       expect = """
               |Alfred: Shall you be taking the Batpod sir?
               |Batman/Bruce Wayne: In the middle of the day Alfred?
-              |
               |> Alfred: The Lamborghini then? Much more subtle.▮
               |
               |Another line.
@@ -160,7 +154,6 @@ class BlockQuoteMarkerInserterTest {
       expect = """
               |> James Gordon: ▮Batman. Batman! Why is he running dad?
               |Gordon: Because we have to▮ chase him.
-              |
               |Uniform Cop: Okay we're going in. Go go! Move!
               |James Gordon: He didn't do anything wrong.
               |Gordon: Because he's the hero Gotham deserves, but not the one it needs right now.
@@ -178,7 +171,6 @@ class BlockQuoteMarkerInserterTest {
               """.trimMargin(),
       expect = """
               |Tell your men they work for me now. This is my city.
-              |
               |> ▮
               """.trimMargin(),
     )
@@ -192,27 +184,27 @@ class BlockQuoteMarkerInserterTest {
               """.trimMargin(),
       expect = """
               |Tell your men they work for me now. This is my city.
-              |
               |>  ▮
               """.trimMargin(),
     )
   }
 
-  @Test fun `apply to a paragraph that is already a block-quote`() {
+  @Test fun `toggle a block-quote off`() {
     markerInserter.assertOnInsert(
       input = """
               |> Tell your men they work for me now. This is my city.▮
               """.trimMargin(),
       expect = """
-              |>> Tell your men they work for me now. This is my city.▮
+              |Tell your men they work for me now. This is my city.▮
               """.trimMargin(),
     )
+    // Collapses every leading marker, not just one.
     markerInserter.assertOnInsert(
       input = """
               |>> Tell your men they work for me now. This is my city.▮
               """.trimMargin(),
       expect = """
-              |>>> Tell your men they work for me now. This is my city.▮
+              |Tell your men they work for me now. This is my city.▮
               """.trimMargin(),
     )
   }

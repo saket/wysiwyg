@@ -151,4 +151,23 @@ class HeadingMarkerInserterTest {
               """.trimMargin(),
     )
   }
+
+  @Test fun `cycle back to h1 after reaching h6`() {
+    markerInserter.assertOnInsert(
+      input = """
+              |##### Tell your men they work for me now. This is my city.▮
+              """.trimMargin(),
+      expect = """
+              |###### Tell your men they work for me now. This is my city.▮
+              """.trimMargin(),
+    )
+    markerInserter.assertOnInsert(
+      input = """
+              |###### Tell your men they work for me now. This is my city.▮
+              """.trimMargin(),
+      expect = """
+              |# Tell your men they work for me now. This is my city.▮
+              """.trimMargin(),
+    )
+  }
 }

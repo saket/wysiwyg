@@ -41,7 +41,7 @@ fun TextFieldState.insertCodeBlockMarker() {
 
 /**
  * Insert ">" at the beginning of the paragraph currently being edited.
- * Can be used multiple times on the same paragraph to insert nested blockquotes.
+ * Applying it again to a block-quote removes the marker.
  */
 fun TextFieldState.insertBlockQuoteMarker() {
   insertMarker(CompoundableParagraphMarkerInserter.BlockQuote)
@@ -49,7 +49,7 @@ fun TextFieldState.insertBlockQuoteMarker() {
 
 /**
  * Insert "#" at the beginning of the paragraph currently being edited.
- * Can be used multiple times on the same paragraph to insert nested headings.
+ * Applying it again raises the heading one level, cycling back to h1 after h6.
  */
 fun TextFieldState.insertHeadingMarker() {
   insertMarker(CompoundableParagraphMarkerInserter.Heading)
@@ -120,43 +120,41 @@ internal object FencedCodeBlockMarkerInserter : MarkdownMarkerInserter {
   }
 }
 
+/**
+ * Inserts a paragraph level marker such as ">" (block quote) or "#" (heading) at the
+ * start of the paragraph currently being edited.
+ *
+ * Each insertion raises the paragraph one level, up to [maxLevel]. Once at [maxLevel],
+ * the next insertion wraps back to [minLevel]: headings cycle h1 through h6 and back to
+ * h1, while block quotes (whose [minLevel] is 0) toggle on and off.
+ */
 internal class CompoundableParagraphMarkerInserter(
   private val leftMarker: Char,
-  private val addSurroundingLineBreaks: Boolean,
+  private val minLevel: Int,
+  private val maxLevel: Int,
 ) : MarkdownMarkerInserter {
 
   override fun insertInto(text: CharSequence, selection: TextRange): TextReplacement {
     val currentParagraph = TextParagraph.findUnderCursor(text, selection)
 
-    val willCompound = currentParagraph.text.getOrNull(0) == leftMarker
-    val hasLeadingSpace = currentParagraph.text.getOrNull(0)?.isWhitespace() ?: false
-    val leftMarkerWithSpace = when {
-      willCompound || hasLeadingSpace -> "$leftMarker"
-      else -> "$leftMarker "
+    val currentLevel = currentParagraph.text.takeWhile { it == leftMarker }.length
+    val newLevel = if (currentLevel >= maxLevel) minLevel else currentLevel + 1
+
+    // The paragraph text with its leading markers removed. The single space that
+    // separates the markers from the content is dropped only when falling back to
+    // level 0, so that "> text" round-trips back to "text".
+    val textAfterMarkers = currentParagraph.text.substring(currentLevel)
+    val markers = "$leftMarker".repeat(newLevel)
+    val replacement = when {
+      newLevel == 0 -> textAfterMarkers.removePrefix(" ")
+      textAfterMarkers.startsWith(" ") -> "$markers$textAfterMarkers"
+      else -> "$markers $textAfterMarkers"
     }
 
-    val needsLeadingNewLine = addSurroundingLineBreaks
-        && currentParagraph.startIndex >= 2
-        && text[currentParagraph.startIndex - 2] != '\n'
-
-    val hasFollowingNewLine = text.getOrNull(currentParagraph.endIndexExclusive + 1) == '\n'
-    val needsFollowingNewLine = !hasFollowingNewLine
-        && addSurroundingLineBreaks
-        && currentParagraph.endIndexExclusive != text.length
-
-    val leadingNewLine = if (needsLeadingNewLine) "\n" else ""
-    val replacement = buildString {
-      append(leadingNewLine)
-      append(leftMarkerWithSpace)
-      append(currentParagraph.text)
-      if (needsFollowingNewLine) {
-        append("\n")
-      }
-    }
-    val cursorOffset = leadingNewLine.length + leftMarkerWithSpace.length
+    val cursorOffset = replacement.length - currentParagraph.text.length
     val newSelection = TextRange(
-      start = selection.start + cursorOffset,
-      end = selection.end + cursorOffset,
+      start = (selection.start + cursorOffset).coerceAtLeast(currentParagraph.startIndex),
+      end = (selection.end + cursorOffset).coerceAtLeast(currentParagraph.startIndex),
     )
     return TextReplacement {
       replace(
@@ -171,12 +169,14 @@ internal class CompoundableParagraphMarkerInserter(
   companion object {
     val BlockQuote = CompoundableParagraphMarkerInserter(
       leftMarker = '>',
-      addSurroundingLineBreaks = true,
+      minLevel = 0,
+      maxLevel = 1,
     )
 
     val Heading = CompoundableParagraphMarkerInserter(
       leftMarker = '#',
-      addSurroundingLineBreaks = false,
+      minLevel = 1,
+      maxLevel = 6,
     )
   }
 }
