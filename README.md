@@ -22,11 +22,28 @@ WysiwygTextField(
 
 ### Supported features
 
+#### Markdown elements
+
+| Element           | Example                              |
+|-------------------|--------------------------------------|
+| Headings          | `# Heading` through `###### Heading` |
+| Bold              | `**bold**`                           |
+| Italic            | `*italic*`                           |
+| Strikethrough     | `~~strikethrough~~`                  |
+| Inline code       | `` `code` ``                         |
+| Fenced code block | triple backticks                     |
+| Block quote       | `> quote`                            |
+| Ordered list      | `1. item`                            |
+| Unordered list    | `- item`                             |
+| Task list         | `- [ ] item`                         |
+| Link              | `[text](url)`                        |
+| Thematic break    | `---`                                |
+
 #### Interactive checkboxes
 
-Task lists are interactive. Tapping a checkbox toggles its marker in the text between `[ ]` and `[x]`.
-
 <img src="wysiwyg/src/test/snapshots/videos/me.saket.wysiwyg_ReadmeImagesTest_checkboxes.png" width="300" />
+
+Task lists are interactive. Tapping a checkbox toggles its marker in the text between `[ ]` and `[x]`.
 
 TODO: document
 - Formatting actions
