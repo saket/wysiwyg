@@ -15,7 +15,7 @@ WysiwygTextField(
   wysiwyg = rememberWysiwyg(
     textState = rememberTextFieldState(),
   ),
-  theme = WysiwygTheme.Default,
+  theme = WysiwygTheme.Github,
   contentPadding = PaddingValues(16.dp),
 )
 ```

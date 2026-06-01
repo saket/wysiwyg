@@ -884,7 +884,7 @@ class WysiwygTest {
     contentPadding: PaddingValues = PaddingValues(16.dp),
     scrollState: ScrollState = rememberScrollState(),
     textStyle: TextStyle = DefaultTextStyle,
-    theme: WysiwygTheme = WysiwygTheme.GithubLight,
+    theme: WysiwygTheme = WysiwygTheme.Github,
   ) {
     val textState = rememberTextFieldState(markdown)
     WysiwygEditor(
@@ -909,7 +909,7 @@ class WysiwygTest {
     scrollState: ScrollState = rememberScrollState(),
     wysiwyg: Wysiwyg,
     textStyle: TextStyle = DefaultTextStyle,
-    theme: WysiwygTheme = WysiwygTheme.GithubLight,
+    theme: WysiwygTheme = WysiwygTheme.Github,
   ) {
     CompositionLocalProvider(LocalCursorBlinkEnabled provides false) {
       WysiwygTextField(
@@ -925,6 +925,7 @@ class WysiwygTest {
     }
   }
 
+  @Suppress("unused")
   enum class WysiwygThemeParam(
     val theme: WysiwygTheme,
     val background: Color,

@@ -1,5 +1,8 @@
 package me.saket.wysiwyg
 
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
@@ -58,6 +61,12 @@ class WysiwygTheme(
   }
 
   companion object {
+    /** Maps to [GithubLight] or [GithubDark] based on the system theme. */
+    val Github: WysiwygTheme
+      @Composable
+      @ReadOnlyComposable
+      get() = if (isSystemInDarkTheme()) GithubDark else GithubLight
+
     val GithubLight: WysiwygTheme = WysiwygTheme(
       markerColor = Color(0xFF57606A),
       linkTextColor = Color(0xFF0969DA),

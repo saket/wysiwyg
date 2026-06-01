@@ -86,14 +86,6 @@ private fun WysiwygEditor(
         .fitInside(WindowInsetsRulers.SystemBars.current)
         .fitInside(WindowInsetsRulers.Ime.current),
     ) {
-      val wysiwygTheme = if (isSystemInDarkTheme()) {
-        WysiwygTheme.GithubDark
-      } else {
-        WysiwygTheme.GithubLight
-      }.copy(
-        markerColor = MaterialTheme.colorScheme.tertiary,
-      )
-
       WysiwygTextField(
         modifier = Modifier.focusRequester(focusRequester),
         contentPadding = PaddingValues(horizontal = 24.dp, vertical = 16.dp),
@@ -105,7 +97,9 @@ private fun WysiwygEditor(
           letterSpacing = 0.5.sp,
           color = LocalContentColor.current,
         ),
-        theme = wysiwygTheme,
+        theme = WysiwygTheme.Github.copy(
+          markerColor = MaterialTheme.colorScheme.tertiary,
+        ),
       )
     }
 
