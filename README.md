@@ -20,13 +20,20 @@ WysiwygTextField(
 )
 ```
 
+### Supported features
+
+#### Interactive checkboxes
+
+Task lists are interactive. Tapping a checkbox toggles its marker in the text between `[ ]` and `[x]`.
+
+<img src="wysiwyg/src/test/snapshots/videos/me.saket.wysiwyg_ReadmeImagesTest_checkboxes.png" width="300" />
+
 TODO: document
-- Markdown parser
-- Checkboxes
 - Formatting actions
 - Auto-format on enter
 - Customization
   - theme
+  - Markdown parser
 
 ### License
 
