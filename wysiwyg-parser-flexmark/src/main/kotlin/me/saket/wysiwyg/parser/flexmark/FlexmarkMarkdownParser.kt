@@ -161,9 +161,16 @@ class FlexmarkMarkdownParser(
       }
       is FencedCodeBlock -> {
         if (openingMarker.contains('`') && !closingMarker.isEmpty()) {
+          // Include the info string (e.g. the "kotlin" language tag) in the opening
+          // marker so it's styled alongside the backticks.
+          val openingMarkerEnd = if (!info.isEmpty()) {
+            info.endOffset - chars.startOffset
+          } else {
+            openingMarker.length
+          }
           FencedCodeBlockNode(
             range = LocalTextRange.span(0, chars.length),
-            openingMarkerRange = LocalTextRange.span(0, openingMarker.length),
+            openingMarkerRange = LocalTextRange.span(0, openingMarkerEnd),
             closingMarkerRange = LocalTextRange(textLength - closingMarker.length, textLength),
           )
         } else return null

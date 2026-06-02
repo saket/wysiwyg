@@ -184,7 +184,7 @@ class WysiwygTest {
         WysiwygEditor(
           markdown = """
             |Fenced code block that isn't separated by a blank line:
-            |```
+            |```kotlin
             |fun greet(name: String) {
             |  println("Hello, ${'$'}name!")
             |}
