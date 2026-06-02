@@ -52,7 +52,7 @@ WysiwygTextField(
 TODO: document
 - Formatting actions
 - Customization
-  - theme
+  - Theme
   - Markdown parser
 
 ### Limitations
