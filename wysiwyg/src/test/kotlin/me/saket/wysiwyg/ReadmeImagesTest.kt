@@ -95,7 +95,7 @@ class ReadmeImagesTest {
 
     // The typing coroutine lags the gif's frame clock, so give the window enough
     // headroom to finish typing and hold on the completed list for a beat.
-    paparazzi.gif(end = 4_000, fps = 20) {
+    paparazzi.gif(end = AutoFormatScreenshotDuration, fps = 20) {
       val wysiwyg = rememberWysiwyg(
         textState = textState,
         parser = remember {
@@ -137,7 +137,7 @@ class ReadmeImagesTest {
       """.trimMargin()
     )
 
-    paparazzi.gif(end = 5_000, fps = 20) {
+    paparazzi.gif(end = AutoFormatScreenshotDuration, fps = 20) {
       val wysiwyg = rememberWysiwyg(
         textState = textState,
         parser = remember {
@@ -200,6 +200,9 @@ class ReadmeImagesTest {
   }
 
   companion object {
+    // Used for screenshots shown together so that they loop at the same time.
+    val AutoFormatScreenshotDuration = 5_000L
+
     val ReadmeTextStyle = TextStyle(
       fontSize = 18.sp,
       lineHeight = 1.7.em,
