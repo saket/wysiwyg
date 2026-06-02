@@ -17,6 +17,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -60,6 +61,7 @@ private fun WysiwygEditor(
     initialText =
       """
         |# Wysiwyg
+        |
         |A markdown editor that styles text *as you type*, so you never have to guess what your **bold** and `code` will look like.
         |
         |> The single biggest source of inspiration for Markdown's syntax is the format of plain text email.
@@ -99,6 +101,7 @@ private fun WysiwygEditor(
         ),
         theme = WysiwygTheme.Github.copy(
           markerColor = MaterialTheme.colorScheme.tertiary,
+          codeBackground = MaterialTheme.colorScheme.secondaryContainer,
         ),
       )
     }

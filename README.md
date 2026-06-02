@@ -41,13 +41,16 @@ WysiwygTextField(
 
 #### Interactive checkboxes
 
-<img src="wysiwyg/src/test/snapshots/videos/me.saket.wysiwyg_ReadmeImagesTest_checkboxes.png" width="300" />
+<img src="wysiwyg/src/test/snapshots/videos/me.saket.wysiwyg_ReadmeImagesTest_checkboxes.png" width="400" />
 
-Task lists are interactive. Tapping a checkbox toggles its marker in the text between `[ ]` and `[x]`.
+#### Auto-format on enter
+
+| List continuation                                                                                                                   | Code blocks                                                                                                                       |
+|-------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------|
+| <img src="wysiwyg/src/test/snapshots/videos/me.saket.wysiwyg_ReadmeImagesTest_auto_complete_list_items_on_enter.png" width="400" /> | <img src="wysiwyg/src/test/snapshots/videos/me.saket.wysiwyg_ReadmeImagesTest_auto_close_code_blocks_on_enter.png" width="400" /> | 
 
 TODO: document
 - Formatting actions
-- Auto-format on enter
 - Customization
   - theme
   - Markdown parser
