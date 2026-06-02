@@ -55,6 +55,17 @@ TODO: document
   - theme
   - Markdown parser
 
+### Limitations
+
+- Wysiwyg uses `BasicTextField()` internally, which can't handle large documents. In my limited testing, editing a document with 50k characters drops enough frames to feel sluggish, even on my flagship Pixel 10 Pro.
+
+### Road to stability
+
+This library is experimental and the API may change. A couple of upstream Compose changes need to land first:
+
+- Editing plain paragraphs still feels rough, pending [b/241426911](https://issuetracker.google.com/issues/241426911).
+- Styling will move to `TextStyleBuffer` once it [lands in Compose](https://android-review.googlesource.com/c/platform/frameworks/support/+/3968187), replacing the current full re-parse.
+
 ### License
 
 ```
