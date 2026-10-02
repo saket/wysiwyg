@@ -3,9 +3,7 @@
 package me.saket.wysiwyg.parser
 
 import androidx.compose.foundation.text.input.TextFieldState
-import androidx.compose.foundation.text.input.toTextFieldBuffer
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextMeasurer
@@ -29,37 +27,35 @@ internal fun MarkdownDocument.renderHtml(
   source: String,
   includeMonospaceTags: Boolean = false,
 ): String {
-  val buffer = TextFieldState(source).toTextFieldBuffer()
-  with(AnnotatedStringMarkdownRenderer(buffer, source, changes)) {
-    FakeMarkdownRenderScope.render(this@renderHtml)
+  val state = TextFieldState(source)
+  state.edit {
+    with(AnnotatedStringMarkdownRenderer(this, source, this@renderHtml.changes)) {
+      FakeMarkdownRenderScope.render(this@renderHtml)
+    }
   }
+  val range = TextRange(0, source.length)
   return HtmlMarkdownRenderer(
     source = source,
-    annotations = buffer.outputTransformationAnnotations.orEmpty(),
+    spanStyles = state.textStyles.getSpanStyles(range).map {
+      StyleRange(style = it.item, range = TextRange(it.start, it.end))
+    },
+    paragraphStyles = state.textStyles.getParagraphStyles(range).map {
+      StyleRange(style = it.item, range = TextRange(it.start, it.end))
+    },
     includeMonospaceTags = includeMonospaceTags,
   ).toHtml()
 }
 
-internal class HtmlMarkdownRenderer(
+private class HtmlMarkdownRenderer(
   private val source: String,
-  annotations: List<AnnotatedString.Range<AnnotatedString.Annotation>>,
+  spanStyles: List<StyleRange<SpanStyle>>,
+  paragraphStyles: List<StyleRange<ParagraphStyle>>,
   includeMonospaceTags: Boolean,
 ) {
   private val tags = mutableListOf<TagInsertion>()
   private var sequence = 0
 
   init {
-    val spanStyles = annotations.mapNotNull { annotation ->
-      (annotation.item as? SpanStyle)?.let {
-        StyleRange(style = it, range = TextRange(annotation.start, annotation.end))
-      }
-    }
-    val paragraphStyles = annotations.mapNotNull { annotation ->
-      (annotation.item as? ParagraphStyle)?.let {
-        StyleRange(style = it, range = TextRange(annotation.start, annotation.end))
-      }
-    }
-
     emitParagraphTags(paragraphStyles)
     emitLinkTags(spanStyles)
     emitHeadingTags(spanStyles)
